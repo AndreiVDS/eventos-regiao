@@ -17,12 +17,13 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 
 /**
  * Calcula o painel de métricas a partir de TODOS os eventos.
- * `escopo` = 'aprovados' considera só os publicados; 'todos' inclui pendentes.
+ * Os KPIs de fila (pendentes/recusados) usam todos os status; os
+ * gráficos de distribuição refletem só o que está publicado.
  */
-export function calcularMetricas(eventos, escopo = 'todos') {
-  const base = escopo === 'aprovados' ? eventos.filter((e) => e.status === 'aprovado') : eventos
+export function calcularMetricas(eventos) {
   const aprovados = eventos.filter((e) => e.status === 'aprovado')
   const pendentes = eventos.filter((e) => e.status === 'pendente')
+  const base = aprovados
 
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)

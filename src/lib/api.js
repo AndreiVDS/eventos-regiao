@@ -34,14 +34,14 @@ function gravarEnviados(lista) {
   localStorage.setItem(CHAVE_ENVIADOS, JSON.stringify(lista))
 }
 
-function normalizar(texto = '') {
+export function normalizar(texto = '') {
   return texto
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, "")
 }
 
-function aplicarFiltros(eventos, filtros = {}) {
+export function aplicarFiltros(eventos, filtros = {}) {
   const { busca, cidade, categoria, entrada, quando } = filtros
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)

@@ -1,6 +1,6 @@
 // Gera os artefatos de dados a partir de scripts/dados.mjs.
 // Uso: npm run gerar-dados
-import { writeFileSync, mkdirSync } from 'node:fs'
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { cidades, eventos } from './dados.mjs'
@@ -126,6 +126,20 @@ sql += `insert into public.eventos (${colsEvento.join(', ')}) values\n`
 sql += eventosJson.map((e) => '  (' + colsEvento.map((k) => q(e[k])).join(', ') + ')').join(',\n')
 sql += '\non conflict (id) do nothing;\n'
 writeFileSync(p('supabase/seed.sql'), sql)
+
+// ---------- 5b. supabase/setup.sql (schema + seed num arquivo só) ----------
+const schema = readFileSync(p('supabase/schema.sql'), 'utf8')
+writeFileSync(
+  p('supabase/setup.sql'),
+  `-- ============================================================\n` +
+    `--  Eventos Região — instalação completa em UMA colagem.\n` +
+    `--  Cole tudo isto no SQL Editor do Supabase e execute.\n` +
+    `--  (equivale a schema.sql + seed.sql)\n` +
+    `-- ============================================================\n\n` +
+    schema +
+    `\n\n-- =====================  DADOS DE EXEMPLO  =====================\n\n` +
+    sql,
+)
 
 // ---------- 6. api/_dados.json (snapshot para a API serverless) ----------
 mkdirSync(p('api'), { recursive: true })

@@ -1,21 +1,25 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Cabecalho from './componentes/Cabecalho'
 import Rodape from './componentes/Rodape'
 import RotaProtegida from './componentes/RotaProtegida'
+import LimiteErro from './componentes/LimiteErro'
+import Carregando from './componentes/Carregando'
 import Home from './paginas/Home'
 import Eventos from './paginas/Eventos'
 import Evento from './paginas/Evento'
 import Cidades from './paginas/Cidades'
 import Cidade from './paginas/Cidade'
-import DivulgueSeuEvento from './paginas/DivulgueSeuEvento'
 import Sobre from './paginas/Sobre'
-import Entrar from './paginas/Entrar'
 import NaoEncontrado from './paginas/NaoEncontrado'
-import MinhaArea from './paginas/organizador/MinhaArea'
-import NovoEvento from './paginas/organizador/NovoEvento'
-import Painel from './paginas/painel/Painel'
-import Moderacao from './paginas/painel/Moderacao'
+
+// Fluxos com login carregam sob demanda — visitantes não baixam esse código.
+const DivulgueSeuEvento = lazy(() => import('./paginas/DivulgueSeuEvento'))
+const Entrar = lazy(() => import('./paginas/Entrar'))
+const MinhaArea = lazy(() => import('./paginas/organizador/MinhaArea'))
+const NovoEvento = lazy(() => import('./paginas/organizador/NovoEvento'))
+const Painel = lazy(() => import('./paginas/painel/Painel'))
+const Moderacao = lazy(() => import('./paginas/painel/Moderacao'))
 
 function RolarAoTopo() {
   const { pathname } = useLocation()
@@ -33,52 +37,56 @@ export default function App() {
       <Cabecalho />
 
       <main id="conteudo" className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/eventos" element={<Eventos />} />
-          <Route path="/eventos/:id" element={<Evento />} />
-          <Route path="/cidades" element={<Cidades />} />
-          <Route path="/cidades/:slug" element={<Cidade />} />
-          <Route path="/divulgue" element={<DivulgueSeuEvento />} />
-          <Route path="/sobre" element={<Sobre />} />
-          <Route path="/entrar" element={<Entrar />} />
+        <LimiteErro>
+          <Suspense fallback={<Carregando />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/eventos" element={<Eventos />} />
+              <Route path="/eventos/:id" element={<Evento />} />
+              <Route path="/cidades" element={<Cidades />} />
+              <Route path="/cidades/:slug" element={<Cidade />} />
+              <Route path="/divulgue" element={<DivulgueSeuEvento />} />
+              <Route path="/sobre" element={<Sobre />} />
+              <Route path="/entrar" element={<Entrar />} />
 
-          <Route
-            path="/organizador"
-            element={
-              <RotaProtegida>
-                <MinhaArea />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/organizador/novo"
-            element={
-              <RotaProtegida>
-                <NovoEvento />
-              </RotaProtegida>
-            }
-          />
+              <Route
+                path="/organizador"
+                element={
+                  <RotaProtegida>
+                    <MinhaArea />
+                  </RotaProtegida>
+                }
+              />
+              <Route
+                path="/organizador/novo"
+                element={
+                  <RotaProtegida>
+                    <NovoEvento />
+                  </RotaProtegida>
+                }
+              />
 
-          <Route
-            path="/painel"
-            element={
-              <RotaProtegida exige="equipe">
-                <Painel />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/painel/moderacao"
-            element={
-              <RotaProtegida exige="equipe">
-                <Moderacao />
-              </RotaProtegida>
-            }
-          />
+              <Route
+                path="/painel"
+                element={
+                  <RotaProtegida exige="equipe">
+                    <Painel />
+                  </RotaProtegida>
+                }
+              />
+              <Route
+                path="/painel/moderacao"
+                element={
+                  <RotaProtegida exige="equipe">
+                    <Moderacao />
+                  </RotaProtegida>
+                }
+              />
 
-          <Route path="*" element={<NaoEncontrado />} />
-        </Routes>
+              <Route path="*" element={<NaoEncontrado />} />
+            </Routes>
+          </Suspense>
+        </LimiteErro>
       </main>
 
       <Rodape />

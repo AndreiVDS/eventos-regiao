@@ -56,7 +56,8 @@ Pré-requisitos: **Node.js 18+**.
 
 ```bash
 npm install
-npm run dev          # http://localhost:5173
+npm run setup        # cria o .env, gera os dados de exemplo e imprime os próximos passos
+npm run dev          # http://localhost:5173  (modo demonstração, sem contas)
 ```
 
 Outros comandos:
@@ -64,8 +65,9 @@ Outros comandos:
 ```bash
 npm run build        # regenera os dados e gera a versão de produção em dist/
 npm run preview      # serve o dist/ localmente
+npm run test         # testes (Vitest)
 npm run lint         # ESLint
-npm run gerar-dados  # regenera public/dados/*.json, supabase/seed.sql,
+npm run gerar-dados  # regenera public/dados/*.json, supabase/*.sql,
                      # api/_dados.json e os SVGs de cidades/eventos
 ```
 
@@ -73,23 +75,22 @@ Os dados de exemplo têm **uma fonte única**: `scripts/dados.mjs`. Edite lá e 
 
 ---
 
-## Conectando o back-end (Supabase)
+## Conectando o back-end (Supabase) — ~10 min
 
 1. Crie um projeto em <https://supabase.com>.
-2. No **SQL Editor**, rode `supabase/schema.sql` (tabelas + políticas de segurança RLS) e, opcionalmente, `supabase/seed.sql` (dados de exemplo).
-3. Em **Project Settings → API**, copie a **Project URL** e a chave **anon public**.
-4. Crie um arquivo `.env` na raiz (baseado em `.env.example`):
-
+2. **SQL Editor** → cole e execute **`supabase/setup.sql`** (é o schema + os dados de exemplo num arquivo só).
+3. **Authentication → Users** → crie os usuários da equipe.
+4. No mesmo SQL Editor, rode (uma vez, com os e-mails reais):
+   ```sql
+   insert into public.equipe (email) values ('voce@exemplo.com') on conflict do nothing;
+   ```
+5. **Project Settings → API** → copie a **Project URL** e a chave **anon public** para o `.env`:
    ```env
    VITE_SUPABASE_URL=https://xxxx.supabase.co
    VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
    VITE_ADMIN_EMAILS=voce@exemplo.com,colega@exemplo.com
    ```
-
-5. Em **Authentication → Users**, crie os usuários da equipe. Adicione os mesmos e-mails:
-   - na tabela `public.equipe` (bloco comentado no fim do `schema.sql`);
-   - na variável `VITE_ADMIN_EMAILS`.
-   Quem estiver nessa lista entra como **equipe**; qualquer outro e-mail entra como **organizador**.
+   Quem está em `equipe` / `VITE_ADMIN_EMAILS` entra como **equipe**; os demais, como **organizador**.
 6. Reinicie o `npm run dev`.
 
 ---
@@ -112,13 +113,22 @@ As funções leem do Supabase quando configurado; caso contrário, de `api/_dado
 
 ---
 
-## Deploy na Vercel
+## Deploy na Vercel — ~5 min
 
-1. Suba o repositório para o GitHub.
-2. Em <https://vercel.com>, **New Project → Import** o repositório. A Vercel detecta o Vite (build `npm run build`, saída `dist`) e serve `/api` como funções.
-3. Em **Settings → Environment Variables**, adicione `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` e `VITE_ADMIN_EMAILS`.
-4. Cada `git push` na branch principal gera um deploy; pull requests ganham uma URL de preview.
-5. Domínio próprio: **Settings → Domains**.
+**Opção rápida (com o repositório público):**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAndreiVDS%2Feventos-regiao&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,VITE_ADMIN_EMAILS&project-name=eventos-regiao&repository-name=eventos-regiao)
+
+O botão clona o repo, pede as três variáveis e faz o deploy.
+
+**Manual:**
+
+1. <https://vercel.com> → **New Project → Import** o repositório. A Vercel detecta o Vite e serve `/api` como funções.
+2. **Settings → Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_ADMIN_EMAILS`.
+3. Cada `git push` na branch principal gera um deploy; pull requests ganham uma URL de preview.
+4. Domínio próprio: **Settings → Domains**.
+
+> Dá para publicar **sem o Supabase**: sem as variáveis, o site sobe em modo demonstração com os 27 eventos de exemplo e a API pública servida do snapshot.
 
 ---
 

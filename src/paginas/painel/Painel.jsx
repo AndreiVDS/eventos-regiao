@@ -26,7 +26,7 @@ export default function Painel() {
 
   if (carregando) return <Carregando texto="Calculando métricas…" />
 
-  const m = calcularMetricas(eventos || [], 'todos')
+  const m = calcularMetricas(eventos || [])
 
   return (
     <div className="container-pagina py-10">
