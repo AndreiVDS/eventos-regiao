@@ -48,6 +48,8 @@ A plataforma é um **PWA** (Progressive Web App): funciona no celular, pode ser 
 
 > A aplicação roda **sem back-end** para demonstração: enquanto as variáveis do Supabase não estão configuradas, os dados vêm de `public/dados/*.json`, o login usa uma sessão local e os envios ficam no navegador.
 
+> **Nunca fez deploy nem usou Supabase?** Leia o **[Guia de publicação](docs/GUIA-PUBLICACAO.md)** — explicação passo a passo, do zero.
+
 ---
 
 ## Rodando localmente
