@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "jaragua-do-sul",
+    "nome": "Jaraguá do Sul",
+    "uf": "SC",
+    "regiao": "Norte de Santa Catarina",
+    "descricao": "Cidade de forte colonização alemã e italiana no Vale do Itapocu, conhecida pelo parque fabril, pelo empreendedorismo e por festas tradicionais como a Schützenfest, que celebra o tiro esportivo, a dança e a gastronomia germânica.",
+    "imagem_url": "/img/cidades/jaragua-do-sul.svg",
+    "site_prefeitura": "https://www.jaraguadosul.sc.gov.br"
+  },
+  {
+    "slug": "blumenau",
+    "nome": "Blumenau",
+    "uf": "SC",
+    "regiao": "Vale do Itajaí",
+    "descricao": "Fundada por imigrantes alemães em 1850, Blumenau mantém viva a arquitetura enxaimel, a produção de cervejas artesanais e a Oktoberfest, uma das maiores festas populares do país.",
+    "imagem_url": "/img/cidades/blumenau.svg",
+    "site_prefeitura": "https://www.blumenau.sc.gov.br"
+  },
+  {
+    "slug": "florianopolis",
+    "nome": "Florianópolis",
+    "uf": "SC",
+    "regiao": "Grande Florianópolis",
+    "descricao": "Capital de Santa Catarina, a Ilha da Magia reúne cultura açoriana, praias, o boi de mamão, a renda de bilro e uma cena vibrante de música, tecnologia e economia criativa.",
+    "imagem_url": "/img/cidades/florianopolis.svg",
+    "site_prefeitura": "https://www.pmf.sc.gov.br"
+  },
+  {
+    "slug": "joinville",
+    "nome": "Joinville",
+    "uf": "SC",
+    "regiao": "Norte de Santa Catarina",
+    "descricao": "Maior cidade catarinense, a Cidade das Flores e das Bicicletas é polo industrial e sede do Festival de Dança de Joinville, o maior do mundo em número de participantes.",
+    "imagem_url": "/img/cidades/joinville.svg",
+    "site_prefeitura": "https://www.joinville.sc.gov.br"
+  },
+  {
+    "slug": "curitiba",
+    "nome": "Curitiba",
+    "uf": "PR",
+    "regiao": "Região Metropolitana de Curitiba",
+    "descricao": "Capital do Paraná, referência em planejamento urbano, parques, teatros e uma agenda cultural intensa que mistura tradições de imigrantes europeus, ucranianos e a cultura paranaense.",
+    "imagem_url": "/img/cidades/curitiba.svg",
+    "site_prefeitura": "https://www.curitiba.pr.gov.br"
+  },
+  {
+    "slug": "ipatinga",
+    "nome": "Ipatinga",
+    "uf": "MG",
+    "regiao": "Vale do Aço — Minas Gerais",
+    "descricao": "Coração do Vale do Aço mineiro, Ipatinga cresceu ao redor da siderurgia e hoje se destaca pelo Parque Ipanema, por feiras de economia criativa e por uma agenda cultural que valoriza a identidade do interior de Minas.",
+    "imagem_url": "/img/cidades/ipatinga.svg",
+    "site_prefeitura": "https://www.ipatinga.mg.gov.br"
+  }
+]

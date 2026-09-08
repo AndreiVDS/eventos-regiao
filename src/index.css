@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-creme text-tinta font-corpo antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-titulo tracking-wide;
+  }
+
+  /* Foco visível para navegação por teclado (acessibilidade — Obj. 4 da proposta).
+     Nunca removemos o outline sem oferecer um substituto claro. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-offset-2 ring-tinta ring-offset-creme;
+    border-radius: 4px;
+  }
+
+  /* Respeita quem pediu menos animações no sistema operacional. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Link "pular para o conteúdo" — fica escondido até receber foco. */
+  .link-pular {
+    @apply sr-only;
+  }
+  .link-pular:focus {
+    @apply not-sr-only fixed left-4 top-4 z-50 rounded bg-tinta px-4 py-2 text-creme;
+  }
+
+  .container-pagina {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 font-semibold
+           transition-colors focus-visible:ring-2;
+  }
+  .btn-destaque {
+    @apply btn bg-destaque text-tinta hover:bg-tinta hover:text-destaque;
+  }
+  .btn-tinta {
+    @apply btn bg-tinta text-creme hover:bg-destaque hover:text-tinta;
+  }
+  .btn-contorno {
+    @apply btn border-2 border-tinta text-tinta hover:bg-tinta hover:text-creme;
+  }
+
+  .campo {
+    @apply w-full rounded-lg border-2 border-tinta/20 bg-white px-4 py-2.5 text-tinta
+           placeholder:text-tinta/40 focus:border-tinta;
+  }
+  .rotulo {
+    @apply mb-1 block font-semibold text-tinta;
+  }
+}
