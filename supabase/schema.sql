@@ -22,8 +22,10 @@ create table if not exists public.cidades (
 );
 
 -- ---------- Tabela: eventos ----------
+-- id é texto (slug legível na URL, ex.: "rock-in-rio-2026"); o app gera
+-- o slug a partir do título ao cadastrar um evento novo.
 create table if not exists public.eventos (
-  id                 uuid primary key default gen_random_uuid(),
+  id                 text primary key,
   titulo             text not null,
   descricao          text not null,
   descricao_completa text,

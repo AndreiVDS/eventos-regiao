@@ -108,6 +108,19 @@ export async function obterEvento(id) {
   return eventos.find((e) => e.id === id) || null
 }
 
+/** Gera um slug legível a partir do título + sufixo curto para evitar colisão. */
+export function gerarSlug(titulo = 'evento') {
+  const base = titulo
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 60)
+  const sufixo = Math.random().toString(36).slice(2, 7)
+  return `${base || 'evento'}-${sufixo}`
+}
+
 /**
  * Envia um evento para moderação. Fica com status "pendente" até um
  * organizador da plataforma aprovar no painel.
@@ -115,7 +128,7 @@ export async function obterEvento(id) {
 export async function enviarEvento(dados) {
   const registro = {
     ...dados,
-    id: dados.id || crypto.randomUUID(),
+    id: dados.id || gerarSlug(dados.titulo),
     status: 'pendente',
     criado_em: new Date().toISOString(),
   }

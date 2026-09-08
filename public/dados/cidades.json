@@ -4,7 +4,7 @@
     "nome": "Jaraguá do Sul",
     "uf": "SC",
     "regiao": "Norte de Santa Catarina",
-    "descricao": "Cidade de forte colonização alemã e italiana no Vale do Itapocu, conhecida pelo parque fabril, pelo empreendedorismo e por festas tradicionais como a Schützenfest, que celebra o tiro esportivo, a dança e a gastronomia germânica.",
+    "descricao": "Cidade de colonização alemã e italiana no Vale do Itapocu, conhecida pelo parque fabril, pelo empreendedorismo e por festas como a Schützenfest, que celebra o tiro esportivo, a dança e a gastronomia germânica.",
     "imagem_url": "/img/cidades/jaragua-do-sul.svg",
     "site_prefeitura": "https://www.jaraguadosul.sc.gov.br"
   },
@@ -13,7 +13,7 @@
     "nome": "Blumenau",
     "uf": "SC",
     "regiao": "Vale do Itajaí",
-    "descricao": "Fundada por imigrantes alemães em 1850, Blumenau mantém viva a arquitetura enxaimel, a produção de cervejas artesanais e a Oktoberfest, uma das maiores festas populares do país.",
+    "descricao": "Fundada por imigrantes alemães em 1850, mantém viva a arquitetura enxaimel, a produção de cervejas artesanais e a Oktoberfest, uma das maiores festas populares do país.",
     "imagem_url": "/img/cidades/blumenau.svg",
     "site_prefeitura": "https://www.blumenau.sc.gov.br"
   },
@@ -40,7 +40,7 @@
     "nome": "Curitiba",
     "uf": "PR",
     "regiao": "Região Metropolitana de Curitiba",
-    "descricao": "Capital do Paraná, referência em planejamento urbano, parques, teatros e uma agenda cultural intensa que mistura tradições de imigrantes europeus, ucranianos e a cultura paranaense.",
+    "descricao": "Capital do Paraná, referência em planejamento urbano, parques e teatros, com uma agenda cultural intensa que mistura tradições de imigrantes europeus e a cultura paranaense.",
     "imagem_url": "/img/cidades/curitiba.svg",
     "site_prefeitura": "https://www.curitiba.pr.gov.br"
   },
@@ -49,8 +49,98 @@
     "nome": "Ipatinga",
     "uf": "MG",
     "regiao": "Vale do Aço — Minas Gerais",
-    "descricao": "Coração do Vale do Aço mineiro, Ipatinga cresceu ao redor da siderurgia e hoje se destaca pelo Parque Ipanema, por feiras de economia criativa e por uma agenda cultural que valoriza a identidade do interior de Minas.",
+    "descricao": "Coração do Vale do Aço mineiro, cresceu ao redor da siderurgia e hoje se destaca pelo Parque Ipanema, por feiras de economia criativa e por uma agenda que valoriza a identidade do interior de Minas.",
     "imagem_url": "/img/cidades/ipatinga.svg",
     "site_prefeitura": "https://www.ipatinga.mg.gov.br"
+  },
+  {
+    "slug": "porto-alegre",
+    "nome": "Porto Alegre",
+    "uf": "RS",
+    "regiao": "Região Metropolitana de Porto Alegre",
+    "descricao": "Capital gaúcha às margens do Guaíba, terra do chimarrão e do tradicionalismo, com forte cena literária, o Acampamento Farroupilha e uma das feiras de livro mais antigas do continente.",
+    "imagem_url": "/img/cidades/porto-alegre.svg",
+    "site_prefeitura": "https://prefeitura.poa.br"
+  },
+  {
+    "slug": "gramado",
+    "nome": "Gramado",
+    "uf": "RS",
+    "regiao": "Serra Gaúcha",
+    "descricao": "Na Serra Gaúcha, de arquitetura europeia e clima frio, é destino de turismo o ano todo — do Natal Luz, o mais longo do mundo, ao Festival de Cinema.",
+    "imagem_url": "/img/cidades/gramado.svg",
+    "site_prefeitura": "https://www.gramado.rs.gov.br"
+  },
+  {
+    "slug": "rio-de-janeiro",
+    "nome": "Rio de Janeiro",
+    "uf": "RJ",
+    "regiao": "Região Metropolitana do Rio de Janeiro",
+    "descricao": "A Cidade Maravilhosa reúne praias, samba, o maior Réveillon do mundo em Copacabana, o Carnaval e uma agenda de grandes festivais de música e esporte.",
+    "imagem_url": "/img/cidades/rio-de-janeiro.svg",
+    "site_prefeitura": "https://prefeitura.rio"
+  },
+  {
+    "slug": "sao-paulo",
+    "nome": "São Paulo",
+    "uf": "SP",
+    "regiao": "Região Metropolitana de São Paulo",
+    "descricao": "A maior metrópole do país concentra teatros, museus, a Virada Cultural, a Corrida de São Silvestre e uma diversidade cultural que reflete migrações de todo o mundo.",
+    "imagem_url": "/img/cidades/sao-paulo.svg",
+    "site_prefeitura": "https://www.capital.sp.gov.br"
+  },
+  {
+    "slug": "paraty",
+    "nome": "Paraty",
+    "uf": "RJ",
+    "regiao": "Costa Verde — Rio de Janeiro",
+    "descricao": "Cidade histórica tombada, de ruas de pedra e casario colonial entre a serra e o mar, sede da Flip — Festa Literária Internacional de Paraty.",
+    "imagem_url": "/img/cidades/paraty.svg",
+    "site_prefeitura": "https://www.paraty.rj.gov.br"
+  },
+  {
+    "slug": "campos-do-jordao",
+    "nome": "Campos do Jordão",
+    "uf": "SP",
+    "regiao": "Serra da Mantiqueira — São Paulo",
+    "descricao": "A \"Suíça brasileira\" na Serra da Mantiqueira, conhecida pelo inverno rigoroso e por sediar o Festival Internacional de Inverno, maior evento de música clássica do país.",
+    "imagem_url": "/img/cidades/campos-do-jordao.svg",
+    "site_prefeitura": "https://www.camposdojordao.sp.gov.br"
+  },
+  {
+    "slug": "salvador",
+    "nome": "Salvador",
+    "uf": "BA",
+    "regiao": "Região Metropolitana de Salvador",
+    "descricao": "Primeira capital do Brasil, centro da cultura afro-brasileira: Pelourinho, capoeira, candomblé, a Festa de Iemanjá, a Lavagem do Bonfim e um dos maiores Carnavais do mundo.",
+    "imagem_url": "/img/cidades/salvador.svg",
+    "site_prefeitura": "https://www.salvador.ba.gov.br"
+  },
+  {
+    "slug": "olinda",
+    "nome": "Olinda",
+    "uf": "PE",
+    "regiao": "Região Metropolitana do Recife",
+    "descricao": "Patrimônio Mundial pela Unesco, cidade do frevo e do maracatu, famosa pelos bonecos gigantes e por um Carnaval de rua tradicional e gratuito.",
+    "imagem_url": "/img/cidades/olinda.svg",
+    "site_prefeitura": "https://www.olinda.pe.gov.br"
+  },
+  {
+    "slug": "parintins",
+    "nome": "Parintins",
+    "uf": "AM",
+    "regiao": "Baixo Amazonas",
+    "descricao": "Ilha no meio do Rio Amazonas, palco do Festival Folclórico de Parintins, em que os bois-bumbás Garantido e Caprichoso encenam lendas indígenas e ribeirinhas para um público de milhares no Bumbódromo.",
+    "imagem_url": "/img/cidades/parintins.svg",
+    "site_prefeitura": "https://www.parintins.am.gov.br"
+  },
+  {
+    "slug": "ouro-preto",
+    "nome": "Ouro Preto",
+    "uf": "MG",
+    "regiao": "Região Central de Minas Gerais",
+    "descricao": "Primeiro sítio brasileiro reconhecido como Patrimônio Mundial, joia do barroco mineiro, das igrejas de Aleijadinho, da Semana Santa e de festivais de inverno e de literatura.",
+    "imagem_url": "/img/cidades/ouro-preto.svg",
+    "site_prefeitura": "https://www.ouropreto.mg.gov.br"
   }
 ]
