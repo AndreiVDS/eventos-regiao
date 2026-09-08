@@ -6,7 +6,7 @@
   "description": "Plataforma Inclusiva para Fortalecimento do Turismo e Cultura - Atividade Extensionista III (UNINTER)",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/gerar-dados.mjs && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "gerar-dados": "node scripts/gerar-dados.mjs"

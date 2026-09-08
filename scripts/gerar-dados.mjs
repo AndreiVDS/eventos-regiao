@@ -84,6 +84,17 @@ sql += eventosJson.map((e) => '  (' + colsEvento.map((k) => q(e[k])).join(', ') 
 sql += '\non conflict (id) do nothing;\n'
 writeFileSync(p('supabase/seed.sql'), sql)
 
+// ---------- 5. api/_dados.json (snapshot para a API serverless) ----------
+mkdirSync(p('api'), { recursive: true })
+writeFileSync(
+  p('api/_dados.json'),
+  JSON.stringify(
+    { cidades: cidadesJson, eventos: eventosJson.filter((e) => e.status === 'aprovado') },
+    null,
+    2,
+  ) + '\n',
+)
+
 console.log(
   `OK — ${cidadesJson.length} cidades, ${eventosJson.length} eventos.\n` +
     'Gerados: public/dados/*.json, supabase/seed.sql, public/img/cidades/*.svg',
