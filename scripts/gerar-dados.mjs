@@ -31,6 +31,8 @@ const cidadesJson = cidades.map((c) => ({
   uf: c.uf,
   regiao: c.regiao,
   descricao: c.descricao,
+  lat: c.lat ?? null,
+  lng: c.lng ?? null,
   imagem_url: `/img/cidades/${c.slug}.svg`,
   site_prefeitura: c.site_prefeitura,
 }))
@@ -110,8 +112,9 @@ const eventosJson = eventos.map((e, i) => {
 writeFileSync(p('public/dados/eventos.json'), JSON.stringify(eventosJson, null, 2) + '\n')
 
 // ---------- 5. supabase/seed.sql ----------
-const q = (s) => (s == null ? 'null' : `'${String(s).replace(/'/g, "''")}'`)
-const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'imagem_url', 'site_prefeitura']
+const q = (s) =>
+  s == null ? 'null' : typeof s === 'number' ? String(s) : `'${String(s).replace(/'/g, "''")}'`
+const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'lat', 'lng', 'imagem_url', 'site_prefeitura']
 const colsEvento = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'cidade', 'cidade_nome', 'uf',
   'local', 'endereco', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto',

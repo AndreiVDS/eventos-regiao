@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import CardEvento from '../componentes/CardEvento'
 import FiltrosEventos from '../componentes/FiltrosEventos'
@@ -6,29 +6,45 @@ import EsqueletoCards from '../componentes/EsqueletoCards'
 import EstadoVazio from '../componentes/EstadoVazio'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
+import { useCidadeAtual } from '../lib/cidade'
 
 const PADRAO = { busca: '', cidade: '', categoria: '', entrada: '', quando: 'futuros' }
 
 export default function Eventos() {
   const [params, setParams] = useSearchParams()
+  const [cidadeSlug, definirCidade] = useCidadeAtual()
+
+  // Um link compartilhado com ?cidade=... passa a valer também no seletor do topo.
+  useEffect(() => {
+    const daUrl = params.get('cidade')
+    if (daUrl != null && daUrl !== cidadeSlug) definirCidade(daUrl)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const filtros = useMemo(
     () => ({
       busca: params.get('busca') || '',
-      cidade: params.get('cidade') || '',
+      // sem parâmetro na URL → usa a cidade escolhida no cabeçalho
+      cidade: params.has('cidade') ? params.get('cidade') : cidadeSlug,
       categoria: params.get('categoria') || '',
       entrada: params.get('entrada') || '',
       quando: params.get('quando') ?? 'futuros',
     }),
-    [params],
+    [params, cidadeSlug],
   )
 
   function aplicar(novos) {
-    const limpo = {}
+    const p = new URLSearchParams()
     for (const [k, v] of Object.entries(novos)) {
-      if (v && !(k === 'quando' && v === 'futuros')) limpo[k] = v
+      if (k === 'quando' && (!v || v === 'futuros')) continue
+      if (k === 'cidade') {
+        p.set('cidade', v || '') // sempre explícito, para permitir "todas"
+        definirCidade(v || '')
+        continue
+      }
+      if (v) p.set(k, v)
     }
-    setParams(limpo, { replace: true })
+    setParams(p, { replace: true })
   }
 
   const { dados: cidades } = useAsync(() => listarCidades(), [])

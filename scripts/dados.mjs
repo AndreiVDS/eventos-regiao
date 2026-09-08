@@ -14,6 +14,8 @@
 export const cidades = [
   {
     slug: 'jaragua-do-sul',
+    lat: -26.4851,
+    lng: -49.0666,
     nome: 'Jaraguá do Sul',
     uf: 'SC',
     regiao: 'Norte de Santa Catarina',
@@ -24,6 +26,8 @@ export const cidades = [
   },
   {
     slug: 'blumenau',
+    lat: -26.9194,
+    lng: -49.0661,
     nome: 'Blumenau',
     uf: 'SC',
     regiao: 'Vale do Itajaí',
@@ -34,6 +38,8 @@ export const cidades = [
   },
   {
     slug: 'florianopolis',
+    lat: -27.5949,
+    lng: -48.5482,
     nome: 'Florianópolis',
     uf: 'SC',
     regiao: 'Grande Florianópolis',
@@ -44,6 +50,8 @@ export const cidades = [
   },
   {
     slug: 'joinville',
+    lat: -26.3045,
+    lng: -48.8487,
     nome: 'Joinville',
     uf: 'SC',
     regiao: 'Norte de Santa Catarina',
@@ -54,6 +62,8 @@ export const cidades = [
   },
   {
     slug: 'curitiba',
+    lat: -25.4284,
+    lng: -49.2733,
     nome: 'Curitiba',
     uf: 'PR',
     regiao: 'Região Metropolitana de Curitiba',
@@ -64,6 +74,8 @@ export const cidades = [
   },
   {
     slug: 'ipatinga',
+    lat: -19.4683,
+    lng: -42.5369,
     nome: 'Ipatinga',
     uf: 'MG',
     regiao: 'Vale do Aço — Minas Gerais',
@@ -74,6 +86,8 @@ export const cidades = [
   },
   {
     slug: 'porto-alegre',
+    lat: -30.0346,
+    lng: -51.2177,
     nome: 'Porto Alegre',
     uf: 'RS',
     regiao: 'Região Metropolitana de Porto Alegre',
@@ -84,6 +98,8 @@ export const cidades = [
   },
   {
     slug: 'gramado',
+    lat: -29.3747,
+    lng: -50.876,
     nome: 'Gramado',
     uf: 'RS',
     regiao: 'Serra Gaúcha',
@@ -94,6 +110,8 @@ export const cidades = [
   },
   {
     slug: 'rio-de-janeiro',
+    lat: -22.9068,
+    lng: -43.1729,
     nome: 'Rio de Janeiro',
     uf: 'RJ',
     regiao: 'Região Metropolitana do Rio de Janeiro',
@@ -104,6 +122,8 @@ export const cidades = [
   },
   {
     slug: 'sao-paulo',
+    lat: -23.5505,
+    lng: -46.6333,
     nome: 'São Paulo',
     uf: 'SP',
     regiao: 'Região Metropolitana de São Paulo',
@@ -114,6 +134,8 @@ export const cidades = [
   },
   {
     slug: 'paraty',
+    lat: -23.2178,
+    lng: -44.7131,
     nome: 'Paraty',
     uf: 'RJ',
     regiao: 'Costa Verde — Rio de Janeiro',
@@ -124,6 +146,8 @@ export const cidades = [
   },
   {
     slug: 'campos-do-jordao',
+    lat: -22.7392,
+    lng: -45.5915,
     nome: 'Campos do Jordão',
     uf: 'SP',
     regiao: 'Serra da Mantiqueira — São Paulo',
@@ -134,6 +158,8 @@ export const cidades = [
   },
   {
     slug: 'salvador',
+    lat: -12.9777,
+    lng: -38.5016,
     nome: 'Salvador',
     uf: 'BA',
     regiao: 'Região Metropolitana de Salvador',
@@ -144,6 +170,8 @@ export const cidades = [
   },
   {
     slug: 'olinda',
+    lat: -8.0089,
+    lng: -34.8553,
     nome: 'Olinda',
     uf: 'PE',
     regiao: 'Região Metropolitana do Recife',
@@ -154,6 +182,8 @@ export const cidades = [
   },
   {
     slug: 'parintins',
+    lat: -2.6283,
+    lng: -56.7358,
     nome: 'Parintins',
     uf: 'AM',
     regiao: 'Baixo Amazonas',
@@ -164,6 +194,8 @@ export const cidades = [
   },
   {
     slug: 'ouro-preto',
+    lat: -20.3856,
+    lng: -43.5035,
     nome: 'Ouro Preto',
     uf: 'MG',
     regiao: 'Região Central de Minas Gerais',

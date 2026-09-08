@@ -19,9 +19,14 @@ create table if not exists public.cidades (
   uf              text not null,
   regiao          text not null,
   descricao       text not null default '',
+  lat             double precision,
+  lng             double precision,
   imagem_url      text,
   site_prefeitura text
 );
+-- Se a tabela já existia sem estas colunas:
+alter table public.cidades add column if not exists lat double precision;
+alter table public.cidades add column if not exists lng double precision;
 
 -- ---------- Tabela: eventos ----------
 -- id é texto (slug legível na URL, ex.: "rock-in-rio-2026"); o app gera

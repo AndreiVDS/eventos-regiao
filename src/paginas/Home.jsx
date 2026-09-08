@@ -4,16 +4,23 @@ import CardEvento from '../componentes/CardEvento'
 import EsqueletoCards from '../componentes/EsqueletoCards'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
+import { useCidadeAtual } from '../lib/cidade'
 import { CATEGORIAS } from '../lib/formatacao'
 
 export default function Home() {
   const navigate = useNavigate()
   const [busca, setBusca] = useState('')
+  const [cidadeSlug] = useCidadeAtual()
 
   const { dados: eventos, carregando } = useAsync(() => listarEventos({ quando: 'futuros' }), [])
   const { dados: cidades } = useAsync(() => listarCidades(), [])
 
-  const destaques = (eventos || []).slice(0, 6)
+  const cidadeAtual = (cidades || []).find((c) => c.slug === cidadeSlug)
+  const daCidade = cidadeSlug
+    ? (eventos || []).filter((e) => e.cidade === cidadeSlug)
+    : eventos || []
+  const destaques = daCidade.slice(0, 6)
+
   const numeros = useMemo(() => {
     const lista = eventos || []
     return {
@@ -26,7 +33,10 @@ export default function Home() {
 
   function pesquisar(e) {
     e.preventDefault()
-    navigate(`/eventos?busca=${encodeURIComponent(busca.trim())}`)
+    const p = new URLSearchParams()
+    if (busca.trim()) p.set('busca', busca.trim())
+    if (cidadeSlug) p.set('cidade', cidadeSlug)
+    navigate(`/eventos?${p}`)
   }
 
   return (
@@ -111,20 +121,38 @@ export default function Home() {
       <section className="container-pagina py-14">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl">Próximos eventos</h2>
-            <p className="text-suave">Selecionados na agenda das cidades participantes.</p>
+            <h2 className="text-3xl">
+              Próximos eventos{cidadeAtual ? ` em ${cidadeAtual.nome}` : ''}
+            </h2>
+            <p className="text-suave">
+              {cidadeAtual
+                ? `Agenda de ${cidadeAtual.nome}/${cidadeAtual.uf}.`
+                : 'Selecionados na agenda das cidades participantes.'}
+            </p>
           </div>
-          <Link to="/eventos" className="btn-contorno !py-2 text-sm">Ver todos</Link>
+          <Link
+            to={cidadeSlug ? `/eventos?cidade=${cidadeSlug}` : '/eventos'}
+            className="btn-contorno !py-2 text-sm"
+          >
+            Ver todos
+          </Link>
         </div>
 
         {carregando ? (
           <EsqueletoCards />
-        ) : (
+        ) : destaques.length > 0 ? (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {destaques.map((evento) => (
               <CardEvento key={evento.id} evento={evento} />
             ))}
           </div>
+        ) : (
+          <p className="mt-8 rounded-xl bg-superficie p-8 text-center text-suave ring-1 ring-borda/10">
+            Ainda não há eventos futuros em {cidadeAtual?.nome}.{' '}
+            <Link to="/eventos" className="font-semibold text-texto underline">
+              Ver todas as cidades
+            </Link>
+          </p>
         )}
       </section>
 
