@@ -18,7 +18,7 @@ export default class LimiteErro extends Component {
       <div className="container-pagina flex flex-col items-center py-24 text-center">
         <p className="font-titulo text-6xl text-destaque">Ops</p>
         <h1 className="mt-2 text-3xl">Algo deu errado nesta tela</h1>
-        <p className="mt-2 max-w-md text-tinta/70">
+        <p className="mt-2 max-w-md text-suave">
           Recarregue a página. Se o problema continuar, avise a equipe.
         </p>
         <button className="btn-destaque mt-6" onClick={() => window.location.assign('/')}>

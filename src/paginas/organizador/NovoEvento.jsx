@@ -13,17 +13,17 @@ export default function NovoEvento() {
 
   return (
     <div className="container-pagina py-10">
-      <nav aria-label="Trilha" className="text-sm text-tinta/60">
+      <nav aria-label="Trilha" className="text-sm text-suave">
         <Link to="/organizador" className="hover:underline">Meus eventos</Link> / Novo
       </nav>
       <h1 className="mt-2 text-4xl">Cadastrar evento</h1>
-      <p className="mt-1 max-w-2xl text-tinta/70">
+      <p className="mt-1 max-w-2xl text-suave">
         O evento entra como <strong>“em revisão”</strong>. Assim que a equipe aprovar, ele aparece
         na agenda pública e no seu histórico como “publicado”.
       </p>
 
       {ok ? (
-        <div className="mt-8 rounded-xl bg-white p-8 text-center shadow-sm ring-1 ring-tinta/10">
+        <div className="mt-8 rounded-xl bg-superficie p-8 text-center shadow-sm ring-1 ring-borda/10">
           <p className="text-5xl" aria-hidden="true">✅</p>
           <h2 className="mt-3 text-2xl">Enviado para revisão</h2>
           <div className="mt-5 flex justify-center gap-3">

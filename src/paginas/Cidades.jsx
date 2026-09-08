@@ -9,7 +9,7 @@ export default function Cidades() {
   return (
     <div className="container-pagina py-10">
       <h1 className="text-4xl">Cidades participantes</h1>
-      <p className="mt-1 max-w-2xl text-tinta/70">
+      <p className="mt-1 max-w-2xl text-suave">
         A plataforma nasce no Norte de Santa Catarina e no Vale do Aço, e cresce à medida que novas
         comunidades entram. Conheça a identidade cultural de cada cidade.
       </p>
@@ -21,7 +21,7 @@ export default function Cidades() {
           {cidades.map((c) => (
             <article
               key={c.slug}
-              className="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-tinta/10"
+              className="flex flex-col overflow-hidden rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10"
             >
               <img
                 src={c.imagem_url}
@@ -31,10 +31,10 @@ export default function Cidades() {
               />
               <div className="flex flex-1 flex-col p-5">
                 <h2 className="text-2xl">
-                  {c.nome} <span className="text-base text-tinta/60">/{c.uf}</span>
+                  {c.nome} <span className="text-base text-suave">/{c.uf}</span>
                 </h2>
-                <p className="text-sm font-semibold text-tinta/60">{c.regiao}</p>
-                <p className="mt-2 flex-1 text-sm text-tinta/80">{c.descricao}</p>
+                <p className="text-sm font-semibold text-suave">{c.regiao}</p>
+                <p className="mt-2 flex-1 text-sm text-suave">{c.descricao}</p>
                 <Link to={`/cidades/${c.slug}`} className="btn-contorno mt-4 !py-2 text-sm">
                   Ver eventos em {c.nome}
                 </Link>

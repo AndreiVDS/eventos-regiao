@@ -14,7 +14,7 @@ export default function CardEvento({ evento }) {
   const passou = eventoJaPassou(evento)
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-tinta/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
+    <article className="group flex flex-col overflow-hidden rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative overflow-hidden">
         <img
           src={evento.imagem_url}
@@ -49,9 +49,9 @@ export default function CardEvento({ evento }) {
           </Link>
         </h3>
 
-        <p className="text-sm text-tinta/70 line-clamp-3">{evento.descricao}</p>
+        <p className="text-sm text-suave line-clamp-3">{evento.descricao}</p>
 
-        <dl className="mt-auto space-y-1 text-sm text-tinta/80">
+        <dl className="mt-auto space-y-1 text-sm text-suave">
           <div className="flex gap-2">
             <dt className="sr-only">Data</dt>
             <span aria-hidden="true">🗓️</span>

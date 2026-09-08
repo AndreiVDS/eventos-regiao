@@ -27,6 +27,20 @@
     />
 
     <title>Eventos Região — Turismo e Cultura Local</title>
+
+    <!-- Aplica o tema antes de pintar a tela, evitando "flash" de tema errado -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tema')
+          var escuro =
+            t === 'escuro' ||
+            ((t === 'sistema' || !t) &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          if (escuro) document.documentElement.classList.add('dark')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

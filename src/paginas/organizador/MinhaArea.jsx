@@ -29,11 +29,11 @@ export default function MinhaArea() {
     <div className="container-pagina py-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-tinta/50">
+          <p className="text-sm font-semibold uppercase tracking-wide text-suave/80">
             Área do organizador
           </p>
           <h1 className="text-4xl">Meus eventos</h1>
-          <p className="mt-1 text-tinta/70">{usuario?.email}</p>
+          <p className="mt-1 text-suave">{usuario?.email}</p>
         </div>
         <div className="flex gap-2">
           <Link to="/organizador/novo" className="btn-destaque !py-2 text-sm">Cadastrar evento</Link>
@@ -42,7 +42,7 @@ export default function MinhaArea() {
       </div>
 
       {modoDemo && (
-        <p className="mt-4 rounded-lg bg-destaque/20 p-3 text-sm text-tinta">
+        <p className="mt-4 rounded-lg border-l-4 border-destaque bg-destaque/10 p-3 text-sm text-texto">
           <strong>Modo demonstração:</strong> seus eventos ficam salvos só neste navegador.
         </p>
       )}
@@ -70,12 +70,12 @@ export default function MinhaArea() {
             return (
               <li
                 key={e.id}
-                className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-tinta/10"
+                className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-superficie p-4 shadow-sm ring-1 ring-borda/10"
               >
                 <img src={e.imagem_url} alt="" className="h-14 w-20 rounded object-cover" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{e.titulo}</p>
-                  <p className="text-sm text-tinta/60">
+                  <p className="text-sm text-suave">
                     {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf} ·{' '}
                     {formatarPeriodo(e.data_inicio, e.data_fim)}
                   </p>

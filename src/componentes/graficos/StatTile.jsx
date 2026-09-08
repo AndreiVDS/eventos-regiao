@@ -1,7 +1,7 @@
 /** Número-destaque com rótulo. Sem gráfico — é só o dado. */
 export default function StatTile({ rotulo, valor, sufixo = '', detalhe, tom = 'claro' }) {
   const tons = {
-    claro: 'bg-white ring-1 ring-tinta/10 text-tinta',
+    claro: 'bg-superficie ring-1 ring-borda/10 text-texto',
     escuro: 'bg-tinta text-creme',
     destaque: 'bg-destaque text-tinta',
   }

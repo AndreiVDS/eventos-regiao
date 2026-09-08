@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import BotaoTema from './BotaoTema'
 
 const linksPublicos = [
   { para: '/eventos', texto: 'Eventos' },
@@ -46,12 +47,15 @@ export default function Cabecalho() {
           ) : (
             <NavLink to="/entrar" className={classeLink}>Entrar</NavLink>
           )}
-          <Link to="/divulgue" className="btn-destaque ml-2 !py-2">Divulgue seu evento</Link>
+          <BotaoTema className="ml-1" />
+          <Link to="/divulgue" className="btn-destaque ml-1 !py-2">Divulgue seu evento</Link>
         </nav>
 
+        <div className="flex items-center gap-1 md:hidden">
+        <BotaoTema />
         <button
           type="button"
-          className="rounded-md p-2 text-creme hover:bg-white/10 md:hidden"
+          className="rounded-md p-2 text-creme hover:bg-white/10"
           aria-expanded={aberto}
           aria-controls="menu-mobile"
           aria-label={aberto ? 'Fechar menu' : 'Abrir menu'}
@@ -65,6 +69,7 @@ export default function Cabecalho() {
             )}
           </svg>
         </button>
+        </div>
       </div>
 
       {aberto && (

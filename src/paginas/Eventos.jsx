@@ -40,7 +40,7 @@ export default function Eventos() {
   return (
     <div className="container-pagina py-10">
       <h1 className="text-4xl">Agenda de eventos</h1>
-      <p className="mt-1 text-tinta/70">
+      <p className="mt-1 text-suave">
         {carregando
           ? 'Buscando…'
           : `${eventos?.length || 0} evento${eventos?.length === 1 ? '' : 's'} encontrado${

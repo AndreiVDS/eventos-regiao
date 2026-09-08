@@ -63,20 +63,20 @@ export default function Evento() {
           <img
             src={evento.imagem_url}
             alt={`Imagem de divulgação de ${evento.titulo}`}
-            className="mb-8 aspect-[16/9] w-full rounded-xl object-cover ring-1 ring-tinta/10"
+            className="mb-8 aspect-[16/9] w-full rounded-xl object-cover ring-1 ring-borda/10"
           />
           <h2 className="text-2xl">Sobre o evento</h2>
-          <p className="mt-3 whitespace-pre-line text-tinta/80">
+          <p className="mt-3 whitespace-pre-line text-suave">
             {evento.descricao_completa || evento.descricao}
           </p>
 
           <h2 className="mt-10 text-2xl">Local</h2>
-          <p className="mt-2 text-tinta/80">
+          <p className="mt-2 text-suave">
             <strong>{evento.local}</strong>
             <br />
             {evento.endereco} — {evento.cidade_nome}/{evento.uf}
           </p>
-          <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-tinta/10">
+          <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-borda/10">
             <iframe
               title={`Mapa de ${evento.local}`}
               src={mapa}
@@ -89,37 +89,37 @@ export default function Evento() {
             href={mapaLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-block text-sm text-tinta underline hover:text-tinta/70"
+            className="mt-2 inline-block text-sm text-texto underline hover:text-suave"
           >
             Abrir no Google Maps
           </a>
         </div>
 
-        <aside className="h-fit rounded-xl bg-white p-6 shadow-sm ring-1 ring-tinta/10">
+        <aside className="h-fit rounded-xl bg-superficie p-6 shadow-sm ring-1 ring-borda/10">
           <dl className="space-y-4 text-sm">
             <div>
-              <dt className="font-semibold text-tinta">🗓️ Data</dt>
-              <dd className="text-tinta/80">
+              <dt className="font-semibold text-texto">🗓️ Data</dt>
+              <dd className="text-suave">
                 {formatarPeriodo(evento.data_inicio, evento.data_fim)}
               </dd>
             </div>
             {evento.horario && (
               <div>
-                <dt className="font-semibold text-tinta">⏰ Horário</dt>
-                <dd className="text-tinta/80">{evento.horario}</dd>
+                <dt className="font-semibold text-texto">⏰ Horário</dt>
+                <dd className="text-suave">{evento.horario}</dd>
               </div>
             )}
             <div>
-              <dt className="font-semibold text-tinta">🎟️ Entrada</dt>
-              <dd className="text-tinta/80">
+              <dt className="font-semibold text-texto">🎟️ Entrada</dt>
+              <dd className="text-suave">
                 {rotuloEntrada(evento.entrada)}
                 {evento.preco_texto ? ` — ${evento.preco_texto}` : ''}
               </dd>
             </div>
             {evento.organizador_nome && (
               <div>
-                <dt className="font-semibold text-tinta">🧑‍🤝‍🧑 Organização</dt>
-                <dd className="text-tinta/80">{evento.organizador_nome}</dd>
+                <dt className="font-semibold text-texto">🧑‍🤝‍🧑 Organização</dt>
+                <dd className="text-suave">{evento.organizador_nome}</dd>
               </div>
             )}
           </dl>

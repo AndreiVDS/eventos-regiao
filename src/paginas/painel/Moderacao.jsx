@@ -31,7 +31,7 @@ export default function Moderacao() {
     <div className="container-pagina py-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-tinta/50">Painel da equipe</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-suave/80">Painel da equipe</p>
           <h1 className="text-4xl">Moderação de eventos</h1>
         </div>
         <button className="btn-contorno !py-2 text-sm" onClick={sair}>Sair</button>
@@ -45,7 +45,7 @@ export default function Moderacao() {
         <Carregando texto="Carregando eventos pendentes…" />
       ) : (
         <>
-          <p className="mt-6 text-tinta/70">
+          <p className="mt-6 text-suave">
             {pendentes.length} evento{pendentes.length === 1 ? '' : 's'} aguardando revisão.
           </p>
 
@@ -61,7 +61,7 @@ export default function Moderacao() {
               {pendentes.map((e) => (
                 <li
                   key={e.id}
-                  className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-tinta/10 sm:flex sm:gap-5"
+                  className="rounded-xl bg-superficie p-5 shadow-sm ring-1 ring-borda/10 sm:flex sm:gap-5"
                 >
                   <img
                     src={e.imagem_url}
@@ -70,12 +70,12 @@ export default function Moderacao() {
                   />
                   <div className="flex-1">
                     <h2 className="text-xl">{e.titulo}</h2>
-                    <p className="text-sm text-tinta/60">
+                    <p className="text-sm text-suave">
                       {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf} ·{' '}
                       {formatarPeriodo(e.data_inicio, e.data_fim)} · {rotuloEntrada(e.entrada)}
                     </p>
-                    <p className="mt-2 text-sm text-tinta/80">{e.descricao}</p>
-                    <p className="mt-2 text-xs text-tinta/60">
+                    <p className="mt-2 text-sm text-suave">{e.descricao}</p>
+                    <p className="mt-2 text-xs text-suave">
                       Organização: {e.organizador_nome} — contato:{' '}
                       {e.organizador_contato || e.criado_por_email || '—'}
                     </p>

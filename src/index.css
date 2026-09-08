@@ -3,12 +3,27 @@
 @tailwind utilities;
 
 @layer base {
+  /* Tokens de cor — canal RGB separado por espaço, para o Tailwind aplicar opacidade */
   :root {
+    --cor-fundo: 250 249 247; /* #faf9f7 */
+    --cor-superficie: 255 255 255; /* #ffffff */
+    --cor-texto: 31 30 31; /* #1f1e1f */
+    --cor-suave: 92 92 94; /* #5c5c5e — texto secundário */
+    --cor-borda: 31 30 31; /* usado sempre com opacidade (/10, /20) */
     color-scheme: light;
   }
 
+  .dark {
+    --cor-fundo: 22 22 24; /* #161618 */
+    --cor-superficie: 32 32 36; /* #202024 */
+    --cor-texto: 233 233 234; /* #e9e9ea */
+    --cor-suave: 162 162 166; /* #a2a2a6 */
+    --cor-borda: 255 255 255;
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-creme text-tinta font-corpo antialiased;
+    @apply bg-fundo text-texto font-corpo antialiased;
   }
 
   h1,
@@ -20,10 +35,9 @@
     @apply text-balance;
   }
 
-  /* Foco visível para navegação por teclado (acessibilidade — Obj. 4 da proposta).
-     Nunca removemos o outline sem oferecer um substituto claro. */
+  /* Foco visível para navegação por teclado (acessibilidade — Obj. 4 da proposta). */
   :focus-visible {
-    @apply outline-none ring-2 ring-offset-2 ring-tinta ring-offset-creme;
+    @apply outline-none ring-2 ring-offset-2 ring-destaque ring-offset-fundo;
     border-radius: 4px;
   }
 
@@ -31,7 +45,6 @@
     @apply bg-destaque text-tinta;
   }
 
-  /* Respeita quem pediu menos animações no sistema operacional. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -45,7 +58,6 @@
 }
 
 @layer components {
-  /* Link "pular para o conteúdo" — fica escondido até receber foco. */
   .link-pular {
     @apply sr-only;
   }
@@ -58,7 +70,7 @@
   }
 
   .cartao {
-    @apply rounded-xl bg-white shadow-sm ring-1 ring-tinta/10;
+    @apply rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10;
   }
 
   .btn {
@@ -66,25 +78,24 @@
            transition-all duration-200 focus-visible:ring-2 active:scale-[0.98];
   }
   .btn-destaque {
-    @apply btn bg-destaque text-tinta hover:bg-tinta hover:text-destaque;
+    @apply btn bg-destaque text-tinta hover:brightness-95;
   }
   .btn-tinta {
     @apply btn bg-tinta text-creme hover:bg-destaque hover:text-tinta;
   }
   .btn-contorno {
-    @apply btn border-2 border-tinta text-tinta hover:bg-tinta hover:text-creme;
+    @apply btn border-2 border-texto text-texto hover:bg-texto hover:text-fundo;
   }
 
   .campo {
-    @apply w-full rounded-lg border-2 border-tinta/20 bg-white px-4 py-2.5 text-tinta
-           transition-colors placeholder:text-tinta/40 focus:border-tinta;
+    @apply w-full rounded-lg border-2 border-borda/20 bg-superficie px-4 py-2.5 text-texto
+           transition-colors placeholder:text-suave/70 focus:border-destaque;
   }
   .rotulo {
-    @apply mb-1 block font-semibold text-tinta;
+    @apply mb-1 block font-semibold text-texto;
   }
 
-  /* Bloco de carregamento (esqueleto) */
   .esqueleto {
-    @apply animate-pulse rounded-lg bg-tinta/10;
+    @apply animate-pulse rounded-lg bg-borda/10;
   }
 }

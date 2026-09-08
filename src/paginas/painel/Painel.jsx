@@ -10,7 +10,7 @@ import { useAuth } from '../../lib/auth'
 export function AbasPainel() {
   const classe = ({ isActive }) =>
     `rounded-lg px-4 py-2 text-sm font-semibold ${
-      isActive ? 'bg-tinta text-creme' : 'bg-white ring-1 ring-tinta/10 hover:bg-tinta/5'
+      isActive ? 'bg-tinta text-creme' : 'bg-superficie ring-1 ring-borda/10 hover:bg-texto/5'
     }`
   return (
     <nav className="flex flex-wrap gap-2" aria-label="Seções do painel">
@@ -32,7 +32,7 @@ export default function Painel() {
     <div className="container-pagina py-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-tinta/50">Painel da equipe</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-suave/80">Painel da equipe</p>
           <h1 className="text-4xl">Visão geral</h1>
         </div>
         <button onClick={sair} className="btn-contorno !py-2 text-sm">Sair</button>

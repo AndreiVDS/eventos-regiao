@@ -8,19 +8,19 @@ export default function GraficoBarras({ titulo, dados, unidade = '', vazio = 'Se
   const temAlgum = dados.some((d) => d.valor > 0)
 
   return (
-    <figure className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-tinta/10">
+    <figure className="rounded-xl bg-superficie p-5 shadow-sm ring-1 ring-borda/10">
       <figcaption className="mb-4 font-titulo text-xl tracking-wide">{titulo}</figcaption>
 
       {!temAlgum ? (
-        <p className="py-6 text-center text-sm text-tinta/60">{vazio}</p>
+        <p className="py-6 text-center text-sm text-suave">{vazio}</p>
       ) : (
         <ul className="space-y-2.5">
           {dados.map((d) => (
             <li key={d.chave ?? d.rotulo} className="grid grid-cols-[7.5rem_1fr_2.5rem] items-center gap-2">
-              <span className="truncate text-sm text-tinta/80" title={d.rotulo}>
+              <span className="truncate text-sm text-suave" title={d.rotulo}>
                 {d.rotulo}
               </span>
-              <span className="h-4 rounded bg-tinta/10" aria-hidden="true">
+              <span className="h-4 rounded bg-texto/10" aria-hidden="true">
                 <span
                   className="block h-4 rounded bg-destaque transition-[width] duration-500"
                   style={{ width: `${Math.max((d.valor / max) * 100, d.valor > 0 ? 4 : 0)}%` }}
@@ -33,18 +33,18 @@ export default function GraficoBarras({ titulo, dados, unidade = '', vazio = 'Se
         </ul>
       )}
 
-      <details className="mt-4 text-sm text-tinta/70">
+      <details className="mt-4 text-sm text-suave">
         <summary className="cursor-pointer">Ver dados em tabela</summary>
         <table className="mt-2 w-full border-collapse">
           <thead>
-            <tr className="border-b border-tinta/15 text-left">
+            <tr className="border-b border-borda/15 text-left">
               <th className="py-1 pr-2 font-semibold">Item</th>
               <th className="py-1 font-semibold">{unidade || 'Total'}</th>
             </tr>
           </thead>
           <tbody>
             {dados.map((d) => (
-              <tr key={(d.chave ?? d.rotulo) + '-t'} className="border-b border-tinta/10">
+              <tr key={(d.chave ?? d.rotulo) + '-t'} className="border-b border-borda/10">
                 <td className="py-1 pr-2">{d.rotulo}</td>
                 <td className="py-1 tabular-nums">{d.valor}</td>
               </tr>

@@ -40,14 +40,14 @@ export default function Entrar() {
   return (
     <div className="container-pagina flex justify-center py-16">
       <div className="w-full max-w-sm">
-        <div className="rounded-xl bg-white p-8 shadow-sm ring-1 ring-tinta/10">
+        <div className="rounded-xl bg-superficie p-8 shadow-sm ring-1 ring-borda/10">
           <h1 className="text-3xl">{modo === 'entrar' ? 'Entrar' : 'Criar conta'}</h1>
-          <p className="mt-1 text-sm text-tinta/70">
+          <p className="mt-1 text-sm text-suave">
             Para organizadores acompanharem seus eventos e para a equipe moderar a plataforma.
           </p>
 
           {modoDemo && (
-            <div className="mt-4 rounded-lg bg-destaque/20 p-3 text-xs text-tinta">
+            <div className="mt-4 rounded-lg border-l-4 border-destaque bg-destaque/10 p-3 text-xs text-texto">
               <p className="font-semibold">Modo demonstração</p>
               <p className="mt-1">Sem banco conectado. Entre direto com um papel:</p>
               <div className="mt-2 flex gap-2">
@@ -84,21 +84,21 @@ export default function Entrar() {
               <input id="senha" type="password" className="campo" value={senha} required minLength={6}
                 onChange={(e) => setSenha(e.target.value)} />
             </div>
-            {erro && <p className="text-sm text-red-700" role="alert">{erro}</p>}
+            {erro && <p className="text-sm text-red-700 dark:text-red-400" role="alert">{erro}</p>}
             <button type="submit" className="btn-destaque w-full" disabled={ocupado}>
               {ocupado ? 'Aguarde…' : modo === 'entrar' ? 'Entrar' : 'Criar conta'}
             </button>
           </form>
 
           <button
-            className="mt-4 text-sm text-tinta underline"
+            className="mt-4 text-sm text-texto underline"
             onClick={() => setModo((m) => (m === 'entrar' ? 'cadastrar' : 'entrar'))}
           >
             {modo === 'entrar' ? 'Não tem conta? Criar agora' : 'Já tenho conta'}
           </button>
         </div>
 
-        <p className="mt-4 text-center text-sm text-tinta/60">
+        <p className="mt-4 text-center text-sm text-suave">
           Só quer ver eventos? <Link to="/eventos" className="underline">Ir para a agenda</Link>
         </p>
       </div>

@@ -66,7 +66,7 @@ export default function Home() {
             <input
               id="busca-home"
               type="search"
-              className="campo flex-1 !text-tinta"
+              className="campo flex-1"
               placeholder="Buscar por evento, cidade ou tema"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
@@ -112,7 +112,7 @@ export default function Home() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl">Próximos eventos</h2>
-            <p className="text-tinta/70">Selecionados na agenda das cidades participantes.</p>
+            <p className="text-suave">Selecionados na agenda das cidades participantes.</p>
           </div>
           <Link to="/eventos" className="btn-contorno !py-2 text-sm">Ver todos</Link>
         </div>
@@ -130,10 +130,10 @@ export default function Home() {
 
       {/* Cidades */}
       {cidades && (
-        <section className="bg-white py-14">
+        <section className="bg-superficie py-14">
           <div className="container-pagina">
             <h2 className="text-3xl">Explore por cidade</h2>
-            <p className="text-tinta/70">
+            <p className="text-suave">
               Cada cidade tem sua identidade, suas tradições e sua própria agenda.
             </p>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -141,7 +141,7 @@ export default function Home() {
                 <Link
                   key={c.slug}
                   to={`/cidades/${c.slug}`}
-                  className="group relative overflow-hidden rounded-xl ring-1 ring-tinta/10"
+                  className="group relative overflow-hidden rounded-xl ring-1 ring-borda/10"
                 >
                   <img
                     src={c.imagem_url}
@@ -180,7 +180,7 @@ export default function Home() {
                 {p.n}
               </span>
               <h3 className="mt-4 text-xl">{p.t}</h3>
-              <p className="mt-1 text-tinta/70">{p.d}</p>
+              <p className="mt-1 text-suave">{p.d}</p>
             </div>
           ))}
         </div>
@@ -191,7 +191,7 @@ export default function Home() {
         <div className="container-pagina flex flex-col items-start gap-4 py-12 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-3xl text-tinta">Tem um evento na sua cidade?</h2>
-            <p className="mt-1 max-w-xl text-tinta/80">
+            <p className="mt-1 max-w-xl text-suave">
               Grandes ou pequenos, todos os eventos que fortalecem a cultura e a economia local têm
               espaço aqui. O cadastro é gratuito.
             </p>

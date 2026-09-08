@@ -1,6 +1,6 @@
 export default function Selo({ children, tom = 'neutro' }) {
   const tons = {
-    neutro: 'bg-tinta/10 text-tinta',
+    neutro: 'bg-texto/10 text-texto',
     destaque: 'bg-destaque text-tinta',
     escuro: 'bg-tinta text-creme',
   }

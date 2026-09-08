@@ -16,10 +16,10 @@ export default function DivulgueSeuEvento() {
   if (enviado) {
     return (
       <div className="container-pagina py-16">
-        <div className="mx-auto max-w-xl rounded-xl bg-white p-8 text-center shadow-sm ring-1 ring-tinta/10">
+        <div className="mx-auto max-w-xl rounded-xl bg-superficie p-8 text-center shadow-sm ring-1 ring-borda/10">
           <p className="text-5xl" aria-hidden="true">✅</p>
           <h1 className="mt-4 text-3xl">Evento enviado!</h1>
-          <p className="mt-2 text-tinta/75">
+          <p className="mt-2 text-suave">
             Recebemos sua proposta. A equipe vai revisar as informações e, uma vez aprovado, o
             evento aparece na agenda pública.
           </p>
@@ -39,20 +39,20 @@ export default function DivulgueSeuEvento() {
   return (
     <div className="container-pagina py-10">
       <h1 className="text-4xl">Divulgue seu evento</h1>
-      <p className="mt-1 max-w-2xl text-tinta/70">
+      <p className="mt-1 max-w-2xl text-suave">
         Grandes ou pequenos, todos os eventos que fortalecem a cultura e a economia local podem ser
         cadastrados aqui. O envio é gratuito e passa por uma revisão antes de ser publicado.
       </p>
 
       {!autenticado && (
-        <p className="mt-4 rounded-lg bg-tinta/5 p-3 text-sm">
+        <p className="mt-4 rounded-lg bg-texto/5 p-3 text-sm">
           Dica: <Link to="/entrar" className="font-semibold underline">crie uma conta de organizador</Link>{' '}
           para acompanhar o status dos seus eventos e ver métricas.
         </p>
       )}
 
       {!supabaseConfigurado && (
-        <p className="mt-4 rounded-lg bg-destaque/20 p-3 text-sm text-tinta">
+        <p className="mt-4 rounded-lg border-l-4 border-destaque bg-destaque/10 p-3 text-sm text-texto">
           <strong>Modo demonstração:</strong> o banco de dados ainda não está conectado, então o
           envio fica salvo apenas neste navegador. Configure o Supabase (veja o README) para receber
           os envios de verdade.

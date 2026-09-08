@@ -19,7 +19,7 @@ export default function Sobre() {
   return (
     <div className="container-pagina py-10">
       <h1 className="text-4xl">Sobre o projeto</h1>
-      <p className="mt-3 max-w-3xl text-lg text-tinta/80">
+      <p className="mt-3 max-w-3xl text-lg text-suave">
         <strong>Eventos Região</strong> é uma plataforma inclusiva para o fortalecimento do turismo
         e da cultura, desenvolvida como Atividade Extensionista do curso de Engenharia de Software da
         UNINTER. A proposta é aproximar pessoas dos eventos que celebram a cultura local e impulsionar
@@ -45,7 +45,7 @@ export default function Sobre() {
           ].map((p) => (
             <div key={p.t} className="cartao p-5">
               <h3 className="text-xl">{p.t}</h3>
-              <p className="mt-1 text-sm text-tinta/80">{p.d}</p>
+              <p className="mt-1 text-sm text-suave">{p.d}</p>
             </div>
           ))}
         </div>
@@ -55,9 +55,9 @@ export default function Sobre() {
         <h2 className="text-2xl">Objetivos</h2>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {objetivos.map((o) => (
-            <li key={o} className="flex gap-3 rounded-lg bg-white p-4 shadow-sm ring-1 ring-tinta/10">
+            <li key={o} className="flex gap-3 rounded-lg bg-superficie p-4 shadow-sm ring-1 ring-borda/10">
               <span aria-hidden="true">✔️</span>
-              <span className="text-sm text-tinta/80">{o}</span>
+              <span className="text-sm text-suave">{o}</span>
             </li>
           ))}
         </ul>
@@ -76,9 +76,9 @@ export default function Sobre() {
           </p>
         </div>
 
-        <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-tinta/10">
+        <div className="rounded-xl bg-superficie p-6 shadow-sm ring-1 ring-borda/10">
           <h2 className="text-2xl">Compromisso com a acessibilidade</h2>
-          <p className="mt-2 text-sm text-tinta/80">
+          <p className="mt-2 text-sm text-suave">
             A plataforma é construída seguindo boas práticas de acessibilidade: navegação por
             teclado, foco visível, contraste adequado, textos alternativos em imagens, estrutura
             semântica e respeito à preferência de menos animações do sistema. É também um
@@ -89,7 +89,7 @@ export default function Sobre() {
 
       <section className="mt-10">
         <h2 className="text-2xl">API pública</h2>
-        <p className="mt-2 max-w-2xl text-sm text-tinta/80">
+        <p className="mt-2 max-w-2xl text-sm text-suave">
           A agenda também é aberta por uma API de leitura, para que sites de prefeituras,
           associações e veículos locais possam reaproveitar os eventos.
         </p>
@@ -104,9 +104,9 @@ GET /api/cidades`}
         <h2 className="text-2xl">Equipe</h2>
         <ul className="mt-4 flex flex-wrap gap-4">
           {equipe.map((p) => (
-            <li key={p.ru} className="rounded-lg bg-white px-4 py-3 shadow-sm ring-1 ring-tinta/10">
+            <li key={p.ru} className="rounded-lg bg-superficie px-4 py-3 shadow-sm ring-1 ring-borda/10">
               <p className="font-semibold">{p.nome}</p>
-              <p className="text-sm text-tinta/60">RU {p.ru}</p>
+              <p className="text-sm text-suave">RU {p.ru}</p>
             </li>
           ))}
         </ul>

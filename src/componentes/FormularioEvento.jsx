@@ -84,7 +84,7 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
   return (
     <form onSubmit={enviar} noValidate className="grid gap-6 lg:grid-cols-2">
       {erros.geral && (
-        <p className="lg:col-span-2 rounded-lg bg-red-100 p-3 text-sm text-red-800" role="alert">
+        <p className="lg:col-span-2 rounded-lg bg-red-100 p-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200" role="alert">
           {erros.geral}
         </p>
       )}
@@ -190,7 +190,7 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
             plataforma. Os dados de contato serão usados apenas pela equipe organizadora (conforme a LGPD).
           </span>
         </label>
-        {erros.aceite && <p className="mt-1 text-sm text-red-700" role="alert">{erros.aceite}</p>}
+        {erros.aceite && <p className="mt-1 text-sm text-red-700 dark:text-red-400" role="alert">{erros.aceite}</p>}
       </div>
 
       <div className="lg:col-span-2">
@@ -206,9 +206,9 @@ function Grupo({ rotulo, htmlFor, erro, dica, children, className = '' }) {
   return (
     <div className={className}>
       <label className="rotulo" htmlFor={htmlFor}>{rotulo}</label>
-      {dica && <p className="mb-1 text-xs text-tinta/60">{dica}</p>}
+      {dica && <p className="mb-1 text-xs text-suave">{dica}</p>}
       {children}
-      {erro && <p id={`err-${htmlFor}`} className="mt-1 text-sm text-red-700" role="alert">{erro}</p>}
+      {erro && <p id={`err-${htmlFor}`} className="mt-1 text-sm text-red-700 dark:text-red-400" role="alert">{erro}</p>}
     </div>
   )
 }

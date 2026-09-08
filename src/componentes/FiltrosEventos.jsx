@@ -21,7 +21,7 @@ export default function FiltrosEventos({ valores, aoMudar, cidades }) {
 
   return (
     <form
-      className="grid gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-tinta/10 sm:grid-cols-2 lg:grid-cols-3"
+      className="grid gap-4 rounded-xl bg-superficie p-4 shadow-sm ring-1 ring-borda/10 sm:grid-cols-2 lg:grid-cols-3"
       onSubmit={(e) => e.preventDefault()}
       role="search"
       aria-label="Filtrar eventos"
