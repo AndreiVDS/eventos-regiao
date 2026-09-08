@@ -3,8 +3,8 @@
   <rect width="1200" height="750" fill="url(#g)"/>
   <g fill="#ffffff" opacity="0.08"><circle cx="1030" cy="120" r="260"/><circle cx="140" cy="700" r="200"/></g>
   <text x="70" y="150" fill="#f4b400" font-size="120" opacity="0.9">❖</text>
-  <text x="70" y="380" fill="#ffffff" font-size="92" letter-spacing="2">25ª FLIP — FESTA</text>
-  <text x="70" y="470" fill="#ffffff" font-size="92" letter-spacing="2">LITERÁRIA INTERNACIONAL …</text>
+  <text x="70" y="380" fill="#ffffff" font-size="80" letter-spacing="1">25ª FLIP — FESTA</text>
+  <text x="70" y="470" fill="#ffffff" font-size="80" letter-spacing="1">LITERÁRIA INTERNACIONAL …</text>
   <text x="74" y="620" fill="#f4b400" font-size="42" letter-spacing="4">PARATY · RJ</text>
   <text x="74" y="680" fill="#ffffff" opacity="0.7" font-size="30" letter-spacing="3">EVENTOS REGIÃO</text>
 </svg>
