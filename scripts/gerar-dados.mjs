@@ -124,7 +124,8 @@ let sql = '-- Seed gerado por scripts/gerar-dados.mjs — não edite à mão.\n'
 sql += '-- Dados de exemplo (eventos reais e recorrentes; datas ilustrativas).\n\n'
 sql += `insert into public.cidades (${colsCidade.join(', ')}) values\n`
 sql += cidadesJson.map((c) => '  (' + colsCidade.map((k) => q(c[k])).join(', ') + ')').join(',\n')
-sql += '\non conflict (slug) do nothing;\n\n'
+// atualiza coordenadas em bases que já tinham as cidades sem lat/lng
+sql += '\non conflict (slug) do update set lat = excluded.lat, lng = excluded.lng;\n\n'
 sql += `insert into public.eventos (${colsEvento.join(', ')}) values\n`
 sql += eventosJson.map((e) => '  (' + colsEvento.map((k) => q(e[k])).join(', ') + ')').join(',\n')
 sql += '\non conflict (id) do nothing;\n'
