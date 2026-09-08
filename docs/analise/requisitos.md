@@ -33,6 +33,10 @@ Eventos culturais, esportivos e comunitários de cidades do interior são divulg
 | RF12 | Não exibir publicamente o contato do organizador | Alta |
 | RF13 | Funcionar como PWA instalável e com cache offline básico | Média |
 | RF14 | Marcar visualmente eventos já encerrados | Baixa |
+| RF15 | Organizador cria conta e acompanha os próprios eventos com indicadores (total, publicados, em revisão) | Alta |
+| RF16 | Cadastrar evento também de dentro da área do organizador | Média |
+| RF17 | Painel da equipe com métricas: eventos por cidade, categoria, estado e mês, e KPIs | Alta |
+| RF18 | Expor API pública de leitura (`/api/eventos`, `/api/eventos/:id`, `/api/cidades`) com filtros | Média |
 
 ## 4. Requisitos Não Funcionais (RNF)
 
@@ -51,10 +55,10 @@ Eventos culturais, esportivos e comunitários de cidades do interior são divulg
 ## 5. Fora de escopo (nesta fase)
 
 - Venda de ingressos e pagamentos.
-- Conta e área logada para o organizador acompanhar o evento.
+- Edição de um evento já publicado pelo próprio organizador.
 - Aplicativo nativo publicado nas lojas.
 - Notificações push e favoritos por usuário.
-- Moderação colaborativa / múltiplos papéis de equipe.
+- Escrita pela API pública (ela é somente leitura).
 
 ## 6. Regras de negócio
 

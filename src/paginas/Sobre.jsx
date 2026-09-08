@@ -27,6 +27,31 @@ export default function Sobre() {
       </p>
 
       <section className="mt-10">
+        <h2 className="text-2xl">Para quem é</h2>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              t: 'Visitante',
+              d: 'Turista ou morador que quer descobrir o que acontece perto de si. Busca e filtra sem precisar de conta.',
+            },
+            {
+              t: 'Organizador',
+              d: 'Cria conta, cadastra eventos gratuitamente e acompanha o status de cada um em "Meus eventos".',
+            },
+            {
+              t: 'Equipe',
+              d: 'Revisa os eventos enviados e acompanha as métricas da plataforma por cidade, categoria e período.',
+            },
+          ].map((p) => (
+            <div key={p.t} className="cartao p-5">
+              <h3 className="text-xl">{p.t}</h3>
+              <p className="mt-1 text-sm text-tinta/80">{p.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
         <h2 className="text-2xl">Objetivos</h2>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {objetivos.map((o) => (
@@ -60,6 +85,19 @@ export default function Sobre() {
             aplicativo instalável (PWA) que funciona mesmo com internet instável.
           </p>
         </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-2xl">API pública</h2>
+        <p className="mt-2 max-w-2xl text-sm text-tinta/80">
+          A agenda também é aberta por uma API de leitura, para que sites de prefeituras,
+          associações e veículos locais possam reaproveitar os eventos.
+        </p>
+        <pre className="mt-3 overflow-x-auto rounded-lg bg-tinta p-4 text-sm text-creme">
+{`GET /api/eventos?uf=SC&categoria=cultura
+GET /api/eventos/:id
+GET /api/cidades`}
+        </pre>
       </section>
 
       <section className="mt-10">

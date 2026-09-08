@@ -3,8 +3,9 @@
 ## Atores
 
 - **Visitante** — qualquer pessoa (morador ou turista), sem login.
-- **Organizador** — visitante que envia um evento (não tem login nesta fase).
-- **Equipe** — integrante do projeto, autenticado, responsável pela moderação.
+- **Organizador** — pessoa autenticada que cadastra e acompanha os próprios eventos.
+- **Equipe** — integrante do projeto, autenticado, responsável pela moderação e pelas métricas.
+- **Sistema terceiro** — site externo que consome a API pública de leitura.
 
 ## Diagrama de casos de uso
 
@@ -13,6 +14,7 @@ graph LR
   V(("Visitante"))
   O(("Organizador"))
   E(("Equipe"))
+  S(("Sistema terceiro"))
 
   subgraph Plataforma
     UC1[Buscar e filtrar eventos]
@@ -20,9 +22,12 @@ graph LR
     UC3[Explorar cidades]
     UC4[Ver agenda de uma cidade]
     UC5[Enviar evento para divulgação]
-    UC6[Autenticar-se no painel]
+    UC6[Autenticar-se]
     UC7[Moderar eventos pendentes]
     UC8[Instalar como aplicativo -PWA-]
+    UC9[Acompanhar meus eventos e indicadores]
+    UC10[Ver métricas da plataforma]
+    UC11[Consumir a API pública]
   end
 
   V --- UC1
@@ -31,9 +36,14 @@ graph LR
   V --- UC4
   V --- UC8
   O --- UC5
-  E --- UC6
+  O --- UC9
   E --- UC7
+  E --- UC10
+  S --- UC11
+  UC5 -. inclui .-> UC6
   UC7 -. inclui .-> UC6
+  UC9 -. inclui .-> UC6
+  UC10 -. inclui .-> UC6
 ```
 
 ## Fluxos principais
@@ -69,6 +79,33 @@ graph LR
 **Fluxos alternativos**
 - **1a.** Sessão ausente/expirada → o sistema redireciona para `/painel` (login).
 - **2a.** Fila vazia → o sistema exibe estado vazio "Nada na fila".
+
+### UC9 — Acompanhar meus eventos e indicadores
+
+**Ator:** Organizador
+**Pré-condição:** autenticado.
+
+1. O organizador acessa **Minha área**.
+2. O sistema mostra indicadores (total, publicados, em revisão, ainda vão acontecer) e a lista dos eventos que ele cadastrou, com o status de cada um.
+3. Para eventos publicados, um link leva à página pública do evento.
+4. Um botão leva ao cadastro de um novo evento (UC5 a partir da área logada).
+
+### UC10 — Ver métricas da plataforma
+
+**Ator:** Equipe
+**Pré-condição:** autenticado e com e-mail na lista da equipe.
+
+1. A equipe acessa **/painel**.
+2. O sistema calcula, sobre todos os eventos, os KPIs (publicados, aguardando revisão, cidades e estados ativos, próximos 30 dias, % gratuitos) e os gráficos de eventos por cidade, categoria, estado e mês.
+3. Cada gráfico oferece uma tabela equivalente para leitura assistida.
+
+### UC11 — Consumir a API pública
+
+**Ator:** Sistema terceiro
+
+1. O sistema faz `GET /api/eventos` (com filtros opcionais) ou `GET /api/cidades`.
+2. A plataforma responde JSON com CORS liberado e cabeçalho de cache.
+3. Apenas eventos aprovados são retornados; o contato do organizador nunca é incluído.
 
 ### UC1 — Buscar e filtrar eventos
 
