@@ -139,19 +139,43 @@ export function gerarSlug(titulo = 'evento') {
   return `${base || 'evento'}-${sufixo}`
 }
 
+// Colunas reais da tabela "eventos" (o formulário tem campos extras, como
+// "aceite", que não podem ir no insert).
+const COLUNAS_EVENTO = [
+  'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'cidade',
+  'cidade_nome', 'uf', 'local', 'endereco', 'data_inicio', 'data_fim', 'horario',
+  'entrada', 'preco_texto', 'imagem_url', 'link_oficial', 'organizador_nome',
+  'organizador_contato', 'criado_por', 'status', 'criado_em',
+]
+const CAMPOS_DATA = ['data_inicio', 'data_fim']
+
+/** Mantém só as colunas válidas e troca string vazia por null (datas exigem isso). */
+export function montarRegistroEvento(dados) {
+  const r = {}
+  for (const col of COLUNAS_EVENTO) {
+    let v = dados[col]
+    if (v === '' || v === undefined) v = null
+    if (v && CAMPOS_DATA.includes(col)) v = String(v).slice(0, 10) // YYYY-MM-DD
+    r[col] = v
+  }
+  return r
+}
+
 /**
  * Envia um evento para moderação (status "pendente").
  * `usuario` (opcional) associa o evento a quem o cadastrou.
  */
 export async function enviarEvento(dados, usuario = null) {
-  const registro = {
+  const completo = {
     ...dados,
     id: dados.id || gerarSlug(dados.titulo),
     status: 'pendente',
     criado_em: new Date().toISOString(),
     criado_por: usuario?.id || null,
-    criado_por_email: usuario?.email || dados.organizador_contato || null,
   }
+  const registro = montarRegistroEvento(completo)
+  // guardado só localmente (não vai pro banco): ajuda o organizador a se achar
+  registro.criado_por_email = usuario?.email || dados.organizador_contato || null
 
   if (supabaseConfigurado) {
     const { criado_por_email, ...paraBanco } = registro

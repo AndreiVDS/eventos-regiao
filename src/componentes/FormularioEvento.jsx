@@ -70,7 +70,12 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
       })
     } catch (err) {
       console.error(err)
-      setErros({ geral: 'Não foi possível enviar agora. Tente novamente em instantes.' })
+      const detalhe = err?.message || err?.error_description || err?.hint
+      setErros({
+        geral: detalhe
+          ? `Não foi possível enviar: ${detalhe}`
+          : 'Não foi possível enviar agora. Tente novamente em instantes.',
+      })
     } finally {
       setEnviando(false)
     }

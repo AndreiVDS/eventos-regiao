@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizar, aplicarFiltros, gerarSlug } from './api'
+import { normalizar, aplicarFiltros, gerarSlug, montarRegistroEvento } from './api'
 
 const base = [
   { id: 'a', titulo: 'Festival de Cinema', descricao: '', cidade_nome: 'Gramado', local: 'Palácio',
@@ -43,6 +43,24 @@ describe('aplicarFiltros', () => {
   it('ordena por data de início', () => {
     const r = aplicarFiltros(base, { quando: 'futuros' })
     expect(r[0].id).toBe('a')
+  })
+})
+
+describe('montarRegistroEvento', () => {
+  it('remove campos que não são colunas (ex.: aceite)', () => {
+    const r = montarRegistroEvento({ titulo: 'X', aceite: true, foo: 1 })
+    expect('aceite' in r).toBe(false)
+    expect('foo' in r).toBe(false)
+    expect(r.titulo).toBe('X')
+  })
+  it('troca string vazia por null (data_fim em branco não quebra o insert)', () => {
+    const r = montarRegistroEvento({ titulo: 'X', data_fim: '', endereco: '' })
+    expect(r.data_fim).toBeNull()
+    expect(r.endereco).toBeNull()
+  })
+  it('recorta data para YYYY-MM-DD', () => {
+    const r = montarRegistroEvento({ data_inicio: '2026-10-08T00:00:00.000Z' })
+    expect(r.data_inicio).toBe('2026-10-08')
   })
 })
 
