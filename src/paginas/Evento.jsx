@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import Selo from '../componentes/Selo'
+import AcoesEvento from '../componentes/AcoesEvento'
 import Carregando from '../componentes/Carregando'
 import NaoEncontrado from './NaoEncontrado'
 import { obterEvento } from '../lib/api'
@@ -55,6 +56,12 @@ export default function Evento() {
             {eventoJaPassou(evento) && <Selo tom="escuro">Encerrado</Selo>}
           </div>
           <h1 className="mt-3 max-w-3xl text-4xl sm:text-5xl">{evento.titulo}</h1>
+        </div>
+      </div>
+
+      <div className="border-b border-borda/10">
+        <div className="container-pagina py-4">
+          <AcoesEvento evento={evento} />
         </div>
       </div>
 
