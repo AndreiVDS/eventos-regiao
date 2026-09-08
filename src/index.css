@@ -16,12 +16,19 @@
   h3 {
     @apply font-titulo tracking-wide;
   }
+  h1 {
+    @apply text-balance;
+  }
 
   /* Foco visível para navegação por teclado (acessibilidade — Obj. 4 da proposta).
      Nunca removemos o outline sem oferecer um substituto claro. */
   :focus-visible {
     @apply outline-none ring-2 ring-offset-2 ring-tinta ring-offset-creme;
     border-radius: 4px;
+  }
+
+  ::selection {
+    @apply bg-destaque text-tinta;
   }
 
   /* Respeita quem pediu menos animações no sistema operacional. */
@@ -50,9 +57,13 @@
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
 
+  .cartao {
+    @apply rounded-xl bg-white shadow-sm ring-1 ring-tinta/10;
+  }
+
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 font-semibold
-           transition-colors focus-visible:ring-2;
+           transition-all duration-200 focus-visible:ring-2 active:scale-[0.98];
   }
   .btn-destaque {
     @apply btn bg-destaque text-tinta hover:bg-tinta hover:text-destaque;
@@ -66,9 +77,14 @@
 
   .campo {
     @apply w-full rounded-lg border-2 border-tinta/20 bg-white px-4 py-2.5 text-tinta
-           placeholder:text-tinta/40 focus:border-tinta;
+           transition-colors placeholder:text-tinta/40 focus:border-tinta;
   }
   .rotulo {
     @apply mb-1 block font-semibold text-tinta;
+  }
+
+  /* Bloco de carregamento (esqueleto) */
+  .esqueleto {
+    @apply animate-pulse rounded-lg bg-tinta/10;
   }
 }

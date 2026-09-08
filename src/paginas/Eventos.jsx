@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import CardEvento from '../componentes/CardEvento'
 import FiltrosEventos from '../componentes/FiltrosEventos'
-import Carregando from '../componentes/Carregando'
+import EsqueletoCards from '../componentes/EsqueletoCards'
 import EstadoVazio from '../componentes/EstadoVazio'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
@@ -53,7 +53,7 @@ export default function Eventos() {
       </div>
 
       {carregando ? (
-        <Carregando />
+        <EsqueletoCards />
       ) : eventos && eventos.length > 0 ? (
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {eventos.map((evento) => (

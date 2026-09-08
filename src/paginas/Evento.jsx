@@ -27,11 +27,15 @@ export default function Evento() {
 
   return (
     <article>
-      <div className="relative isolate bg-tinta text-creme">
+      <div className="relative isolate overflow-hidden bg-tinta text-creme">
         <img
           src={evento.imagem_url}
           alt=""
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30"
+          className="absolute inset-0 -z-10 h-full w-full scale-110 object-cover opacity-40 blur-sm"
+        />
+        <div
+          className="absolute inset-0 -z-10"
+          style={{ background: 'linear-gradient(180deg, rgba(31,30,31,0.55), rgba(31,30,31,0.92))' }}
         />
         <div className="container-pagina py-14">
           <nav aria-label="Trilha" className="text-sm text-creme/70">
@@ -56,6 +60,11 @@ export default function Evento() {
 
       <div className="container-pagina grid gap-10 py-12 lg:grid-cols-[1fr_320px]">
         <div>
+          <img
+            src={evento.imagem_url}
+            alt={`Imagem de divulgação de ${evento.titulo}`}
+            className="mb-8 aspect-[16/9] w-full rounded-xl object-cover ring-1 ring-tinta/10"
+          />
           <h2 className="text-2xl">Sobre o evento</h2>
           <p className="mt-3 whitespace-pre-line text-tinta/80">
             {evento.descricao_completa || evento.descricao}

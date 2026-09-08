@@ -66,7 +66,7 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
         ...form,
         cidade_nome: cidadeObj?.nome || form.cidade,
         uf: cidadeObj?.uf || '',
-        imagem_url: form.imagem_url || '/img/1122.png',
+        imagem_url: form.imagem_url || '/img/eventos/_padrao.svg',
       })
     } catch (err) {
       console.error(err)

@@ -36,11 +36,54 @@ const cidadesJson = cidades.map((c) => ({
 }))
 writeFileSync(p('public/dados/cidades.json'), JSON.stringify(cidadesJson, null, 2) + '\n')
 
-// ---------- 3. eventos.json ----------
+// ---------- 3. Banners SVG para eventos sem foto (imagem_url: 'auto') ----------
+mkdirSync(p('public/img/eventos'), { recursive: true })
+const EMOJI_CAT = {
+  cultura: '♪', esporte: '▲', comunitario: '✦', educacao: '❖', negocios: '◆', gastronomia: '✺',
+}
+function bannerEvento(e, cidade) {
+  const [a, b] = cidade.cor
+  // quebra o título em até 2 linhas (~22 caracteres por linha)
+  const linhas = ['', '']
+  for (const w of e.titulo.split(' ')) {
+    const i = linhas[1] || (linhas[0].length && (linhas[0] + ' ' + w).length > 22) ? 1 : 0
+    linhas[i] = (linhas[i] ? linhas[i] + ' ' : '') + w
+  }
+  if (linhas[1].length > 26) linhas[1] = linhas[1].slice(0, 24) + '…'
+  const esc = (x) => x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" font-family="Bebas Neue, Arial, sans-serif">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
+  <rect width="1200" height="750" fill="url(#g)"/>
+  <g fill="#ffffff" opacity="0.08"><circle cx="1030" cy="120" r="260"/><circle cx="140" cy="700" r="200"/></g>
+  <text x="70" y="150" fill="#f4b400" font-size="120" opacity="0.9">${EMOJI_CAT[e.categoria] || '★'}</text>
+  <text x="70" y="380" fill="#ffffff" font-size="92" letter-spacing="2">${esc(linhas[0].toUpperCase())}</text>
+  <text x="70" y="470" fill="#ffffff" font-size="92" letter-spacing="2">${esc(linhas[1].toUpperCase())}</text>
+  <text x="74" y="620" fill="#f4b400" font-size="42" letter-spacing="4">${esc(cidade.nome.toUpperCase())} · ${cidade.uf}</text>
+  <text x="74" y="680" fill="#ffffff" opacity="0.7" font-size="30" letter-spacing="3">EVENTOS REGIÃO</text>
+</svg>`
+}
+
+// banner genérico usado quando um evento é cadastrado sem imagem
+writeFileSync(
+  p('public/img/eventos/_padrao.svg'),
+  bannerEvento(
+    { titulo: 'Evento na sua região', categoria: 'comunitario' },
+    { cor: ['#1f6feb', '#0b2a4a'], nome: 'Eventos Região', uf: 'BR' },
+  ).trim(),
+)
+
+// ---------- 4. eventos.json ----------
 const porSlug = Object.fromEntries(cidades.map((c) => [c.slug, c]))
 const eventosJson = eventos.map((e, i) => {
   const cidade = porSlug[e.cidade]
   if (!cidade) throw new Error(`Evento "${e.id}" aponta para cidade inexistente: ${e.cidade}`)
+
+  let imagem_url = e.imagem_url
+  if (imagem_url === 'auto') {
+    writeFileSync(p('public/img/eventos', `${e.id}.svg`), bannerEvento(e, cidade).trim())
+    imagem_url = `/img/eventos/${e.id}.svg`
+  }
+
   return {
     id: e.id,
     titulo: e.titulo,
@@ -57,7 +100,7 @@ const eventosJson = eventos.map((e, i) => {
     horario: e.horario ?? null,
     entrada: e.entrada,
     preco_texto: e.preco_texto ?? null,
-    imagem_url: e.imagem_url,
+    imagem_url,
     link_oficial: e.link_oficial ?? null,
     organizador_nome: e.organizador_nome,
     status: e.status ?? 'aprovado',
@@ -66,7 +109,7 @@ const eventosJson = eventos.map((e, i) => {
 })
 writeFileSync(p('public/dados/eventos.json'), JSON.stringify(eventosJson, null, 2) + '\n')
 
-// ---------- 4. supabase/seed.sql ----------
+// ---------- 5. supabase/seed.sql ----------
 const q = (s) => (s == null ? 'null' : `'${String(s).replace(/'/g, "''")}'`)
 const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'imagem_url', 'site_prefeitura']
 const colsEvento = [
@@ -84,7 +127,7 @@ sql += eventosJson.map((e) => '  (' + colsEvento.map((k) => q(e[k])).join(', ') 
 sql += '\non conflict (id) do nothing;\n'
 writeFileSync(p('supabase/seed.sql'), sql)
 
-// ---------- 5. api/_dados.json (snapshot para a API serverless) ----------
+// ---------- 6. api/_dados.json (snapshot para a API serverless) ----------
 mkdirSync(p('api'), { recursive: true })
 writeFileSync(
   p('api/_dados.json'),

@@ -14,12 +14,12 @@ export default function CardEvento({ evento }) {
   const passou = eventoJaPassou(evento)
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-tinta/10 transition-shadow hover:shadow-lg">
-      <div className="relative">
+    <article className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-tinta/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
+      <div className="relative overflow-hidden">
         <img
           src={evento.imagem_url}
           alt={`Imagem do evento ${evento.titulo}`}
-          className="h-44 w-full object-cover"
+          className="aspect-[16/10] w-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
         <div className="absolute left-3 top-3 flex flex-col items-center rounded-lg bg-creme px-2.5 py-1 text-tinta shadow">

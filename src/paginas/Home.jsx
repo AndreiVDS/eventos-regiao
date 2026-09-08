@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import CardEvento from '../componentes/CardEvento'
-import Carregando from '../componentes/Carregando'
+import EsqueletoCards from '../componentes/EsqueletoCards'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { CATEGORIAS } from '../lib/formatacao'
@@ -14,6 +14,15 @@ export default function Home() {
   const { dados: cidades } = useAsync(() => listarCidades(), [])
 
   const destaques = (eventos || []).slice(0, 6)
+  const numeros = useMemo(() => {
+    const lista = eventos || []
+    return {
+      eventos: lista.length,
+      cidades: new Set(lista.map((e) => e.cidade)).size,
+      estados: new Set(lista.map((e) => e.uf)).size,
+      gratuitos: lista.filter((e) => e.entrada === 'gratuito').length,
+    }
+  }, [eventos])
 
   function pesquisar(e) {
     e.preventDefault()
@@ -27,10 +36,20 @@ export default function Home() {
         <img
           src="/img/jaragua-do-sul-vista-de-cima.jpg"
           alt=""
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20"
+        />
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              'radial-gradient(900px 500px at 12% -10%, rgba(244,180,0,0.22), transparent 60%), linear-gradient(180deg, rgba(31,30,31,0.35), rgba(31,30,31,0.9))',
+          }}
         />
         <div className="container-pagina py-20 sm:py-28">
-          <h1 className="max-w-3xl text-4xl leading-tight sm:text-6xl">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-creme/25 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-creme/80">
+            Turismo · Cultura · Economia local
+          </p>
+          <h1 className="max-w-3xl text-4xl leading-[1.05] sm:text-6xl">
             Eventos que celebram a cultura da sua região
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-creme/80">
@@ -38,10 +57,12 @@ export default function Home() {
             ajude organizadores locais a alcançar mais gente.
           </p>
 
-          <form onSubmit={pesquisar} role="search" className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row">
-            <label htmlFor="busca-home" className="sr-only">
-              Buscar eventos
-            </label>
+          <form
+            onSubmit={pesquisar}
+            role="search"
+            className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row"
+          >
+            <label htmlFor="busca-home" className="sr-only">Buscar eventos</label>
             <input
               id="busca-home"
               type="search"
@@ -50,9 +71,7 @@ export default function Home() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
-            <button type="submit" className="btn-destaque">
-              Buscar eventos
-            </button>
+            <button type="submit" className="btn-destaque">Buscar eventos</button>
           </form>
 
           <div className="mt-6 flex flex-wrap gap-2">
@@ -60,13 +79,32 @@ export default function Home() {
               <Link
                 key={c.valor}
                 to={`/eventos?categoria=${c.valor}`}
-                className="rounded-full border border-creme/30 px-3 py-1 text-sm hover:bg-creme hover:text-tinta"
+                className="rounded-full border border-creme/30 px-3 py-1 text-sm transition-colors hover:bg-creme hover:text-tinta"
               >
                 {c.emoji} {c.rotulo}
               </Link>
             ))}
           </div>
         </div>
+
+        {/* Faixa de números */}
+        {numeros.eventos > 0 && (
+          <div className="border-t border-white/10 bg-black/20">
+            <dl className="container-pagina grid grid-cols-2 gap-4 py-6 text-center sm:grid-cols-4">
+              {[
+                ['Eventos na agenda', numeros.eventos],
+                ['Cidades', numeros.cidades],
+                ['Estados', numeros.estados],
+                ['Gratuitos', numeros.gratuitos],
+              ].map(([rotulo, valor]) => (
+                <div key={rotulo}>
+                  <dd className="font-titulo text-3xl text-destaque">{valor}</dd>
+                  <dt className="text-xs uppercase tracking-wide text-creme/70">{rotulo}</dt>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
       </section>
 
       {/* Eventos em destaque */}
@@ -76,13 +114,11 @@ export default function Home() {
             <h2 className="text-3xl">Próximos eventos</h2>
             <p className="text-tinta/70">Selecionados na agenda das cidades participantes.</p>
           </div>
-          <Link to="/eventos" className="btn-contorno !py-2 text-sm">
-            Ver todos
-          </Link>
+          <Link to="/eventos" className="btn-contorno !py-2 text-sm">Ver todos</Link>
         </div>
 
         {carregando ? (
-          <Carregando />
+          <EsqueletoCards />
         ) : (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {destaques.map((evento) => (
@@ -101,7 +137,7 @@ export default function Home() {
               Cada cidade tem sua identidade, suas tradições e sua própria agenda.
             </p>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {cidades.map((c) => (
+              {cidades.slice(0, 9).map((c) => (
                 <Link
                   key={c.slug}
                   to={`/cidades/${c.slug}`}
@@ -109,11 +145,11 @@ export default function Home() {
                 >
                   <img
                     src={c.imagem_url}
-                    alt={`Foto de ${c.nome}`}
-                    className="h-48 w-full object-cover transition-transform group-hover:scale-105"
+                    alt={`Postal de ${c.nome}`}
+                    className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                   />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-tinta/90 to-transparent p-4 text-creme">
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-tinta/95 to-transparent p-4 text-creme">
                     <h3 className="text-2xl">
                       {c.nome}
                       <span className="text-base text-creme/70"> /{c.uf}</span>
@@ -122,6 +158,9 @@ export default function Home() {
                   </div>
                 </Link>
               ))}
+            </div>
+            <div className="mt-6">
+              <Link to="/cidades" className="btn-contorno !py-2 text-sm">Ver todas as cidades</Link>
             </div>
           </div>
         </section>
@@ -132,23 +171,11 @@ export default function Home() {
         <h2 className="text-3xl">Como funciona</h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
-            {
-              n: '1',
-              t: 'Descubra',
-              d: 'Busque e filtre eventos por cidade, categoria, data e tipo de entrada. Tudo em um só lugar.',
-            },
-            {
-              n: '2',
-              t: 'Participe',
-              d: 'Veja detalhes, local no mapa e link oficial para ingressos ou inscrição.',
-            },
-            {
-              n: '3',
-              t: 'Divulgue',
-              d: 'É organizador? Cadastre seu evento gratuitamente e alcance moradores e turistas.',
-            },
+            { n: '1', t: 'Descubra', d: 'Busque e filtre eventos por cidade, categoria, data e tipo de entrada. Tudo em um só lugar.' },
+            { n: '2', t: 'Participe', d: 'Veja detalhes, local no mapa e link oficial para ingressos ou inscrição.' },
+            { n: '3', t: 'Divulgue', d: 'É organizador? Cadastre seu evento gratuitamente e alcance moradores e turistas.' },
           ].map((p) => (
-            <div key={p.n} className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-tinta/10">
+            <div key={p.n} className="cartao p-6">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-destaque font-titulo text-xl text-tinta">
                 {p.n}
               </span>
@@ -169,9 +196,7 @@ export default function Home() {
               espaço aqui. O cadastro é gratuito.
             </p>
           </div>
-          <Link to="/divulgue" className="btn-tinta shrink-0">
-            Divulgue seu evento
-          </Link>
+          <Link to="/divulgue" className="btn-tinta shrink-0">Divulgue seu evento</Link>
         </div>
       </section>
     </>
