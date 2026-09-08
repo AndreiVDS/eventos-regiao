@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Carregando from '../../componentes/Carregando'
 import EstadoVazio from '../../componentes/EstadoVazio'
+import { AbasPainel } from './Painel'
 import { listarEventosPendentes, moderarEvento } from '../../lib/api'
-import { supabase, supabaseConfigurado } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth'
 import { formatarPeriodo, rotuloCategoria, rotuloEntrada } from '../../lib/formatacao'
 
 export default function Moderacao() {
-  const navigate = useNavigate()
+  const { sair } = useAuth()
   const [pendentes, setPendentes] = useState(null)
   const [processando, setProcessando] = useState(null)
 
@@ -15,16 +15,7 @@ export default function Moderacao() {
     listarEventosPendentes().then(setPendentes).catch(() => setPendentes([]))
   }, [])
 
-  useEffect(() => {
-    if (supabaseConfigurado) {
-      supabase.auth.getSession().then(({ data }) => {
-        if (!data.session) navigate('/painel', { replace: true })
-        else carregar()
-      })
-    } else {
-      carregar()
-    }
-  }, [navigate, carregar])
+  useEffect(() => carregar(), [carregar])
 
   async function decidir(id, status) {
     setProcessando(id)
@@ -36,71 +27,80 @@ export default function Moderacao() {
     }
   }
 
-  async function sair() {
-    if (supabaseConfigurado) await supabase.auth.signOut()
-    navigate('/painel')
-  }
-
-  if (pendentes === null) return <Carregando texto="Carregando eventos pendentes…" />
-
   return (
     <div className="container-pagina py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-4xl">Moderação de eventos</h1>
-        <button className="btn-contorno !py-2 text-sm" onClick={sair}>
-          Sair
-        </button>
-      </div>
-      <p className="mt-1 text-tinta/70">
-        {pendentes.length} evento{pendentes.length === 1 ? '' : 's'} aguardando revisão.
-      </p>
-
-      {pendentes.length === 0 ? (
-        <div className="mt-8">
-          <EstadoVazio titulo="Nada na fila" descricao="Todos os eventos enviados já foram revisados." />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wide text-tinta/50">Painel da equipe</p>
+          <h1 className="text-4xl">Moderação de eventos</h1>
         </div>
+        <button className="btn-contorno !py-2 text-sm" onClick={sair}>Sair</button>
+      </div>
+
+      <div className="mt-4">
+        <AbasPainel />
+      </div>
+
+      {pendentes === null ? (
+        <Carregando texto="Carregando eventos pendentes…" />
       ) : (
-        <ul className="mt-8 space-y-4">
-          {pendentes.map((e) => (
-            <li
-              key={e.id}
-              className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-tinta/10 sm:flex sm:gap-5"
-            >
-              <img
-                src={e.imagem_url}
-                alt=""
-                className="mb-3 h-32 w-full rounded-lg object-cover sm:mb-0 sm:w-48"
+        <>
+          <p className="mt-6 text-tinta/70">
+            {pendentes.length} evento{pendentes.length === 1 ? '' : 's'} aguardando revisão.
+          </p>
+
+          {pendentes.length === 0 ? (
+            <div className="mt-6">
+              <EstadoVazio
+                titulo="Nada na fila"
+                descricao="Todos os eventos enviados já foram revisados."
               />
-              <div className="flex-1">
-                <h2 className="text-xl">{e.titulo}</h2>
-                <p className="text-sm text-tinta/60">
-                  {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf} ·{' '}
-                  {formatarPeriodo(e.data_inicio, e.data_fim)} · {rotuloEntrada(e.entrada)}
-                </p>
-                <p className="mt-2 text-sm text-tinta/80">{e.descricao}</p>
-                <p className="mt-2 text-xs text-tinta/60">
-                  Organização: {e.organizador_nome} — contato: {e.organizador_contato || '—'}
-                </p>
-                <div className="mt-4 flex gap-3">
-                  <button
-                    className="btn-destaque !py-2 text-sm"
-                    disabled={processando === e.id}
-                    onClick={() => decidir(e.id, 'aprovado')}
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    className="btn-contorno !py-2 text-sm"
-                    disabled={processando === e.id}
-                    onClick={() => decidir(e.id, 'recusado')}
-                  >
-                    Recusar
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+            </div>
+          ) : (
+            <ul className="mt-6 space-y-4">
+              {pendentes.map((e) => (
+                <li
+                  key={e.id}
+                  className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-tinta/10 sm:flex sm:gap-5"
+                >
+                  <img
+                    src={e.imagem_url}
+                    alt=""
+                    className="mb-3 h-32 w-full rounded-lg object-cover sm:mb-0 sm:w-48"
+                  />
+                  <div className="flex-1">
+                    <h2 className="text-xl">{e.titulo}</h2>
+                    <p className="text-sm text-tinta/60">
+                      {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf} ·{' '}
+                      {formatarPeriodo(e.data_inicio, e.data_fim)} · {rotuloEntrada(e.entrada)}
+                    </p>
+                    <p className="mt-2 text-sm text-tinta/80">{e.descricao}</p>
+                    <p className="mt-2 text-xs text-tinta/60">
+                      Organização: {e.organizador_nome} — contato:{' '}
+                      {e.organizador_contato || e.criado_por_email || '—'}
+                    </p>
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        className="btn-destaque !py-2 text-sm"
+                        disabled={processando === e.id}
+                        onClick={() => decidir(e.id, 'aprovado')}
+                      >
+                        Aprovar
+                      </button>
+                      <button
+                        className="btn-contorno !py-2 text-sm"
+                        disabled={processando === e.id}
+                        onClick={() => decidir(e.id, 'recusado')}
+                      >
+                        Recusar
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </div>
   )

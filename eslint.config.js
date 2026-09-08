@@ -28,8 +28,9 @@ export default [
       ...reactHooks.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]' }],
+      'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
+      'react-refresh/only-export-components': 'off',
+      'no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]', ignoreRestSiblings: true }],
     },
   },
 ]

@@ -3,14 +3,16 @@ import { supabase, supabaseConfigurado } from './supabase'
 /**
  * Camada de acesso a dados da plataforma.
  *
- * Estratégia: se o Supabase estiver configurado (variáveis de ambiente
- * VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY), usamos o banco real.
- * Caso contrário, caímos para os arquivos de exemplo em /public/dados,
- * para que o site rode e possa ser demonstrado sem depender de infraestrutura.
+ * Se o Supabase estiver configurado (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY),
+ * usa o banco real. Caso contrário, opera em "modo demonstração":
+ *   - leitura a partir de /public/dados/*.json
+ *   - eventos enviados ficam em localStorage (chave "eventos_enviados"),
+ *     com ciclo de vida completo (pendente → aprovado/recusado)
  */
 
-let cacheLocal = null
+const CHAVE_ENVIADOS = 'eventos_enviados'
 
+let cacheLocal = null
 async function carregarDadosLocais() {
   if (cacheLocal) return cacheLocal
   const [eventos, cidades] = await Promise.all([
@@ -19,6 +21,17 @@ async function carregarDadosLocais() {
   ])
   cacheLocal = { eventos, cidades }
   return cacheLocal
+}
+
+function lerEnviados() {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_ENVIADOS) || '[]')
+  } catch {
+    return []
+  }
+}
+function gravarEnviados(lista) {
+  localStorage.setItem(CHAVE_ENVIADOS, JSON.stringify(lista))
 }
 
 function normalizar(texto = '') {
@@ -63,6 +76,8 @@ function aplicarFiltros(eventos, filtros = {}) {
     .sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio))
 }
 
+/* ============================ Cidades ============================ */
+
 export async function listarCidades() {
   if (supabaseConfigurado) {
     const { data, error } = await supabase.from('cidades').select('*').order('nome')
@@ -83,6 +98,8 @@ export async function obterCidade(slug) {
   return cidades.find((c) => c.slug === slug) || null
 }
 
+/* ===================== Eventos (público) ===================== */
+
 export async function listarEventos(filtros = {}) {
   if (supabaseConfigurado) {
     let query = supabase.from('eventos').select('*').eq('status', 'aprovado')
@@ -91,11 +108,10 @@ export async function listarEventos(filtros = {}) {
     if (filtros.entrada) query = query.eq('entrada', filtros.entrada)
     const { data, error } = await query.order('data_inicio', { ascending: true })
     if (error) throw error
-    // Filtros de texto e período aplicados no cliente (mesma regra dos dados locais).
     return aplicarFiltros(data, { busca: filtros.busca, quando: filtros.quando })
   }
   const { eventos } = await carregarDadosLocais()
-  return aplicarFiltros(eventos, filtros)
+  return aplicarFiltros([...eventos, ...lerEnviados()], filtros)
 }
 
 export async function obterEvento(id) {
@@ -105,8 +121,10 @@ export async function obterEvento(id) {
     return data
   }
   const { eventos } = await carregarDadosLocais()
-  return eventos.find((e) => e.id === id) || null
+  return [...eventos, ...lerEnviados()].find((e) => e.id === id) || null
 }
+
+/* ===================== Envio de evento ===================== */
 
 /** Gera um slug legível a partir do título + sufixo curto para evitar colisão. */
 export function gerarSlug(titulo = 'evento') {
@@ -122,35 +140,56 @@ export function gerarSlug(titulo = 'evento') {
 }
 
 /**
- * Envia um evento para moderação. Fica com status "pendente" até um
- * organizador da plataforma aprovar no painel.
+ * Envia um evento para moderação (status "pendente").
+ * `usuario` (opcional) associa o evento a quem o cadastrou.
  */
-export async function enviarEvento(dados) {
+export async function enviarEvento(dados, usuario = null) {
   const registro = {
     ...dados,
     id: dados.id || gerarSlug(dados.titulo),
     status: 'pendente',
     criado_em: new Date().toISOString(),
+    criado_por: usuario?.id || null,
+    criado_por_email: usuario?.email || dados.organizador_contato || null,
   }
 
   if (supabaseConfigurado) {
-    const { error } = await supabase.from('eventos').insert(registro)
+    const { criado_por_email, ...paraBanco } = registro
+    const { error } = await supabase.from('eventos').insert(paraBanco)
     if (error) throw error
     return registro
   }
 
-  // Sem backend: guardamos como rascunho local e avisamos a pessoa.
-  const rascunhos = JSON.parse(localStorage.getItem('eventos_pendentes') || '[]')
-  rascunhos.push(registro)
-  localStorage.setItem('eventos_pendentes', JSON.stringify(rascunhos))
+  gravarEnviados([...lerEnviados(), registro])
   return registro
 }
 
-/* ----- Painel de moderação (requer Supabase + login) ----- */
+/* ================= Área do organizador ================= */
+
+/** Eventos cadastrados pela pessoa logada, em qualquer status. */
+export async function listarMeusEventos(usuario) {
+  if (!usuario) return []
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('eventos')
+      .select('*')
+      .eq('criado_por', usuario.id)
+      .order('criado_em', { ascending: false })
+    if (error) throw error
+    return data
+  }
+  return lerEnviados()
+    .filter((e) => e.criado_por === usuario.id || e.criado_por_email === usuario.email)
+    .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em))
+}
+
+/* ================= Área da equipe ================= */
 
 export async function listarEventosPendentes() {
   if (!supabaseConfigurado) {
-    return JSON.parse(localStorage.getItem('eventos_pendentes') || '[]')
+    return lerEnviados()
+      .filter((e) => e.status === 'pendente')
+      .sort((a, b) => new Date(a.criado_em) - new Date(b.criado_em))
   }
   const { data, error } = await supabase
     .from('eventos')
@@ -161,10 +200,21 @@ export async function listarEventosPendentes() {
   return data
 }
 
+/** Todos os eventos (qualquer status) — base das métricas do painel. */
+export async function listarTodosEventos() {
+  if (!supabaseConfigurado) {
+    const { eventos } = await carregarDadosLocais()
+    return [...eventos, ...lerEnviados()]
+  }
+  const { data, error } = await supabase.from('eventos').select('*')
+  if (error) throw error
+  return data
+}
+
 export async function moderarEvento(id, status) {
   if (!supabaseConfigurado) {
-    const rascunhos = JSON.parse(localStorage.getItem('eventos_pendentes') || '[]')
-    localStorage.setItem('eventos_pendentes', JSON.stringify(rascunhos.filter((e) => e.id !== id)))
+    const lista = lerEnviados().map((e) => (e.id === id ? { ...e, status } : e))
+    gravarEnviados(lista)
     return
   }
   const { error } = await supabase.from('eventos').update({ status }).eq('id', id)
