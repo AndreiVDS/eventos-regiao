@@ -11,7 +11,9 @@ import Evento from './paginas/Evento'
 import Cidades from './paginas/Cidades'
 import Cidade from './paginas/Cidade'
 import Sobre from './paginas/Sobre'
+import Privacidade from './paginas/Privacidade'
 import NaoEncontrado from './paginas/NaoEncontrado'
+import BannerConsentimento from './componentes/BannerConsentimento'
 
 // Fluxos com login carregam sob demanda — visitantes não baixam esse código.
 const DivulgueSeuEvento = lazy(() => import('./paginas/DivulgueSeuEvento'))
@@ -48,6 +50,7 @@ export default function App() {
               <Route path="/cidades/:slug" element={<Cidade />} />
               <Route path="/divulgue" element={<DivulgueSeuEvento />} />
               <Route path="/sobre" element={<Sobre />} />
+              <Route path="/privacidade" element={<Privacidade />} />
               <Route path="/entrar" element={<Entrar />} />
 
               <Route
@@ -99,6 +102,7 @@ export default function App() {
       </main>
 
       <Rodape />
+      <BannerConsentimento />
     </div>
   )
 }

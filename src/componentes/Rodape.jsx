@@ -19,6 +19,7 @@ export default function Rodape() {
             <li><Link to="/cidades" className="hover:text-destaque">Cidades</Link></li>
             <li><Link to="/divulgue" className="hover:text-destaque">Divulgue seu evento</Link></li>
             <li><Link to="/sobre" className="hover:text-destaque">Sobre o projeto</Link></li>
+            <li><Link to="/privacidade" className="hover:text-destaque">Privacidade e dados</Link></li>
           </ul>
         </nav>
 
