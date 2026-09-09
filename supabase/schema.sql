@@ -137,6 +137,32 @@ create policy "equipe: vê a si mesmo"
   on public.equipe for select to authenticated
   using (lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
 
+-- ---------- Tabela: presencas ("Vou participar") ----------
+create table if not exists public.presencas (
+  evento_id  text not null references public.eventos (id) on delete cascade,
+  usuario_id uuid not null references auth.users (id) on delete cascade,
+  criado_em  timestamptz not null default now(),
+  primary key (evento_id, usuario_id)
+);
+create index if not exists presencas_evento_idx on public.presencas (evento_id);
+
+alter table public.presencas enable row level security;
+
+-- leitura liberada (só expõe ids de usuário — permite contar e saber "eu vou")
+drop policy if exists "presencas: leitura" on public.presencas;
+create policy "presencas: leitura" on public.presencas for select using (true);
+
+-- cada um marca/desmarca a própria presença
+drop policy if exists "presencas: marca a própria" on public.presencas;
+create policy "presencas: marca a própria"
+  on public.presencas for insert to authenticated
+  with check (usuario_id = auth.uid());
+
+drop policy if exists "presencas: desmarca a própria" on public.presencas;
+create policy "presencas: desmarca a própria"
+  on public.presencas for delete to authenticated
+  using (usuario_id = auth.uid());
+
 -- =====================================================================
 --  View pública sem dados de contato (recomendada para leitura anônima)
 -- =====================================================================

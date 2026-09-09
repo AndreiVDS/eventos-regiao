@@ -4,6 +4,7 @@ import EstadoVazio from '../../componentes/EstadoVazio'
 import StatTile from '../../componentes/graficos/StatTile'
 import Selo from '../../componentes/Selo'
 import { listarMeusEventos } from '../../lib/api'
+import { contarPresencasEm } from '../../lib/presenca'
 import { useAuth } from '../../lib/auth'
 import { useAsync } from '../../lib/useAsync'
 import { formatarPeriodo, rotuloCategoria, eventoJaPassou } from '../../lib/formatacao'
@@ -17,6 +18,8 @@ const STATUS = {
 export default function MinhaArea() {
   const { usuario, sair, modoDemo } = useAuth()
   const { dados: eventos, carregando } = useAsync(() => listarMeusEventos(usuario), [usuario?.id])
+  const ids = (eventos || []).map((e) => e.id)
+  const { dados: presencas } = useAsync(() => contarPresencasEm(ids), [ids.join(',')])
 
   if (carregando) return <Carregando texto="Carregando seus eventos…" />
 
@@ -24,6 +27,7 @@ export default function MinhaArea() {
   const aprovados = lista.filter((e) => e.status === 'aprovado')
   const pendentes = lista.filter((e) => e.status === 'pendente')
   const proximos = aprovados.filter((e) => !eventoJaPassou(e))
+  const totalConfirmados = Object.values(presencas || {}).reduce((a, b) => a + b, 0)
 
   return (
     <div className="container-pagina py-10">
@@ -48,10 +52,10 @@ export default function MinhaArea() {
       )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile rotulo="Total" valor={lista.length} />
         <StatTile rotulo="Publicados" valor={aprovados.length} tom="destaque" />
         <StatTile rotulo="Em revisão" valor={pendentes.length} />
         <StatTile rotulo="Ainda vão acontecer" valor={proximos.length} />
+        <StatTile rotulo="Confirmações" valor={totalConfirmados} detalhe="pessoas que vão participar" />
       </div>
 
       <h2 className="mt-10 text-2xl">Histórico</h2>
@@ -80,6 +84,11 @@ export default function MinhaArea() {
                     {formatarPeriodo(e.data_inicio, e.data_fim)}
                   </p>
                 </div>
+                {e.status === 'aprovado' && (presencas?.[e.id] || 0) > 0 && (
+                  <span className="text-sm text-suave">
+                    ✋ {presencas[e.id]} confirmado{presencas[e.id] === 1 ? '' : 's'}
+                  </span>
+                )}
                 <Selo tom={s.tom}>{s.rotulo}</Selo>
                 {e.status === 'aprovado' && (
                   <Link to={`/eventos/${e.id}`} className="text-sm font-semibold underline">

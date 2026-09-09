@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import Selo from '../componentes/Selo'
 import AcoesEvento from '../componentes/AcoesEvento'
+import BotaoPresenca from '../componentes/BotaoPresenca'
 import CardEvento from '../componentes/CardEvento'
 import Carregando from '../componentes/Carregando'
 import NaoEncontrado from './NaoEncontrado'
@@ -72,7 +73,8 @@ export default function Evento() {
       </div>
 
       <div className="border-b border-borda/10">
-        <div className="container-pagina py-4">
+        <div className="container-pagina flex flex-wrap items-center gap-2 py-4">
+          <BotaoPresenca evento={evento} />
           <AcoesEvento evento={evento} />
         </div>
       </div>
