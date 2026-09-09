@@ -41,7 +41,7 @@ function IconeAlvo() {
 export default function SeletorCidade({ classe = '' }) {
   const { dados: cidades } = useAsync(() => listarCidades(), [])
   const [slug, definir] = useCidadeAtual()
-  const { coords, raioKm, definirCoords, definirRaio } = useLocalizacao()
+  const { coords, precisao, raioKm, definirCoords, definirRaio } = useLocalizacao()
   const permissao = usePermissaoGeo()
   const [aberto, setAberto] = useState(false)
   const [busca, setBusca] = useState('')
@@ -86,15 +86,19 @@ export default function SeletorCidade({ classe = '' }) {
       const r = await resolverLocalizacao(cidades || [])
       definirCoords(r.ponto)
       setBusca('')
-      const dist = formatarDistancia(r.distanciaKm)
       if (r.dentro) {
         definir(r.cidade.slug)
-        setGpsEstado({ tom: 'ok', texto: `Você está perto de ${r.cidade.nome} · a ~${dist}` })
+        setGpsEstado({
+          tom: 'ok',
+          texto: `Localização ativada em ${r.cidade.nome}. A distância até cada evento já aparece na lista.`,
+        })
       } else {
         definir('')
         setGpsEstado({
           tom: 'aviso',
-          texto: `Ainda não temos eventos na sua região. A cidade mais próxima é ${r.cidade.nome}, a ~${dist} — os eventos aparecem do mais perto para o mais longe.`,
+          texto: `Ainda não temos eventos na sua região. A cidade mais próxima é ${r.cidade.nome}, a ~${formatarDistancia(
+            r.distanciaKm,
+          )} — os eventos aparecem do mais perto para o mais longe.`,
         })
       }
     } catch (err) {
@@ -192,23 +196,30 @@ export default function SeletorCidade({ classe = '' }) {
           )}
 
           {coords && (
-            <div className="mt-2 flex items-center gap-2 rounded-lg bg-texto/5 px-2 py-1.5">
-              <label htmlFor="raio-eventos" className="text-xs font-semibold text-suave">
-                Mostrar eventos
-              </label>
-              <select
-                id="raio-eventos"
-                className="flex-1 rounded-md border-2 border-borda/20 bg-superficie px-2 py-1 text-xs text-texto"
-                value={raioKm ?? ''}
-                onChange={(e) => definirRaio(e.target.value ? Number(e.target.value) : null)}
-              >
-                {RAIOS.map((r) => (
-                  <option key={r.rotulo} value={r.km ?? ''}>
-                    {r.rotulo}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <>
+              {precisao != null && (
+                <p className="mt-1 px-2 text-[11px] text-suave">
+                  Precisão de cerca de {precisao < 1000 ? `${precisao} m` : `${(precisao / 1000).toFixed(1)} km`}.
+                </p>
+              )}
+              <div className="mt-2 flex items-center gap-2 rounded-lg bg-texto/5 px-2 py-1.5">
+                <label htmlFor="raio-eventos" className="text-xs font-semibold text-suave">
+                  Mostrar eventos
+                </label>
+                <select
+                  id="raio-eventos"
+                  className="flex-1 rounded-md border-2 border-borda/20 bg-superficie px-2 py-1 text-xs text-texto"
+                  value={raioKm ?? ''}
+                  onChange={(e) => definirRaio(e.target.value ? Number(e.target.value) : null)}
+                >
+                  {RAIOS.map((r) => (
+                    <option key={r.rotulo} value={r.km ?? ''}>
+                      {r.rotulo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
           )}
 
           <label htmlFor="busca-cidade" className="sr-only">

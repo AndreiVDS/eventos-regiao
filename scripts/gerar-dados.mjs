@@ -8,6 +8,10 @@ import { cidades, eventos } from './dados.mjs'
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const p = (...partes) => resolve(raiz, ...partes)
 
+// Coordenadas do LOCAL de cada evento (curadoria). Um evento também pode trazer
+// lat/lng no próprio objeto em dados.mjs — isso tem prioridade.
+const coordsEvento = JSON.parse(readFileSync(p('scripts/coordenadas-eventos.json'), 'utf8'))
+
 // ---------- 1. Postais SVG das cidades ----------
 mkdirSync(p('public/img/cidades'), { recursive: true })
 for (const c of cidades) {
@@ -86,6 +90,10 @@ const eventosJson = eventos.map((e, i) => {
     imagem_url = `/img/eventos/${e.id}.svg`
   }
 
+  const par = coordsEvento[e.id]
+  const lat = e.lat ?? (Array.isArray(par) ? par[0] : null)
+  const lng = e.lng ?? (Array.isArray(par) ? par[1] : null)
+
   return {
     id: e.id,
     titulo: e.titulo,
@@ -99,6 +107,8 @@ const eventosJson = eventos.map((e, i) => {
     uf: cidade.uf,
     local: e.local,
     endereco: e.endereco ?? null,
+    lat,
+    lng,
     data_inicio: e.data_inicio,
     data_fim: e.data_fim ?? null,
     horario: e.horario ?? null,
@@ -123,7 +133,7 @@ const q = (s) =>
 const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'lat', 'lng', 'imagem_url', 'site_prefeitura']
 const colsEvento = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade', 'cidade_nome', 'uf',
-  'local', 'endereco', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto', 'destaque',
+  'local', 'endereco', 'lat', 'lng', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto', 'destaque',
   'imagem_url', 'link_oficial', 'organizador_nome', 'status', 'criado_em',
 ]
 let sql = '-- Seed gerado por scripts/gerar-dados.mjs — não edite à mão.\n'
@@ -134,7 +144,8 @@ sql += cidadesJson.map((c) => '  (' + colsCidade.map((k) => q(c[k])).join(', ') 
 sql += '\non conflict (slug) do update set lat = excluded.lat, lng = excluded.lng;\n\n'
 sql += `insert into public.eventos (${colsEvento.join(', ')}) values\n`
 sql += eventosJson.map((e) => '  (' + colsEvento.map((k) => q(e[k])).join(', ') + ')').join(',\n')
-sql += '\non conflict (id) do nothing;\n'
+// atualiza as coordenadas do local em bases que já tinham os eventos
+sql += '\non conflict (id) do update set lat = excluded.lat, lng = excluded.lng;\n'
 writeFileSync(p('supabase/seed.sql'), sql)
 
 // ---------- 5b. supabase/setup.sql (schema + seed num arquivo só) ----------

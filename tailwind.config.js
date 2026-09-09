@@ -13,6 +13,7 @@ export default {
         // Tokens adaptativos — valores vêm de variáveis CSS e trocam no tema escuro
         fundo: 'rgb(var(--cor-fundo) / <alpha-value>)',
         superficie: 'rgb(var(--cor-superficie) / <alpha-value>)',
+        'superficie-2': 'rgb(var(--cor-superficie-2) / <alpha-value>)',
         texto: 'rgb(var(--cor-texto) / <alpha-value>)',
         suave: 'rgb(var(--cor-suave) / <alpha-value>)',
         borda: 'rgb(var(--cor-borda) / <alpha-value>)',
@@ -20,6 +21,11 @@ export default {
       fontFamily: {
         titulo: ['"Bebas Neue"', 'system-ui', 'sans-serif'],
         corpo: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
+      boxShadow: {
+        suave: 'var(--sombra-1)',
+        media: 'var(--sombra-2)',
+        alta: 'var(--sombra-3)',
       },
     },
   },

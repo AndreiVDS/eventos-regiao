@@ -5,20 +5,30 @@
 @layer base {
   /* Tokens de cor — canal RGB separado por espaço, para o Tailwind aplicar opacidade */
   :root {
-    --cor-fundo: 250 249 247; /* #faf9f7 */
+    --cor-fundo: 249 247 243; /* #f9f7f3 — creme levemente mais quente */
     --cor-superficie: 255 255 255; /* #ffffff */
-    --cor-texto: 31 30 31; /* #1f1e1f */
-    --cor-suave: 92 92 94; /* #5c5c5e — texto secundário */
-    --cor-borda: 31 30 31; /* usado sempre com opacidade (/10, /20) */
+    --cor-superficie-2: 245 242 236; /* #f5f2ec — camada intermediária */
+    --cor-texto: 28 27 28; /* #1c1b1c */
+    --cor-suave: 90 89 92; /* #5a595c — texto secundário */
+    --cor-borda: 28 27 28; /* usado sempre com opacidade (/10, /20) */
+    --sombra-cor: 24 20 12;
+    --sombra-1: 0 1px 2px rgb(var(--sombra-cor) / 0.06), 0 1px 3px rgb(var(--sombra-cor) / 0.05);
+    --sombra-2: 0 4px 12px rgb(var(--sombra-cor) / 0.08), 0 2px 6px rgb(var(--sombra-cor) / 0.05);
+    --sombra-3: 0 18px 40px -12px rgb(var(--sombra-cor) / 0.22), 0 8px 16px -8px rgb(var(--sombra-cor) / 0.12);
     color-scheme: light;
   }
 
   .dark {
-    --cor-fundo: 22 22 24; /* #161618 */
-    --cor-superficie: 32 32 36; /* #202024 */
-    --cor-texto: 233 233 234; /* #e9e9ea */
-    --cor-suave: 162 162 166; /* #a2a2a6 */
+    --cor-fundo: 20 20 23; /* #141417 */
+    --cor-superficie: 31 31 36; /* #1f1f24 */
+    --cor-superficie-2: 38 38 44; /* #26262c */
+    --cor-texto: 234 234 236; /* #eaeaec */
+    --cor-suave: 165 165 170; /* #a5a5aa */
     --cor-borda: 255 255 255;
+    --sombra-cor: 0 0 0;
+    --sombra-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --sombra-2: 0 6px 18px rgb(0 0 0 / 0.45);
+    --sombra-3: 0 20px 44px -12px rgb(0 0 0 / 0.6);
     color-scheme: dark;
   }
 
@@ -33,6 +43,9 @@
   }
   h1 {
     @apply text-balance;
+  }
+  p {
+    @apply text-pretty;
   }
 
   /* Foco visível para navegação por teclado (acessibilidade — Obj. 4 da proposta). */
@@ -256,7 +269,26 @@
   }
 
   .cartao {
-    @apply rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10;
+    @apply rounded-xl bg-superficie shadow-suave ring-1 ring-borda/10;
+  }
+
+  /* Título de seção com um traço de destaque que "cresce" ao aparecer */
+  .titulo-secao {
+    @apply relative pl-4;
+  }
+  .titulo-secao::before {
+    content: '';
+    @apply absolute left-0 top-1 bottom-1 w-1.5 rounded-full bg-destaque;
+    transform-origin: top;
+    animation: crescer-y 0.6s var(--mola) both;
+  }
+  @keyframes crescer-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
   }
 
   .btn {
@@ -265,14 +297,24 @@
            disabled:pointer-events-none disabled:opacity-60;
   }
   .btn-destaque {
-    @apply btn bg-destaque text-tinta hover:brightness-95 hover:-translate-y-0.5
-           hover:shadow-lg hover:shadow-destaque/25;
+    @apply btn text-tinta hover:-translate-y-0.5 hover:shadow-media hover:shadow-destaque/30;
+    background-image: linear-gradient(180deg, #ffc21f 0%, #f4b400 55%, #e0a300 100%);
   }
   .btn-tinta {
     @apply btn bg-tinta text-creme hover:bg-destaque hover:text-tinta hover:-translate-y-0.5;
   }
   .btn-contorno {
-    @apply btn border-2 border-texto text-texto hover:bg-texto hover:text-fundo;
+    @apply btn border-2 border-texto/80 text-texto hover:bg-texto hover:text-fundo hover:-translate-y-0.5;
+  }
+  .btn-fantasma {
+    @apply btn text-texto hover:bg-texto/5;
+  }
+
+  /* Barra de progresso de rolagem no topo da janela */
+  .barra-rolagem {
+    @apply fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-destaque;
+    transform: scaleX(var(--progresso, 0));
+    will-change: transform;
   }
 
   /* Rodinha de carregamento */
@@ -292,8 +334,9 @@
   }
 
   .campo {
-    @apply w-full rounded-lg border-2 border-borda/20 bg-superficie px-4 py-2.5 text-texto
-           transition-colors placeholder:text-suave/70 focus:border-destaque;
+    @apply w-full rounded-lg border-2 border-borda/15 bg-superficie px-4 py-2.5 text-texto
+           transition-all placeholder:text-suave/70
+           focus:border-destaque focus:ring-4 focus:ring-destaque/15;
   }
   .rotulo {
     @apply mb-1 block font-semibold text-texto;

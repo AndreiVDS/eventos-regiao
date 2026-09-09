@@ -1,5 +1,6 @@
 import { supabase, supabaseConfigurado } from './supabase'
-import { distanciaAteSlug, dentroDoRaio } from './geo'
+import { distanciaAteEvento, dentroDoRaio } from './geo'
+import { geocodificarEvento } from './geocode'
 
 /**
  * Camada de acesso a dados da plataforma.
@@ -55,7 +56,7 @@ export function aplicarFiltros(eventos, filtros = {}) {
       // precisa estar dentro do raio a partir da posição do visitante.
       if (!origem || raioKm == null) return true
       if ((e.formato || 'presencial') === 'online') return true
-      return dentroDoRaio(distanciaAteSlug(origem, e.cidade), raioKm)
+      return dentroDoRaio(distanciaAteEvento(origem, e), raioKm)
     })
     .filter((e) => {
       if (busca) {
@@ -95,7 +96,7 @@ export function aplicarFiltros(eventos, filtros = {}) {
   if (ordenar === 'recentes')
     return lista.sort((a, b) => new Date(b.criado_em || 0) - new Date(a.criado_em || 0))
   if (ordenar === 'perto' && origem) {
-    const dist = (e) => distanciaAteSlug(origem, e.cidade) ?? Infinity
+    const dist = (e) => distanciaAteEvento(origem, e) ?? Infinity
     return lista.sort((a, b) => dist(a) - dist(b) || new Date(a.data_inicio) - new Date(b.data_inicio))
   }
   // encerrados: os que terminaram há menos tempo primeiro
@@ -181,7 +182,7 @@ export function gerarSlug(titulo = 'evento') {
 // "aceite", que não podem ir no insert).
 const COLUNAS_EVENTO = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade',
-  'cidade_nome', 'uf', 'local', 'endereco', 'data_inicio', 'data_fim', 'horario',
+  'cidade_nome', 'uf', 'local', 'endereco', 'lat', 'lng', 'data_inicio', 'data_fim', 'horario',
   'entrada', 'preco_texto', 'imagem_url', 'link_oficial', 'organizador_nome',
   'organizador_contato', 'criado_por', 'destaque', 'status', 'criado_em',
 ]
@@ -212,6 +213,18 @@ export async function enviarEvento(dados, usuario = null) {
     criado_em: new Date().toISOString(),
     criado_por: usuario?.id || null,
   }
+
+  // Descobre a lat/lng do local pelo endereço, para a distância "perto de mim".
+  // É um "melhor esforço": se o geocoder não responder, o evento entra sem
+  // coordenadas e a distância cai no centro da cidade.
+  if (completo.lat == null || completo.lng == null) {
+    const co = await geocodificarEvento(completo)
+    if (co) {
+      completo.lat = co.lat
+      completo.lng = co.lng
+    }
+  }
+
   const registro = montarRegistroEvento(completo)
   // guardado só localmente (não vai pro banco): ajuda o organizador a se achar
   registro.criado_por_email = usuario?.email || dados.organizador_contato || null

@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import {
   haversineKm,
   distanciaAteSlug,
+  distanciaAteEvento,
+  coordsDoEvento,
   formatarDistancia,
   cidadeMaisProxima,
   dentroDaCobertura,
@@ -28,6 +30,30 @@ describe('distanciaAteSlug', () => {
   it('null sem origem ou slug desconhecido', () => {
     expect(distanciaAteSlug(null, 'blumenau')).toBeNull()
     expect(distanciaAteSlug({ lat: 0, lng: 0 }, 'inexistente')).toBeNull()
+  })
+})
+
+describe('coordsDoEvento / distanciaAteEvento', () => {
+  const origem = { lat: -22.95, lng: -43.2 } // zona sul do Rio
+
+  it('usa a coordenada do LOCAL do evento quando existe (exata)', () => {
+    const evento = { cidade: 'rio-de-janeiro', lat: -22.9755, lng: -43.393 } // Barra
+    const co = coordsDoEvento(evento)
+    expect(co.exata).toBe(true)
+    // Barra da Tijuca fica ~20 km do ponto na zona sul; o centro do Rio, ~3 km
+    expect(distanciaAteEvento(origem, evento)).toBeGreaterThan(12)
+  })
+
+  it('cai no centro da cidade quando o evento não tem lat/lng (aproximada)', () => {
+    const evento = { cidade: 'rio-de-janeiro' }
+    const co = coordsDoEvento(evento)
+    expect(co.exata).toBe(false)
+    expect(distanciaAteEvento(origem, evento)).toBeLessThan(8)
+  })
+
+  it('null quando não dá para localizar', () => {
+    expect(distanciaAteEvento(null, { cidade: 'rio-de-janeiro' })).toBeNull()
+    expect(distanciaAteEvento(origem, { cidade: 'cidade-inexistente' })).toBeNull()
   })
 })
 

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import Selo from './Selo'
 import { ehDestaque } from '../lib/api'
-import { useLocalizacao, distanciaAteSlug, formatarDistancia } from '../lib/cidade'
+import { useLocalizacao, distanciaAteEvento, coordsDoEvento, formatarDistancia } from '../lib/cidade'
 import {
   carimboData,
   emojiCategoria,
@@ -16,11 +16,12 @@ export default function CardEvento({ evento, indice = 0 }) {
   const passou = eventoJaPassou(evento)
   const destaque = !passou && ehDestaque(evento)
   const { coords } = useLocalizacao()
-  const distancia = coords ? distanciaAteSlug(coords, evento.cidade) : null
+  const distancia = coords ? distanciaAteEvento(coords, evento) : null
+  const distExata = coordsDoEvento(evento)?.exata
 
   return (
     <article
-      className="surgir group flex flex-col overflow-hidden rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
+      className="surgir group flex flex-col overflow-hidden rounded-xl bg-superficie shadow-suave ring-1 ring-borda/10 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-alta hover:ring-destaque/40"
       style={{ '--atraso': `${Math.min(indice, 8) * 60}ms` }}
     >
       <div className="relative overflow-hidden">
@@ -79,7 +80,14 @@ export default function CardEvento({ evento, indice = 0 }) {
                 {evento.cidade_nome}/{evento.uf}
               </Link>
               {distancia != null && (
-                <span className="chip-distancia ml-1.5 align-middle">
+                <span
+                  className="chip-distancia ml-1.5 align-middle"
+                  title={
+                    distExata
+                      ? 'Distância até o local do evento a partir de onde você está'
+                      : 'Distância aproximada (o local exato ainda não foi mapeado)'
+                  }
+                >
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M12 21s7-6.3 7-12a7 7 0 10-14 0c0 5.7 7 12 7 12z"
@@ -88,7 +96,8 @@ export default function CardEvento({ evento, indice = 0 }) {
                       strokeLinejoin="round"
                     />
                   </svg>
-                  ~{formatarDistancia(distancia)}
+                  {distExata ? '' : '~'}
+                  {formatarDistancia(distancia)}
                 </span>
               )}
             </dd>

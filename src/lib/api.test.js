@@ -75,6 +75,21 @@ describe('aplicarFiltros', () => {
     expect(r.map((e) => e.id)).toEqual(['b', 'a', 'c'])
   })
 
+  it('a coordenada do local do evento tem prioridade sobre o centro da cidade', () => {
+    // "a" fica em gramado mas com lat/lng lá em Curitiba; "c" fica em Curitiba
+    // sem coords. A partir de Curitiba, "a" (coords reais) deve vir antes de "b".
+    const comLocal = [
+      { ...base[0], lat: -25.43, lng: -49.27 }, // "a" na prática em Curitiba
+      base[1], // "b" em Porto Alegre
+    ]
+    const r = aplicarFiltros(comLocal, {
+      quando: '',
+      ordenar: 'perto',
+      origem: { lat: -25.43, lng: -49.27 },
+    })
+    expect(r[0].id).toBe('a')
+  })
+
   it('raioKm remove eventos presenciais fora do raio a partir da origem', () => {
     // origem em Porto Alegre, raio 200 km → só b (POA) e a (Gramado ~95 km); c (Curitiba ~545 km) sai
     const r = aplicarFiltros(base, {

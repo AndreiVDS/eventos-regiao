@@ -52,6 +52,27 @@ export function distanciaAteSlug(origem, slug) {
   return haversineKm(origem, { lat: ref[0], lng: ref[1] })
 }
 
+/**
+ * Coordenada do LOCAL do evento: usa o lat/lng do próprio evento (a rua/venue).
+ * Se o evento ainda não tem coordenadas, cai no centro da cidade — nesse caso
+ * `exata` vem false, e a interface mostra a distância como aproximada.
+ */
+export function coordsDoEvento(evento) {
+  if (!evento) return null
+  if (evento.lat != null && evento.lng != null) {
+    return { lat: evento.lat, lng: evento.lng, exata: true }
+  }
+  const ref = COORDENADAS[evento.cidade]
+  return ref ? { lat: ref[0], lng: ref[1], exata: false } : null
+}
+
+/** Distância em km de `origem` até o local do evento (ou null se faltar dado). */
+export function distanciaAteEvento(origem, evento) {
+  const co = coordsDoEvento(evento)
+  if (!origem || !co) return null
+  return haversineKm(origem, co)
+}
+
 export function formatarDistancia(km) {
   if (km == null) return ''
   if (km < 1) return `${Math.round(km * 1000)} m`

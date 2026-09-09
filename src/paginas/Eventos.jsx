@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import CardEvento from '../componentes/CardEvento'
 import FiltrosEventos from '../componentes/FiltrosEventos'
@@ -9,6 +9,9 @@ import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual, useLocalizacao, RAIOS } from '../lib/cidade'
 
+// O mapa (Leaflet) só é baixado quando o visitante abre a aba "Mapa".
+const MapaEventos = lazy(() => import('../componentes/MapaEventos'))
+
 const PADRAO = {
   busca: '', cidade: '', categoria: '', entrada: '', formato: '',
   quando: 'futuros', de: '', ate: '', ordenar: 'data',
@@ -18,6 +21,7 @@ export default function Eventos() {
   const [params, setParams] = useSearchParams()
   const [cidadeSlug, definirCidade] = useCidadeAtual()
   const { coords, raioKm } = useLocalizacao()
+  const [visao, setVisao] = useState('lista') // 'lista' | 'mapa'
 
   // Um link compartilhado com ?cidade=... passa a valer também no seletor do topo.
   useEffect(() => {
@@ -78,28 +82,57 @@ export default function Eventos() {
   const ordenandoPorPerto = filtros.ordenar === 'perto' && coords
   const rotuloRaio = RAIOS.find((r) => r.km === raioKm)?.rotulo
 
+  const comCoords = (eventos || []).filter((e) => e.lat != null || e.cidade)
+
   return (
     <div className="container-pagina py-10">
       <h1 className="text-4xl">Agenda de eventos</h1>
-      <p className="mt-1 text-suave">
-        {carregando
-          ? 'Buscando…'
-          : `${eventos?.length || 0} evento${eventos?.length === 1 ? '' : 's'} encontrado${
-              eventos?.length === 1 ? '' : 's'
-            }`}
-        {filtros.quando !== 'encerrados' ? (
-          <>
-            {' · '}
+
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-suave">
+          {carregando
+            ? 'Buscando…'
+            : `${eventos?.length || 0} evento${eventos?.length === 1 ? '' : 's'} encontrado${
+                eventos?.length === 1 ? '' : 's'
+              }`}
+          {filtros.quando !== 'encerrados' ? (
+            <>
+              {' · '}
+              <button
+                type="button"
+                className="underline hover:text-texto"
+                onClick={() => aplicar({ ...filtros, quando: 'encerrados', de: '', ate: '' })}
+              >
+                ver encerrados
+              </button>
+            </>
+          ) : null}
+        </p>
+
+        <div
+          className="inline-flex rounded-lg bg-superficie p-0.5 text-sm font-semibold ring-1 ring-borda/15"
+          role="tablist"
+          aria-label="Ver como lista ou mapa"
+        >
+          {[
+            ['lista', 'Lista'],
+            ['mapa', 'Mapa'],
+          ].map(([v, r]) => (
             <button
+              key={v}
               type="button"
-              className="underline hover:text-texto"
-              onClick={() => aplicar({ ...filtros, quando: 'encerrados', de: '', ate: '' })}
+              role="tab"
+              aria-selected={visao === v}
+              onClick={() => setVisao(v)}
+              className={`rounded-md px-3 py-1.5 transition-colors ${
+                visao === v ? 'bg-tinta text-creme' : 'text-suave hover:text-texto'
+              }`}
             >
-              ver encerrados
+              {r}
             </button>
-          </>
-        ) : null}
-      </p>
+          ))}
+        </div>
+      </div>
 
       {ordenandoPorPerto && (
         <p className="mt-1 flex items-center gap-1.5 text-sm text-suave">
@@ -127,11 +160,24 @@ export default function Eventos() {
       {carregando ? (
         <EsqueletoCards />
       ) : eventos && eventos.length > 0 ? (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {eventos.map((evento, i) => (
-            <CardEvento key={evento.id} evento={evento} indice={i} />
-          ))}
-        </div>
+        visao === 'mapa' ? (
+          <div className="mt-8">
+            <Suspense
+              fallback={<div className="esqueleto h-[380px] w-full rounded-xl" aria-hidden="true" />}
+            >
+              <MapaEventos eventos={comCoords} origem={coords} />
+            </Suspense>
+            <p className="mt-2 text-xs text-suave">
+              Toque num pino para ver o evento. Mapa © colaboradores do OpenStreetMap.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {eventos.map((evento, i) => (
+              <CardEvento key={evento.id} evento={evento} indice={i} />
+            ))}
+          </div>
+        )
       ) : (
         <div className="mt-8">
           <EstadoVazio

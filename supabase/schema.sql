@@ -29,6 +29,8 @@ alter table public.cidades add column if not exists lat double precision;
 alter table public.cidades add column if not exists lng double precision;
 alter table public.eventos add column if not exists formato text not null default 'presencial';
 alter table public.eventos add column if not exists destaque boolean not null default false;
+alter table public.eventos add column if not exists lat double precision;
+alter table public.eventos add column if not exists lng double precision;
 
 -- ---------- Tabela: eventos ----------
 -- id é texto (slug legível na URL, ex.: "rock-in-rio-2026"); o app gera
@@ -48,6 +50,8 @@ create table if not exists public.eventos (
   uf                  text not null,
   local               text not null,
   endereco            text,
+  lat                 double precision,   -- coordenadas do LOCAL do evento
+  lng                 double precision,   -- (para a distância "perto de mim")
   data_inicio         date not null,
   data_fim            date,
   horario             text,
@@ -169,7 +173,7 @@ create policy "presencas: desmarca a própria"
 create or replace view public.eventos_publicos as
   select
     id, titulo, descricao, descricao_completa, categoria, cidade,
-    cidade_nome, uf, local, endereco, data_inicio, data_fim, horario,
+    cidade_nome, uf, local, endereco, lat, lng, data_inicio, data_fim, horario,
     entrada, preco_texto, imagem_url, link_oficial, organizador_nome,
     status, criado_em
   from public.eventos

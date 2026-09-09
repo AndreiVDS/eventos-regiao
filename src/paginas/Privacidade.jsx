@@ -31,8 +31,9 @@ export default function Privacidade() {
           <li>Sua <strong>sessão</strong>, para manter o login entre páginas;</li>
           <li>
             Se você usar <strong>“perto de mim”</strong>, sua posição <strong>aproximada</strong>
-            (arredondada para cerca de 1 km, válida por 12 horas) — só para calcular a distância até
-            os eventos. Você pode limpar isso no próprio seletor de cidade.
+            (arredondada para cerca de 110&nbsp;m, válida por 12&nbsp;horas) — só para calcular, no
+            seu próprio navegador, a distância até cada evento. Ela <strong>não é enviada</strong>
+            para nenhum servidor. Você pode limpar isso no seletor de cidade.
           </li>
           <li>No modo de demonstração (sem banco), rascunhos de eventos, destaques e confirmações ficam só no navegador.</li>
         </ul>
@@ -71,6 +72,29 @@ export default function Privacidade() {
           <strong>Não vendemos, alugamos nem compartilhamos seus dados</strong> com terceiros para
           fins comerciais.
         </p>
+      </Bloco>
+
+      <Bloco titulo="Serviços externos">
+        <ul className="ml-5 list-disc space-y-1">
+          <li>
+            <strong>Mapa e localização de eventos:</strong> usamos os mapas do{' '}
+            <a
+              href="https://www.openstreetmap.org/copyright"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              OpenStreetMap
+            </a>{' '}
+            (tiles e geocodificação via Nominatim). Ao cadastrar um evento, o endereço digitado é
+            enviado a esse serviço para descobrir a coordenada do local. Nenhum dado pessoal é
+            enviado junto.
+          </li>
+          <li>
+            <strong>Google Maps</strong> é embutido apenas na página de um evento, para mostrar o
+            mapa do endereço público daquele evento.
+          </li>
+        </ul>
       </Bloco>
 
       <Bloco titulo="Onde os dados ficam">

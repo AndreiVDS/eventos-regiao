@@ -68,6 +68,11 @@ export default function Home() {
               'radial-gradient(900px 500px at 12% -10%, rgba(244,180,0,0.22), transparent 60%), linear-gradient(180deg, rgba(31,30,31,0.35), rgba(31,30,31,0.9))',
           }}
         />
+        <div
+          className="animar-flutuar pointer-events-none absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full opacity-40 blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(244,180,0,0.5), transparent 70%)' }}
+          aria-hidden="true"
+        />
         <div className="container-pagina py-20 sm:py-28">
           <p
             className="surgir mb-3 inline-flex items-center gap-2 rounded-full border border-creme/25 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-creme/80"
@@ -101,12 +106,13 @@ export default function Home() {
             <button type="submit" className="btn-destaque">Buscar eventos</button>
           </form>
 
-          <div className="surgir mt-6 flex flex-wrap gap-2" style={{ '--atraso': '320ms' }}>
-            {CATEGORIAS.map((c) => (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {CATEGORIAS.map((c, i) => (
               <Link
                 key={c.valor}
                 to={`/eventos?categoria=${c.valor}`}
-                className="rounded-full border border-creme/30 px-3 py-1 text-sm transition-colors hover:bg-creme hover:text-tinta"
+                className="surgir rounded-full border border-creme/30 px-3 py-1 text-sm transition-all hover:-translate-y-0.5 hover:border-destaque hover:bg-creme hover:text-tinta"
+                style={{ '--atraso': `${360 + i * 60}ms` }}
               >
                 {c.emoji} {c.rotulo}
               </Link>
@@ -150,7 +156,7 @@ export default function Home() {
       <Secao className="container-pagina py-14">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl">
+            <h2 className="titulo-secao text-3xl">
               Próximos eventos{cidadeAtual ? ` em ${cidadeAtual.nome}` : ''}
             </h2>
             <p className="text-suave">
@@ -191,7 +197,7 @@ export default function Home() {
           <div className="container-pagina">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-3xl">Neste fim de semana</h2>
+                <h2 className="titulo-secao text-3xl">Neste fim de semana</h2>
                 <p className="text-suave">
                   O que rola no sábado e no domingo{cidadeAtual ? ` em ${cidadeAtual.nome}` : ''}.
                 </p>
@@ -216,7 +222,7 @@ export default function Home() {
       {cidades && (
         <Secao className="py-14">
           <div className="container-pagina">
-            <h2 className="text-3xl">Explore por cidade</h2>
+            <h2 className="titulo-secao text-3xl">Explore por cidade</h2>
             <p className="text-suave">
               Cada cidade tem sua identidade, suas tradições e sua própria agenda.
             </p>
@@ -252,7 +258,7 @@ export default function Home() {
 
       {/* Como funciona */}
       <Secao className="container-pagina py-14">
-        <h2 className="text-3xl">Como funciona</h2>
+        <h2 className="titulo-secao text-3xl">Como funciona</h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
             { n: '1', t: 'Descubra', d: 'Busque e filtre eventos por cidade, categoria, data e tipo de entrada. Tudo em um só lugar.' },

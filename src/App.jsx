@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Cabecalho from './componentes/Cabecalho'
+import BarraRolagem from './componentes/BarraRolagem'
 import Rodape from './componentes/Rodape'
 import RotaProtegida from './componentes/RotaProtegida'
 import LimiteErro from './componentes/LimiteErro'
@@ -38,6 +39,7 @@ export default function App() {
     <div className="flex min-h-screen flex-col">
       <a href="#conteudo" className="link-pular">Pular para o conteúdo</a>
       <RolarAoTopo />
+      <BarraRolagem />
       <Cabecalho />
 
       <main id="conteudo" className="flex-1">

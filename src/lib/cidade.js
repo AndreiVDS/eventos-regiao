@@ -8,8 +8,11 @@ import { cidadeMaisProxima, dentroDaCobertura } from './geo'
  */
 
 const CHAVE = 'cidade'
-const CHAVE_LOC = 'localizacao' // { lat, lng, raioKm, em } — coords arredondadas + validade
+const CHAVE_LOC = 'localizacao' // { lat, lng, precisao, raioKm, em }
 const TTL_MS = 12 * 60 * 60 * 1000
+// 3 casas decimais ≈ 110 m: preciso o bastante para ordenar eventos por
+// distância, sem guardar a rua/casa exata da pessoa.
+const CASAS = 1000
 
 const CidadeContexto = createContext(null)
 const LocalContexto = createContext(null)
@@ -26,7 +29,7 @@ function lerLoc() {
   try {
     const o = JSON.parse(localStorage.getItem(CHAVE_LOC) || 'null')
     if (o && Date.now() - o.em < TTL_MS) {
-      return { lat: o.lat, lng: o.lng, raioKm: o.raioKm ?? null }
+      return { lat: o.lat, lng: o.lng, precisao: o.precisao ?? null, raioKm: o.raioKm ?? null }
     }
   } catch {
     /* ignore */
@@ -63,11 +66,16 @@ export function CidadeProvider({ children }) {
       gravarLoc(null)
       return
     }
-    // arredonda para ~1 km (2 casas) — não guardamos a posição exata
-    const lat = Math.round(c.lat * 100) / 100
-    const lng = Math.round(c.lng * 100) / 100
+    const lat = Math.round(c.lat * CASAS) / CASAS
+    const lng = Math.round(c.lng * CASAS) / CASAS
+    const precisao = c.precisao != null ? Math.round(c.precisao) : null
     setLoc((atual) => {
-      const nova = { lat, lng, raioKm: raioKm !== undefined ? raioKm : (atual?.raioKm ?? null) }
+      const nova = {
+        lat,
+        lng,
+        precisao,
+        raioKm: raioKm !== undefined ? raioKm : (atual?.raioKm ?? null),
+      }
       gravarLoc(nova)
       return nova
     })
@@ -98,7 +106,13 @@ export function CidadeProvider({ children }) {
   )
 
   const valorLoc = useMemo(
-    () => ({ coords, raioKm: loc?.raioKm ?? null, definirCoords, definirRaio }),
+    () => ({
+      coords,
+      precisao: loc?.precisao ?? null,
+      raioKm: loc?.raioKm ?? null,
+      definirCoords,
+      definirRaio,
+    }),
     [coords, loc, definirCoords, definirRaio],
   )
 
@@ -130,8 +144,10 @@ export {
   dentroDaCobertura,
   dentroDoRaio,
   coordsDaCidade,
+  coordsDoEvento,
   distanciaAteCidade,
   distanciaAteSlug,
+  distanciaAteEvento,
   formatarDistancia,
   cidadeMaisProxima,
 } from './geo'
@@ -164,7 +180,8 @@ export function obterLocalizacao() {
         e.codigo = codigo
         reject(e)
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+      // alta precisão: no celular usa o GPS de verdade (metros), não só o wi-fi
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
     )
   })
 }
