@@ -52,9 +52,7 @@ export function useMeta({ titulo, descricao, caminho = '', imagem, tipo = 'websi
   const t = titulo ? `${titulo} · Eventos Região` : PADRAO.titulo
   const d = descricao || PADRAO.descricao
   const url = SITE_URL + caminho
-  const img =
-    imagem ||
-    `${SITE_URL}/api/og?t=${encodeURIComponent(titulo || 'Eventos Região')}`
+  const img = imagem || `${SITE_URL}/og.png`
 
   useEffect(() => {
     document.title = t

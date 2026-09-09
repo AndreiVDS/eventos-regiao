@@ -28,7 +28,7 @@ function paginaHtml({ titulo, descricao, caminho, imagem, jsonLd }) {
   const url = SITE + caminho
   const t = esc(titulo)
   const d = esc(descricao).slice(0, 300)
-  const img = imagem || `${SITE}/api/og?t=${encodeURIComponent(titulo)}`
+  const img = imagem || `${SITE}/og.png`
 
   let head = `
     <title>${t}</title>
@@ -67,9 +67,7 @@ function grava(caminhoRel, html) {
 
 // ---- páginas de evento ----
 for (const e of eventos) {
-  const imagem = raster(e.imagem_url)
-    ? SITE + e.imagem_url
-    : `${SITE}/api/og?t=${encodeURIComponent(e.titulo)}&cat=${e.categoria}`
+  const imagem = raster(e.imagem_url) ? SITE + e.imagem_url : `${SITE}/og.png`
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Event',
