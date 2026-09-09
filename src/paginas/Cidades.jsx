@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom'
 import Carregando from '../componentes/Carregando'
 import { listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
+import { useMeta } from '../lib/meta'
 
 export default function Cidades() {
   const { dados: cidades, carregando } = useAsync(() => listarCidades(), [])
+  useMeta({ titulo: 'Cidades participantes', descricao: 'Conheça a identidade cultural de cada cidade e a agenda de eventos de cada uma.', caminho: '/cidades' })
 
   return (
     <div className="container-pagina py-10">

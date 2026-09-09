@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useMeta } from '../lib/meta'
 
 const objetivos = [
   'Centralizar informações sobre eventos de diferentes regiões, hoje espalhadas por redes sociais e cartazes.',
@@ -16,6 +17,7 @@ const equipe = [
 ]
 
 export default function Sobre() {
+  useMeta({ titulo: 'Sobre o projeto', descricao: 'Eventos Região é uma plataforma inclusiva para o turismo e a cultura local, da Atividade Extensionista de Engenharia de Software da UNINTER.', caminho: '/sobre' })
   return (
     <div className="container-pagina py-10">
       <h1 className="text-4xl">Sobre o projeto</h1>

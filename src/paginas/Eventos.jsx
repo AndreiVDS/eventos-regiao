@@ -8,6 +8,7 @@ import ChamadaLocalizacao from '../componentes/ChamadaLocalizacao'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual, useLocalizacao, RAIOS } from '../lib/cidade'
+import { useMeta } from '../lib/meta'
 
 // O mapa (Leaflet) só é baixado quando o visitante abre a aba "Mapa".
 const MapaEventos = lazy(() => import('../componentes/MapaEventos'))
@@ -81,6 +82,16 @@ export default function Eventos() {
 
   const ordenandoPorPerto = filtros.ordenar === 'perto' && coords
   const rotuloRaio = RAIOS.find((r) => r.km === raioKm)?.rotulo
+
+  const cidadeFiltrada = (cidades || []).find((c) => c.slug === filtros.cidade)
+  useMeta({
+    titulo: cidadeFiltrada
+      ? `Eventos em ${cidadeFiltrada.nome}/${cidadeFiltrada.uf}`
+      : 'Agenda de eventos',
+    descricao:
+      'Busque e filtre eventos culturais, esportivos e comunitários por cidade, categoria, data e tipo de entrada.',
+    caminho: '/eventos',
+  })
 
   const comCoords = (eventos || []).filter((e) => e.lat != null || e.cidade)
 

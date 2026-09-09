@@ -5,6 +5,7 @@ import EstadoVazio from '../componentes/EstadoVazio'
 import NaoEncontrado from './NaoEncontrado'
 import { obterCidade, listarEventos } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
+import { useMeta } from '../lib/meta'
 
 export default function Cidade() {
   const { slug } = useParams()
@@ -13,6 +14,14 @@ export default function Cidade() {
     () => listarEventos({ cidade: slug, quando: 'futuros' }),
     [slug],
   )
+
+  useMeta({
+    titulo: cidade ? `Eventos em ${cidade.nome}/${cidade.uf}` : undefined,
+    descricao: cidade
+      ? `Agenda de eventos culturais, esportivos e comunitários em ${cidade.nome}/${cidade.uf}. ${cidade.descricao || ''}`.trim()
+      : undefined,
+    caminho: `/cidades/${slug}`,
+  })
 
   if (carregando) return <Carregando />
   if (!cidade) return <NaoEncontrado />

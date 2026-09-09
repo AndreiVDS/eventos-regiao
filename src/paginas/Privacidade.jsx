@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useConsentimento } from '../lib/consentimento'
+import { useMeta } from '../lib/meta'
 
 function Bloco({ titulo, children }) {
   return (
@@ -12,6 +13,7 @@ function Bloco({ titulo, children }) {
 
 export default function Privacidade() {
   const { reabrir } = useConsentimento()
+  useMeta({ titulo: 'Privacidade e dados', descricao: 'Como o Eventos Região trata dados pessoais, em linha com a LGPD.', caminho: '/privacidade' })
 
   return (
     <div className="container-pagina py-10">

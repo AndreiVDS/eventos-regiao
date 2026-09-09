@@ -11,9 +11,11 @@ import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual } from '../lib/cidade'
 import { eventosDoFimDeSemana } from '../lib/agenda'
 import { CATEGORIAS } from '../lib/formatacao'
+import { useMeta } from '../lib/meta'
 
 export default function Home() {
   const navigate = useNavigate()
+  useMeta({ caminho: '/' })
   const [busca, setBusca] = useState('')
   const [cidadeSlug] = useCidadeAtual()
 

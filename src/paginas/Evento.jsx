@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Selo from '../componentes/Selo'
 import AcoesEvento from '../componentes/AcoesEvento'
@@ -7,6 +8,7 @@ import Carregando from '../componentes/Carregando'
 import NaoEncontrado from './NaoEncontrado'
 import { obterEvento, listarEventos } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
+import { useMeta, SITE_URL } from '../lib/meta'
 import { eventosRelacionados } from '../lib/agenda'
 import {
   emojiCategoria,
@@ -18,10 +20,61 @@ import {
   eventoJaPassou,
 } from '../lib/formatacao'
 
+const raster = (u) => /\.(png|jpe?g|webp)$/i.test(u || '')
+
 export default function Evento() {
   const { id } = useParams()
   const { dados: evento, carregando } = useAsync(() => obterEvento(id), [id])
   const { dados: agenda } = useAsync(() => listarEventos({ quando: '' }), [])
+
+  const imagemAbs = evento && raster(evento.imagem_url) ? SITE_URL + evento.imagem_url : undefined
+  const jsonLd = useMemo(() => {
+    if (!evento) return null
+    const online = evento.formato === 'online'
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      name: evento.titulo,
+      description: evento.descricao,
+      startDate: evento.data_inicio,
+      endDate: evento.data_fim || evento.data_inicio,
+      eventAttendanceMode: online
+        ? 'https://schema.org/OnlineEventAttendanceMode'
+        : 'https://schema.org/OfflineEventAttendanceMode',
+      eventStatus: 'https://schema.org/EventScheduled',
+      image: imagemAbs ? [imagemAbs] : undefined,
+      url: `${SITE_URL}/eventos/${evento.id}`,
+      location: online
+        ? { '@type': 'VirtualLocation', url: evento.link_oficial || `${SITE_URL}/eventos/${evento.id}` }
+        : {
+            '@type': 'Place',
+            name: evento.local,
+            address: `${evento.endereco || ''}, ${evento.cidade_nome}/${evento.uf}`.replace(/^, /, ''),
+            ...(evento.lat != null && evento.lng != null
+              ? { geo: { '@type': 'GeoCoordinates', latitude: evento.lat, longitude: evento.lng } }
+              : {}),
+          },
+      organizer: evento.organizador_nome
+        ? { '@type': 'Organization', name: evento.organizador_nome }
+        : undefined,
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'BRL',
+        price: evento.entrada === 'gratuito' ? 0 : undefined,
+        url: evento.link_oficial || `${SITE_URL}/eventos/${evento.id}`,
+        availability: 'https://schema.org/InStock',
+      },
+    }
+  }, [evento, imagemAbs])
+
+  useMeta({
+    titulo: evento?.titulo,
+    descricao: evento?.descricao,
+    caminho: `/eventos/${id}`,
+    imagem: imagemAbs,
+    tipo: 'article',
+    jsonLd,
+  })
 
   if (carregando) return <Carregando />
   if (!evento) return <NaoEncontrado />
