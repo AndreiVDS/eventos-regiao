@@ -101,6 +101,8 @@ export function useLocalizacao() {
 
 export {
   COORDENADAS,
+  RAIO_COBERTURA_KM,
+  dentroDaCobertura,
   coordsDaCidade,
   distanciaAteCidade,
   distanciaAteSlug,

@@ -5,6 +5,7 @@ import {
   useCidadeAtual,
   useLocalizacao,
   cidadeMaisProxima,
+  dentroDaCobertura,
   obterLocalizacao,
   formatarDistancia,
 } from '../lib/cidade'
@@ -19,7 +20,8 @@ export default function SeletorCidade({ classe = '' }) {
   const { coords, definirCoords } = useLocalizacao()
   const [aberto, setAberto] = useState(false)
   const [busca, setBusca] = useState('')
-  const [gpsEstado, setGpsEstado] = useState(null) // null | 'buscando' | 'ok'+texto | erro
+  // null | 'buscando' | { tom: 'ok' | 'aviso' | 'erro', texto }
+  const [gpsEstado, setGpsEstado] = useState(null)
   const caixaRef = useRef(null)
 
   const atual = (cidades || []).find((c) => c.slug === slug)
@@ -57,15 +59,24 @@ export default function SeletorCidade({ classe = '' }) {
     try {
       const ponto = await obterLocalizacao()
       const perto = cidadeMaisProxima(ponto, cidades || [])
-      if (!perto) throw new Error('Nenhuma cidade cadastrada por perto.')
+      if (!perto) throw new Error('Não consegui carregar as cidades. Tente de novo.')
       definirCoords(ponto)
-      definir(perto.cidade.slug)
       setBusca('')
-      setGpsEstado(
-        `Você está a ${formatarDistancia(perto.distanciaKm)} de ${perto.cidade.nome}`,
-      )
+      const dist = formatarDistancia(perto.distanciaKm)
+      if (dentroDaCobertura(perto.distanciaKm)) {
+        definir(perto.cidade.slug)
+        setGpsEstado({ tom: 'ok', texto: `Você está a ${dist} de ${perto.cidade.nome}` })
+      } else {
+        // longe demais para "morar" numa cidade cadastrada: não força nenhuma,
+        // mas mantém a posição para ordenar os eventos por distância.
+        definir('')
+        setGpsEstado({
+          tom: 'aviso',
+          texto: `Ainda não temos eventos na sua região. A cidade mais próxima é ${perto.cidade.nome}, a ~${dist} — os eventos aparecem do mais perto para o mais longe.`,
+        })
+      }
     } catch (err) {
-      setGpsEstado(err.message || 'Não deu para usar a localização.')
+      setGpsEstado({ tom: 'erro', texto: err.message || 'Não deu para usar a localização.' })
     }
   }
 
@@ -131,14 +142,16 @@ export default function SeletorCidade({ classe = '' }) {
           {gpsEstado && gpsEstado !== 'buscando' && (
             <p
               className={`mt-1 px-2 text-xs ${
-                gpsEstado.startsWith('Você está')
-                  ? 'text-suave'
-                  : 'text-red-700 dark:text-red-400'
+                gpsEstado.tom === 'erro'
+                  ? 'text-red-700 dark:text-red-400'
+                  : gpsEstado.tom === 'aviso'
+                    ? 'text-texto'
+                    : 'text-suave'
               }`}
               role="status"
             >
-              {gpsEstado.startsWith('Você está') ? '✓ ' : ''}
-              {gpsEstado}
+              {gpsEstado.tom === 'ok' ? '✓ ' : ''}
+              {gpsEstado.texto}
             </p>
           )}
 

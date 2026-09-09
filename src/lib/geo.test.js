@@ -4,6 +4,8 @@ import {
   distanciaAteSlug,
   formatarDistancia,
   cidadeMaisProxima,
+  dentroDaCobertura,
+  RAIO_COBERTURA_KM,
 } from './geo'
 
 describe('haversineKm', () => {
@@ -41,5 +43,23 @@ describe('cidadeMaisProxima', () => {
     const cidades = [{ slug: 'blumenau' }, { slug: 'jaragua-do-sul' }, { slug: 'salvador' }]
     const r = cidadeMaisProxima({ lat: -26.49, lng: -49.07 }, cidades)
     expect(r.cidade.slug).toBe('jaragua-do-sul')
+  })
+
+  it('quem está fora da área ainda recebe a cidade mais próxima + a distância real', () => {
+    // ponto no meio do Amazonas, longe de tudo
+    const cidades = [{ slug: 'blumenau' }, { slug: 'jaragua-do-sul' }, { slug: 'parintins' }]
+    const r = cidadeMaisProxima({ lat: -4.5, lng: -60 }, cidades)
+    expect(r.cidade.slug).toBe('parintins')
+    expect(r.distanciaKm).toBeGreaterThan(RAIO_COBERTURA_KM)
+    expect(dentroDaCobertura(r.distanciaKm)).toBe(false)
+  })
+})
+
+describe('dentroDaCobertura', () => {
+  it('true dentro do raio, false fora, false para null', () => {
+    expect(dentroDaCobertura(0)).toBe(true)
+    expect(dentroDaCobertura(RAIO_COBERTURA_KM)).toBe(true)
+    expect(dentroDaCobertura(RAIO_COBERTURA_KM + 1)).toBe(false)
+    expect(dentroDaCobertura(null)).toBe(false)
   })
 })

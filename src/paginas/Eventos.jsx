@@ -25,27 +25,36 @@ export default function Eventos() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const chaveCoords = coords ? `${coords.lat},${coords.lng}` : ''
+
   const filtros = useMemo(
-    () => ({
-      busca: params.get('busca') || '',
+    () => {
       // sem parâmetro na URL → usa a cidade escolhida no cabeçalho
-      cidade: params.has('cidade') ? params.get('cidade') : cidadeSlug,
-      categoria: params.get('categoria') || '',
-      entrada: params.get('entrada') || '',
-      formato: params.get('formato') || '',
-      quando: params.get('quando') ?? 'futuros',
-      de: params.get('de') || '',
-      ate: params.get('ate') || '',
-      ordenar: params.get('ordenar') || 'data',
-    }),
-    [params, cidadeSlug],
+      const cidade = params.has('cidade') ? params.get('cidade') : cidadeSlug
+      return {
+        busca: params.get('busca') || '',
+        cidade,
+        categoria: params.get('categoria') || '',
+        entrada: params.get('entrada') || '',
+        formato: params.get('formato') || '',
+        quando: params.get('quando') ?? 'futuros',
+        de: params.get('de') || '',
+        ate: params.get('ate') || '',
+        // com localização e sem cidade fixa, o padrão é "mais perto de você"
+        ordenar: params.get('ordenar') || (coords && !cidade ? 'perto' : 'data'),
+      }
+    },
+    [params, cidadeSlug, coords],
   )
 
   function aplicar(novos) {
     const p = new URLSearchParams()
     for (const [k, v] of Object.entries(novos)) {
       if (k === 'quando' && (!v || v === 'futuros')) continue
-      if (k === 'ordenar' && (!v || v === 'data')) continue
+      if (k === 'ordenar') {
+        const padrao = coords && !novos.cidade ? 'perto' : 'data'
+        if (!v || v === padrao) continue
+      }
       if (k === 'cidade') {
         p.set('cidade', v || '') // sempre explícito, para permitir "todas"
         definirCidade(v || '')
@@ -57,7 +66,6 @@ export default function Eventos() {
   }
 
   const { dados: cidades } = useAsync(() => listarCidades(), [])
-  const chaveCoords = coords ? `${coords.lat},${coords.lng}` : ''
   const { dados: eventos, carregando } = useAsync(
     () => listarEventos({ ...filtros, origem: coords }),
     [

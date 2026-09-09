@@ -59,6 +59,15 @@ export function formatarDistancia(km) {
   return `${Math.round(km)} km`
 }
 
+// Até esta distância consideramos que a pessoa "é" daquela cidade e a
+// selecionamos automaticamente. Além disso, mantemos "Todas as cidades" e só
+// ordenamos os eventos pela distância.
+export const RAIO_COBERTURA_KM = 120
+
+export function dentroDaCobertura(distanciaKm) {
+  return distanciaKm != null && distanciaKm <= RAIO_COBERTURA_KM
+}
+
 export function cidadeMaisProxima(ponto, cidades) {
   let melhor = null
   let menor = Infinity
