@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Selo from '../componentes/Selo'
 import AcoesEvento from '../componentes/AcoesEvento'
@@ -9,6 +9,8 @@ import NaoEncontrado from './NaoEncontrado'
 import { obterEvento, listarEventos } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useMeta, SITE_URL } from '../lib/meta'
+import { useLocalizacao, distanciaAteEvento, formatarDistancia } from '../lib/cidade'
+import { registrarVisto } from '../lib/recentes'
 import { eventosRelacionados } from '../lib/agenda'
 import {
   emojiCategoria,
@@ -18,6 +20,7 @@ import {
   emojiFormato,
   formatarPeriodo,
   eventoJaPassou,
+  rotuloRecorrencia,
 } from '../lib/formatacao'
 
 const raster = (u) => /\.(png|jpe?g|webp)$/i.test(u || '')
@@ -26,6 +29,13 @@ export default function Evento() {
   const { id } = useParams()
   const { dados: evento, carregando } = useAsync(() => obterEvento(id), [id])
   const { dados: agenda } = useAsync(() => listarEventos({ quando: '' }), [])
+  const { coords } = useLocalizacao()
+
+  useEffect(() => {
+    if (evento?.status === 'aprovado') registrarVisto(evento)
+  }, [evento])
+
+  const distancia = coords && evento ? distanciaAteEvento(coords, evento) : null
 
   const imagemAbs = evento && raster(evento.imagem_url) ? SITE_URL + evento.imagem_url : undefined
   const jsonLd = useMemo(() => {
@@ -149,7 +159,14 @@ export default function Evento() {
             {evento.descricao_completa || evento.descricao}
           </p>
 
-          <h2 className="mt-10 text-2xl">Local</h2>
+          <div className="mt-10 flex flex-wrap items-baseline gap-x-3">
+            <h2 className="text-2xl">Local</h2>
+            {distancia != null && (
+              <span className="chip-distancia">
+                📍 a ~{formatarDistancia(distancia)} de você
+              </span>
+            )}
+          </div>
           <p className="mt-2 text-suave">
             <strong>{evento.local}</strong>
             <br />
@@ -189,6 +206,11 @@ export default function Evento() {
               <dt className="font-semibold text-texto">🗓️ Data</dt>
               <dd className="text-suave">
                 {formatarPeriodo(evento.data_inicio, evento.data_fim)}
+                {evento.recorrencia && (
+                  <span className="mt-1 block text-xs text-texto">
+                    🔁 {rotuloRecorrencia(evento.recorrencia)}
+                  </span>
+                )}
               </dd>
             </div>
             {evento.horario && (

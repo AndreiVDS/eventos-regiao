@@ -19,7 +19,9 @@ export default function Rodape() {
             <li><Link to="/cidades" className="hover:text-destaque">Cidades</Link></li>
             <li><Link to="/divulgue" className="hover:text-destaque">Divulgue seu evento</Link></li>
             <li><Link to="/sobre" className="hover:text-destaque">Sobre o projeto</Link></li>
+            <li><Link to="/contato" className="hover:text-destaque">Contato</Link></li>
             <li><Link to="/privacidade" className="hover:text-destaque">Privacidade e dados</Link></li>
+            <li><Link to="/termos" className="hover:text-destaque">Termos de uso</Link></li>
           </ul>
         </nav>
 
@@ -36,8 +38,8 @@ export default function Rodape() {
         <div>
           <h3 className="font-titulo text-lg tracking-wide text-destaque">Contato</h3>
           <p className="mt-2 text-sm text-creme/70">
-            Fale com a equipe pela página{' '}
-            <Link to="/sobre" className="underline hover:text-destaque">Sobre</Link>.
+            Dúvidas ou quer sua cidade na plataforma?{' '}
+            <Link to="/contato" className="underline hover:text-destaque">Fale com a equipe</Link>.
           </p>
         </div>
       </div>

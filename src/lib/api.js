@@ -269,7 +269,8 @@ export function gerarSlug(titulo = 'evento') {
 // "aceite", que não podem ir no insert).
 const COLUNAS_EVENTO = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade',
-  'cidade_nome', 'uf', 'local', 'endereco', 'lat', 'lng', 'data_inicio', 'data_fim', 'horario',
+  'cidade_nome', 'uf', 'local', 'endereco', 'lat', 'lng', 'recorrencia', 'motivo_recusa',
+  'data_inicio', 'data_fim', 'horario',
   'entrada', 'preco_texto', 'imagem_url', 'link_oficial', 'organizador_nome',
   'organizador_contato', 'criado_por', 'destaque', 'status', 'criado_em',
 ]
@@ -394,13 +395,14 @@ export async function listarTodosEventos() {
   return data
 }
 
-export async function moderarEvento(id, status) {
+export async function moderarEvento(id, status, motivo = '') {
+  const motivoRecusa = status === 'recusado' ? motivo.trim() || null : null
   if (!supabaseConfigurado) {
     let slugCid = null
     const lista = lerEnviados().map((e) => {
       if (e.id !== id) return e
       slugCid = e.cidade
-      return { ...e, status }
+      return { ...e, status, motivo_recusa: motivoRecusa }
     })
     gravarEnviados(lista)
     if (status === 'aprovado' && slugCid) await aprovarCidade(slugCid)
@@ -413,8 +415,56 @@ export async function moderarEvento(id, status) {
       await supabase.from('cidades').update({ aprovada: true }).eq('slug', ev.cidade)
     }
   }
-  const { error } = await supabase.from('eventos').update({ status }).eq('id', id)
+  const { error } = await supabase
+    .from('eventos')
+    .update({ status, motivo_recusa: motivoRecusa })
+    .eq('id', id)
   if (error) throw error
+}
+
+/* ================= Contato ================= */
+
+const CHAVE_CONTATOS = 'contatos_locais'
+
+export async function enviarContato({ nome, email, assunto, mensagem }) {
+  const registro = {
+    nome: (nome || '').trim(),
+    email: (email || '').trim(),
+    assunto: (assunto || '').trim(),
+    mensagem: (mensagem || '').trim(),
+    criado_em: new Date().toISOString(),
+  }
+  if (!registro.nome || !registro.email || !registro.mensagem) {
+    throw new Error('Preencha nome, e-mail e mensagem.')
+  }
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('contatos').insert(registro)
+    if (error) throw error
+    return
+  }
+  try {
+    const l = JSON.parse(localStorage.getItem(CHAVE_CONTATOS) || '[]')
+    localStorage.setItem(CHAVE_CONTATOS, JSON.stringify([registro, ...l]))
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Mensagens de contato (só a equipe lê). */
+export async function listarContatos() {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('contatos')
+      .select('*')
+      .order('criado_em', { ascending: false })
+    if (error) throw error
+    return data
+  }
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_CONTATOS) || '[]')
+  } catch {
+    return []
+  }
 }
 
 /* ================= Destaques (curadoria da equipe) ================= */

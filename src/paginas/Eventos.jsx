@@ -9,6 +9,15 @@ import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual, useLocalizacao, RAIOS } from '../lib/cidade'
 import { useMeta } from '../lib/meta'
+import { rotuloCategoria, rotuloEntrada, rotuloFormato } from '../lib/formatacao'
+
+const PERIODO_ROTULO = {
+  semana: 'Próximos 7 dias',
+  mes: 'Próximos 30 dias',
+  encerrados: 'Já encerrados',
+  '': 'Qualquer data',
+  personalizado: 'Datas escolhidas',
+}
 
 // O mapa (Leaflet) só é baixado quando o visitante abre a aba "Mapa".
 const MapaEventos = lazy(() => import('../componentes/MapaEventos'))
@@ -95,6 +104,24 @@ export default function Eventos() {
 
   const comCoords = (eventos || []).filter((e) => e.lat != null || e.cidade)
 
+  // chips dos filtros ativos (cada um remove o próprio filtro ao clicar)
+  const chips = []
+  if (filtros.busca) chips.push({ k: 'busca', txt: `"${filtros.busca}"` })
+  if (cidadeFiltrada) chips.push({ k: 'cidade', txt: `${cidadeFiltrada.nome}/${cidadeFiltrada.uf}` })
+  if (filtros.categoria) chips.push({ k: 'categoria', txt: rotuloCategoria(filtros.categoria) })
+  if (filtros.entrada) chips.push({ k: 'entrada', txt: rotuloEntrada(filtros.entrada) })
+  if (filtros.formato) chips.push({ k: 'formato', txt: rotuloFormato(filtros.formato) })
+  if (filtros.quando && filtros.quando !== 'futuros')
+    chips.push({ k: 'quando', txt: PERIODO_ROTULO[filtros.quando] || filtros.quando })
+  if (filtros.de || filtros.ate)
+    chips.push({ k: 'datas', txt: `${filtros.de || '…'} → ${filtros.ate || '…'}` })
+
+  function removerChip(k) {
+    if (k === 'datas') aplicar({ ...filtros, de: '', ate: '', quando: 'futuros' })
+    else if (k === 'quando') aplicar({ ...filtros, quando: 'futuros' })
+    else aplicar({ ...filtros, [k]: '' })
+  }
+
   return (
     <div className="container-pagina py-10">
       <h1 className="text-4xl">Agenda de eventos</h1>
@@ -151,6 +178,30 @@ export default function Eventos() {
           Do mais perto para o mais longe
           {rotuloRaio && rotuloRaio !== 'qualquer distância' ? ` · ${rotuloRaio}` : ''}
         </p>
+      )}
+
+      {chips.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {chips.map((c) => (
+            <button
+              key={c.k}
+              type="button"
+              onClick={() => removerChip(c.k)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-texto/10 px-3 py-1 text-sm hover:bg-texto/15"
+            >
+              {c.txt}
+              <span aria-hidden="true" className="text-suave">✕</span>
+              <span className="sr-only">remover filtro</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => aplicar(PADRAO)}
+            className="text-sm text-suave underline hover:text-texto"
+          >
+            limpar tudo
+          </button>
+        </div>
       )}
 
       {!coords && (

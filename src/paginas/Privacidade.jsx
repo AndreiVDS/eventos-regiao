@@ -126,8 +126,8 @@ export default function Privacidade() {
           <li>informação sobre com quem os dados foram compartilhados.</li>
         </ul>
         <p>
-          Para exercer qualquer um desses direitos, entre em contato com a equipe pela página{' '}
-          <Link to="/sobre" className="underline">Sobre</Link> ou pelo repositório do projeto.
+          Para exercer qualquer um desses direitos, fale com a equipe pela página{' '}
+          <Link to="/contato" className="underline">Contato</Link>.
         </p>
       </Bloco>
 

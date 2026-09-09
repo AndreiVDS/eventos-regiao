@@ -41,7 +41,7 @@ function IconeAlvo() {
 export default function SeletorCidade({ classe = '' }) {
   const { dados: cidades } = useAsync(() => listarCidades(), [])
   const [slug, definir] = useCidadeAtual()
-  const { coords, precisao, raioKm, definirCoords, definirRaio } = useLocalizacao()
+  const { coords, precisao, raioKm, bairro, definirCoords, definirRaio } = useLocalizacao()
   const permissao = usePermissaoGeo()
   const [aberto, setAberto] = useState(false)
   const [busca, setBusca] = useState('')
@@ -50,7 +50,8 @@ export default function SeletorCidade({ classe = '' }) {
   const caixaRef = useRef(null)
 
   const atual = (cidades || []).find((c) => c.slug === slug)
-  const rotulo = atual ? atual.nome : coords ? 'Perto de mim' : 'Todas as cidades'
+  const rotulo =
+    bairro || (atual ? atual.nome : coords ? 'Perto de mim' : 'Todas as cidades')
   const negada = permissao === 'negada'
 
   const lista = useMemo(() => {

@@ -212,6 +212,7 @@ export const eventos = [
   // ---------------- Santa Catarina / Paraná / Minas (curadoria regional) ----------------
   {
     id: 'schutzenfest-2026',
+    recorrencia: 'anual',
     destaque: true,
     titulo: '34ª Schützenfest',
     descricao:
@@ -233,6 +234,7 @@ export const eventos = [
   },
   {
     id: 'novale-experience-2026',
+    recorrencia: 'anual',
     titulo: 'Novale Experience 2026',
     descricao:
       'O maior evento de inovação e empreendedorismo do Norte catarinense, com palestras, rodadas de negócios e imersão em tecnologias emergentes.',
@@ -312,6 +314,7 @@ export const eventos = [
   },
   {
     id: 'comedia-daqui-2026',
+    recorrencia: 'semanal',
     titulo: 'Comédia Daqui — Stand-up toda quarta',
     descricao:
       'O comedy club do Norte catarinense apresenta uma noite de stand-up com humoristas da região e convidados.',
@@ -331,6 +334,7 @@ export const eventos = [
   },
   {
     id: 'oktoberfest-blumenau-2026',
+    recorrencia: 'anual',
     destaque: true,
     titulo: 'Oktoberfest Blumenau 2026',
     descricao:
@@ -352,6 +356,7 @@ export const eventos = [
   },
   {
     id: 'festival-danca-joinville-2027',
+    recorrencia: 'anual',
     titulo: 'Festival de Dança de Joinville 2027',
     descricao:
       'O maior festival de dança do mundo em número de participantes, com mostras competitivas, oficinas e apresentações gratuitas na rua.',
@@ -372,6 +377,7 @@ export const eventos = [
   },
   {
     id: 'boi-de-mamao-floripa-2026',
+    recorrencia: 'anual',
     titulo: 'Mostra de Boi de Mamão e Cultura Açoriana',
     descricao:
       'Apresentações do folguedo tradicional da Ilha, com oficinas de confecção de bonecos e roda de conversa sobre a cultura açoriana.',
@@ -392,6 +398,7 @@ export const eventos = [
   },
   {
     id: 'natal-curitiba-2026',
+    recorrencia: 'anual',
     titulo: 'Natal de Curitiba — Programação nos Parques',
     descricao:
       'Corais, espetáculos de luz e feiras de artesanato espalhados pelos parques e pela Ópera de Arame.',
@@ -412,6 +419,7 @@ export const eventos = [
   },
   {
     id: 'festival-teatro-curitiba-2027',
+    recorrencia: 'anual',
     titulo: 'Festival de Curitiba 2027',
     descricao:
       'Um dos maiores festivais de artes cênicas do país, com mostra oficial, Fringe e espetáculos de rua por toda a cidade.',
@@ -432,6 +440,7 @@ export const eventos = [
   },
   {
     id: 'feira-parque-ipanema-2026',
+    recorrencia: 'anual',
     titulo: 'Feira de Economia Criativa no Parque Ipanema',
     descricao:
       'Feira mensal de artesãos, produtores de alimentos e food trucks no principal cartão-postal de Ipatinga.',
@@ -451,6 +460,7 @@ export const eventos = [
   },
   {
     id: 'corrida-vale-do-aco-2026',
+    recorrencia: 'anual',
     titulo: 'Corrida de Rua Vale do Aço',
     descricao: 'Prova de 5 km e 10 km pelas avenidas de Ipatinga, com percurso passando pelo Parque Ipanema.',
     descricao_completa:
@@ -492,6 +502,7 @@ export const eventos = [
   },
   {
     id: 'reveillon-copacabana-2027',
+    recorrencia: 'anual',
     titulo: 'Réveillon de Copacabana 2026/2027',
     descricao:
       'O maior Réveillon do mundo, reconhecido pelo Guinness: shows na areia e queima de fogos de balsas ao longo de 4 km de orla.',
@@ -512,6 +523,7 @@ export const eventos = [
   },
   {
     id: 'acampamento-farroupilha-poa-2026',
+    recorrencia: 'anual',
     destaque: true,
     titulo: 'Acampamento Farroupilha 2026',
     descricao:
@@ -533,6 +545,7 @@ export const eventos = [
   },
   {
     id: 'feira-do-livro-poa-2026',
+    recorrencia: 'anual',
     titulo: '72ª Feira do Livro de Porto Alegre',
     descricao:
       'Uma das feiras de livro a céu aberto mais antigas do mundo, na Praça da Alfândega, com sessões de autógrafos, debates e programação infantil.',
@@ -553,6 +566,7 @@ export const eventos = [
   },
   {
     id: 'natal-luz-gramado-2026',
+    recorrencia: 'anual',
     destaque: true,
     titulo: 'Natal Luz de Gramado 2026',
     descricao:
@@ -574,6 +588,7 @@ export const eventos = [
   },
   {
     id: 'sao-silvestre-2026',
+    recorrencia: 'anual',
     titulo: '100ª Corrida Internacional de São Silvestre',
     descricao:
       'A mais tradicional corrida de rua do Brasil: 15 km pelas ruas de São Paulo no último dia do ano, com elite mundial e milhares de amadores.',
@@ -593,6 +608,7 @@ export const eventos = [
   },
   {
     id: 'virada-cultural-sp-2027',
+    recorrencia: 'anual',
     titulo: 'Virada Cultural de São Paulo 2027',
     descricao:
       '24 horas ininterruptas de shows, teatro, circo, dança e literatura em dezenas de palcos gratuitos espalhados pela cidade.',
@@ -613,6 +629,7 @@ export const eventos = [
   },
   {
     id: 'flip-paraty-2027',
+    recorrencia: 'anual',
     titulo: '25ª Flip — Festa Literária Internacional de Paraty',
     descricao:
       'A mais influente festa literária do país reúne autores brasileiros e estrangeiros no centro histórico de Paraty.',
@@ -633,6 +650,7 @@ export const eventos = [
   },
   {
     id: 'festival-inverno-campos-do-jordao-2027',
+    recorrencia: 'anual',
     titulo: '57º Festival Internacional de Inverno de Campos do Jordão',
     descricao:
       'O maior festival de música clássica da América Latina, com dezenas de concertos gratuitos na Serra da Mantiqueira.',
@@ -653,6 +671,7 @@ export const eventos = [
   },
   {
     id: 'festival-parintins-2027',
+    recorrencia: 'anual',
     destaque: true,
     titulo: 'Festival Folclórico de Parintins 2027',
     descricao:
@@ -674,6 +693,7 @@ export const eventos = [
   },
   {
     id: 'festa-iemanja-salvador-2027',
+    recorrencia: 'anual',
     titulo: 'Festa de Iemanjá 2027',
     descricao:
       'No 2 de fevereiro, milhares de fiéis levam flores e presentes à Rainha do Mar na Colônia de Pescadores do Rio Vermelho.',
@@ -693,6 +713,7 @@ export const eventos = [
   },
   {
     id: 'lavagem-do-bonfim-2027',
+    recorrencia: 'anual',
     titulo: 'Lavagem do Senhor do Bonfim 2027',
     descricao:
       'Cortejo de 8 km com baianas de branco lavando as escadarias da Igreja do Bonfim, ao som de trios, afoxés e fanfarras.',
@@ -712,6 +733,7 @@ export const eventos = [
   },
   {
     id: 'carnaval-olinda-2027',
+    recorrencia: 'anual',
     titulo: 'Carnaval de Olinda 2027',
     descricao:
       'O Carnaval de rua mais tradicional do país: bonecos gigantes, frevo, maracatu e centenas de blocos gratuitos pelas ladeiras do Sítio Histórico.',
@@ -732,6 +754,7 @@ export const eventos = [
   },
   {
     id: 'forum-das-letras-ouro-preto-2026',
+    recorrencia: 'anual',
     titulo: 'Fórum das Letras de Ouro Preto 2026',
     descricao:
       'Festival literário nas igrejas, teatros e casarões barrocos de Ouro Preto, com debates, lançamentos e itinerários literários.',

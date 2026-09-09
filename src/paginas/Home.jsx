@@ -12,10 +12,12 @@ import { useCidadeAtual } from '../lib/cidade'
 import { eventosDoFimDeSemana } from '../lib/agenda'
 import { CATEGORIAS } from '../lib/formatacao'
 import { useMeta } from '../lib/meta'
+import { listarVistos } from '../lib/recentes'
 
 export default function Home() {
   const navigate = useNavigate()
   useMeta({ caminho: '/' })
+  const vistos = listarVistos().slice(0, 6)
   const [busca, setBusca] = useState('')
   const [cidadeSlug] = useCidadeAtual()
 
@@ -153,6 +155,18 @@ export default function Home() {
 
       {/* Carrossel de destaques */}
       {!carregando && carrossel.length >= 2 && <CarrosselDestaque eventos={carrossel} />}
+
+      {/* Vistos recentemente */}
+      {vistos.length >= 2 && (
+        <Secao className="container-pagina pt-12">
+          <h2 className="titulo-secao text-2xl">Vistos recentemente</h2>
+          <div className="mt-5 trilha-cards">
+            {vistos.map((evento, i) => (
+              <CardEvento key={evento.id} evento={evento} indice={i} />
+            ))}
+          </div>
+        </Secao>
+      )}
 
       {/* Próximos eventos */}
       <Secao className="container-pagina py-14">

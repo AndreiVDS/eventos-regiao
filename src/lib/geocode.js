@@ -40,6 +40,33 @@ async function consultar(params, timeoutMs) {
 const soDigitos = (s = '') => String(s).replace(/\D/g, '')
 
 /**
+ * Geocodificação reversa: a partir de lat/lng, devolve o bairro e a cidade.
+ * "Melhor esforço" — se falhar, retorna null e o app mostra só a cidade.
+ * @returns {Promise<{ bairro: string, cidade: string, uf: string } | null>}
+ */
+export async function reverseGeo({ lat, lng }, { timeoutMs = 6000 } = {}) {
+  if (lat == null || lng == null) return null
+  const ctrl = new AbortController()
+  const t = setTimeout(() => ctrl.abort(), timeoutMs)
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&lat=${lat}&lon=${lng}`
+    const r = await fetch(url, { signal: ctrl.signal, headers: { Accept: 'application/json' } })
+    if (!r.ok) return null
+    const d = await r.json()
+    const a = d.address || {}
+    const bairro = a.suburb || a.neighbourhood || a.quarter || a.city_district || a.borough || ''
+    const cidade = a.city || a.town || a.village || a.municipality || ''
+    const uf = (a['ISO3166-2-lvl4'] || '').split('-')[1] || a.state_code || ''
+    if (!bairro && !cidade) return null
+    return { bairro, cidade, uf }
+  } catch {
+    return null
+  } finally {
+    clearTimeout(t)
+  }
+}
+
+/**
  * @param {{ local?, endereco?, cep?, cidade_nome?, uf? }} evento
  * @returns {Promise<{ lat: number, lng: number } | null>}
  */

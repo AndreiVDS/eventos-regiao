@@ -132,6 +132,7 @@ const eventosJson = eventos.map((e, i) => {
     descricao_completa: e.descricao_completa ?? null,
     categoria: e.categoria,
     formato: e.formato ?? 'presencial',
+    recorrencia: e.recorrencia ?? null,
     destaque: e.destaque === true,
     cidade: e.cidade,
     cidade_nome: cidade.nome,
@@ -164,7 +165,7 @@ const q = (s) =>
 const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'lat', 'lng', 'imagem_url', 'site_prefeitura', 'aprovada']
 const colsEvento = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade', 'cidade_nome', 'uf',
-  'local', 'endereco', 'lat', 'lng', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto', 'destaque',
+  'local', 'endereco', 'lat', 'lng', 'recorrencia', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto', 'destaque',
   'imagem_url', 'link_oficial', 'organizador_nome', 'status', 'criado_em',
 ]
 let sql = '-- Seed gerado por scripts/gerar-dados.mjs — não edite à mão.\n'

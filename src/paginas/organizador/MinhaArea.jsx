@@ -92,6 +92,9 @@ export default function MinhaArea() {
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
                     <Selo tom={s.tom}>{s.rotulo}</Selo>
+                    {e.status === 'pendente' && (
+                      <span className="text-sm text-suave">aguardando a equipe revisar</span>
+                    )}
                     {confirmados > 0 && (
                       <span className="text-sm text-suave">
                         ✋ {confirmados} confirmado{confirmados === 1 ? '' : 's'}
@@ -106,6 +109,13 @@ export default function MinhaArea() {
                       </Link>
                     )}
                   </div>
+                  {e.status === 'recusado' && (
+                    <p className="mt-2 rounded-lg bg-red-100 p-2 text-sm text-red-800 dark:bg-red-950/60 dark:text-red-200">
+                      {e.motivo_recusa
+                        ? `Motivo: ${e.motivo_recusa}`
+                        : 'A equipe não aprovou este envio. Ajuste as informações e cadastre de novo.'}
+                    </p>
+                  )}
                 </div>
               </li>
             )

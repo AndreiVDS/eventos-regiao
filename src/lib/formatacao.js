@@ -19,6 +19,17 @@ export const FORMATOS = [
   { valor: 'hibrido', rotulo: 'Híbrido', emoji: '🔀' },
 ]
 
+export const RECORRENCIAS = [
+  { valor: '', rotulo: 'Acontece uma vez' },
+  { valor: 'semanal', rotulo: 'Toda semana', frase: 'Acontece toda semana' },
+  { valor: 'mensal', rotulo: 'Todo mês', frase: 'Acontece todo mês' },
+  { valor: 'anual', rotulo: 'Todo ano', frase: 'Acontece todo ano — esta é a edição desta agenda' },
+]
+
+export function rotuloRecorrencia(valor) {
+  return RECORRENCIAS.find((r) => r.valor === valor)?.frase || ''
+}
+
 export const ORDENACOES = [
   { valor: 'data', rotulo: 'Data (mais próximos)' },
   { valor: 'perto', rotulo: 'Mais perto de você', exigeLocalizacao: true },

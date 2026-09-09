@@ -1,5 +1,6 @@
 import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { cidadeMaisProxima, dentroDaCobertura } from './geo'
+import { reverseGeo } from './geocode'
 
 /**
  * "Cidade atual" — preferência global de localização do visitante.
@@ -29,7 +30,13 @@ function lerLoc() {
   try {
     const o = JSON.parse(localStorage.getItem(CHAVE_LOC) || 'null')
     if (o && Date.now() - o.em < TTL_MS) {
-      return { lat: o.lat, lng: o.lng, precisao: o.precisao ?? null, raioKm: o.raioKm ?? null }
+      return {
+        lat: o.lat,
+        lng: o.lng,
+        precisao: o.precisao ?? null,
+        raioKm: o.raioKm ?? null,
+        bairro: o.bairro ?? null,
+      }
     }
   } catch {
     /* ignore */
@@ -75,10 +82,23 @@ export function CidadeProvider({ children }) {
         lng,
         precisao,
         raioKm: raioKm !== undefined ? raioKm : (atual?.raioKm ?? null),
+        bairro: null,
       }
       gravarLoc(nova)
       return nova
     })
+    // descobre o bairro em segundo plano (não bloqueia nada)
+    reverseGeo({ lat, lng })
+      .then((r) => {
+        if (!r?.bairro) return
+        setLoc((atual) => {
+          if (!atual || atual.lat !== lat || atual.lng !== lng) return atual
+          const nova = { ...atual, bairro: r.bairro }
+          gravarLoc(nova)
+          return nova
+        })
+      })
+      .catch(() => {})
   }, [])
 
   const definirRaio = useCallback((raioKm) => {
@@ -110,6 +130,7 @@ export function CidadeProvider({ children }) {
       coords,
       precisao: loc?.precisao ?? null,
       raioKm: loc?.raioKm ?? null,
+      bairro: loc?.bairro ?? null,
       definirCoords,
       definirRaio,
     }),

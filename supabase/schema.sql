@@ -35,6 +35,13 @@ alter table public.eventos add column if not exists formato text not null defaul
 alter table public.eventos add column if not exists destaque boolean not null default false;
 alter table public.eventos add column if not exists lat double precision;
 alter table public.eventos add column if not exists lng double precision;
+-- migração incremental para bases já existentes (bases novas já têm no create):
+do $$ begin
+  if to_regclass('public.eventos') is not null then
+    alter table public.eventos add column if not exists recorrencia text;
+    alter table public.eventos add column if not exists motivo_recusa text;
+  end if;
+end $$;
 
 -- ---------- Tabela: eventos ----------
 -- id é texto (slug legível na URL, ex.: "rock-in-rio-2026"); o app gera
@@ -56,6 +63,8 @@ create table if not exists public.eventos (
   endereco            text,
   lat                 double precision,   -- coordenadas do LOCAL do evento
   lng                 double precision,   -- (para a distância "perto de mim")
+  recorrencia         text check (recorrencia is null or recorrencia in ('semanal','mensal','anual')),
+  motivo_recusa       text,
   data_inicio         date not null,
   data_fim            date,
   horario             text,
@@ -176,6 +185,25 @@ drop policy if exists "presencas: desmarca a própria" on public.presencas;
 create policy "presencas: desmarca a própria"
   on public.presencas for delete to authenticated
   using (usuario_id = auth.uid());
+
+-- ---------- Tabela: contatos (mensagens da página /contato) ----------
+create table if not exists public.contatos (
+  id         uuid primary key default gen_random_uuid(),
+  nome       text not null,
+  email      text not null,
+  assunto    text,
+  mensagem   text not null,
+  criado_em  timestamptz not null default now()
+);
+alter table public.contatos enable row level security;
+
+drop policy if exists "contatos: qualquer um envia" on public.contatos;
+create policy "contatos: qualquer um envia"
+  on public.contatos for insert to anon, authenticated with check (true);
+
+drop policy if exists "contatos: equipe lê" on public.contatos;
+create policy "contatos: equipe lê"
+  on public.contatos for select to authenticated using (public.is_equipe());
 
 -- =====================================================================
 --  View pública sem dados de contato (recomendada para leitura anônima)

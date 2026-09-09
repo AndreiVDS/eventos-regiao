@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { listarCidades, CIDADE_NOVA } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
-import { CATEGORIAS, ENTRADAS, FORMATOS } from '../lib/formatacao'
+import { CATEGORIAS, ENTRADAS, FORMATOS, RECORRENCIAS } from '../lib/formatacao'
 import { buscarCep, formatarCep } from '../lib/cep'
 import { enviarImagem, validarImagem, DICA_IMAGEM } from '../lib/upload'
 import { UFS, municipiosDoEstado } from '../lib/municipios'
@@ -12,6 +12,7 @@ export const EVENTO_VAZIO = {
   descricao_completa: '',
   categoria: '',
   formato: 'presencial',
+  recorrencia: '',
   cidade: '',
   cidade_nova_nome: '',
   cidade_nova_uf: '',
@@ -187,6 +188,14 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
         <select id="formato" className="campo" value={form.formato || 'presencial'}
           onChange={(e) => campo('formato', e.target.value)}>
           {FORMATOS.map((f) => <option key={f.valor} value={f.valor}>{f.rotulo}</option>)}
+        </select>
+      </Grupo>
+
+      <Grupo rotulo="Com que frequência acontece?" htmlFor="recorrencia"
+        dica="Se for um evento fixo (toda semana, todo ano...), a plataforma mostra isso na página.">
+        <select id="recorrencia" className="campo" value={form.recorrencia || ''}
+          onChange={(e) => campo('recorrencia', e.target.value)}>
+          {RECORRENCIAS.map((r) => <option key={r.valor} value={r.valor}>{r.rotulo}</option>)}
         </select>
       </Grupo>
 
@@ -384,8 +393,10 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
           <input type="checkbox" className="mt-1 h-5 w-5" checked={form.aceite}
             onChange={(e) => campo('aceite', e.target.checked)} aria-invalid={inval('aceite')} />
           <span>
-            Confirmo que as informações são verdadeiras e autorizo a divulgação do evento na
-            plataforma. Os dados de contato serão usados apenas pela equipe organizadora (conforme a LGPD).
+            Confirmo que as informações são verdadeiras, que tenho direito de uso das imagens
+            enviadas e autorizo a divulgação do evento na plataforma. Li e aceito os{' '}
+            <a href="/termos" target="_blank" className="underline">Termos de uso</a> e a{' '}
+            <a href="/privacidade" target="_blank" className="underline">Política de Privacidade</a>.
           </span>
         </label>
         {erros.aceite && <p className="mt-1 text-sm text-red-700 dark:text-red-400" role="alert">{erros.aceite}</p>}

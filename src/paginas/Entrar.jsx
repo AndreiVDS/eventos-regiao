@@ -6,12 +6,14 @@ export default function Entrar() {
   const navigate = useNavigate()
   const local = useLocation()
   const destino = local.state?.de || '/organizador'
-  const { entrar, cadastrar, entrarDemo, modoDemo, autenticado, ehEquipe } = useAuth()
+  const { entrar, cadastrar, entrarDemo, pedirRedefinicao, modoDemo, autenticado, ehEquipe } =
+    useAuth()
 
-  const [modo, setModo] = useState('entrar') // 'entrar' | 'cadastrar'
+  const [modo, setModo] = useState('entrar') // 'entrar' | 'cadastrar' | 'recuperar'
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
+  const [aviso, setAviso] = useState('')
   const [ocupado, setOcupado] = useState(false)
 
   if (autenticado) {
@@ -21,29 +23,43 @@ export default function Entrar() {
   async function enviar(e) {
     e.preventDefault()
     setErro('')
+    setAviso('')
     setOcupado(true)
     try {
-      if (modo === 'entrar') await entrar(email, senha)
-      else await cadastrar(email, senha)
-      navigate(destino, { replace: true })
+      if (modo === 'recuperar') {
+        await pedirRedefinicao(email)
+        setAviso('Se este e-mail tiver conta, você vai receber um link para criar uma nova senha.')
+      } else if (modo === 'entrar') {
+        await entrar(email, senha)
+        navigate(destino, { replace: true })
+      } else {
+        await cadastrar(email, senha)
+        navigate(destino, { replace: true })
+      }
     } catch (err) {
       setErro(
         err?.message?.includes('already registered')
           ? 'Este e-mail já tem conta. Use "Entrar".'
-          : 'Não foi possível. Verifique e-mail e senha (mínimo 6 caracteres).',
+          : err?.message?.includes('conectado')
+            ? err.message
+            : 'Não foi possível. Verifique e-mail e senha (mínimo 6 caracteres).',
       )
     } finally {
       setOcupado(false)
     }
   }
 
+  const titulos = { entrar: 'Entrar', cadastrar: 'Criar conta', recuperar: 'Recuperar senha' }
+
   return (
     <div className="container-pagina flex justify-center py-16">
       <div className="w-full max-w-sm">
         <div className="rounded-xl bg-superficie p-8 shadow-sm ring-1 ring-borda/10">
-          <h1 className="text-3xl">{modo === 'entrar' ? 'Entrar' : 'Criar conta'}</h1>
+          <h1 className="text-3xl">{titulos[modo]}</h1>
           <p className="mt-1 text-sm text-suave">
-            Para organizadores acompanharem seus eventos e para a equipe moderar a plataforma.
+            {modo === 'recuperar'
+              ? 'Digite seu e-mail e enviaremos um link para criar uma nova senha.'
+              : 'Para organizadores acompanharem seus eventos e para a equipe moderar a plataforma.'}
           </p>
 
           {modoDemo && (
@@ -79,23 +95,55 @@ export default function Entrar() {
               <input id="email" type="email" className="campo" value={email} required
                 onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <div>
-              <label className="rotulo" htmlFor="senha">Senha</label>
-              <input id="senha" type="password" className="campo" value={senha} required minLength={6}
-                onChange={(e) => setSenha(e.target.value)} />
-            </div>
+            {modo !== 'recuperar' && (
+              <div>
+                <label className="rotulo" htmlFor="senha">Senha</label>
+                <input id="senha" type="password" className="campo" value={senha} required minLength={6}
+                  onChange={(e) => setSenha(e.target.value)} />
+              </div>
+            )}
             {erro && <p className="text-sm text-red-700 dark:text-red-400" role="alert">{erro}</p>}
+            {aviso && <p className="rounded-lg bg-destaque/15 p-2 text-sm text-texto" role="status">{aviso}</p>}
             <button type="submit" className="btn-destaque w-full" disabled={ocupado}>
-              {ocupado ? 'Aguarde…' : modo === 'entrar' ? 'Entrar' : 'Criar conta'}
+              {ocupado
+                ? 'Aguarde…'
+                : modo === 'entrar'
+                  ? 'Entrar'
+                  : modo === 'cadastrar'
+                    ? 'Criar conta'
+                    : 'Enviar link'}
             </button>
           </form>
 
-          <button
-            className="mt-4 text-sm text-texto underline"
-            onClick={() => setModo((m) => (m === 'entrar' ? 'cadastrar' : 'entrar'))}
-          >
-            {modo === 'entrar' ? 'Não tem conta? Criar agora' : 'Já tenho conta'}
-          </button>
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <button
+              className="text-texto underline"
+              onClick={() => {
+                setErro('')
+                setAviso('')
+                setModo((m) => (m === 'cadastrar' ? 'entrar' : 'cadastrar'))
+              }}
+            >
+              {modo === 'cadastrar' ? 'Já tenho conta' : 'Não tem conta? Criar agora'}
+            </button>
+            {modo !== 'recuperar' && !modoDemo && (
+              <button
+                className="text-suave underline"
+                onClick={() => {
+                  setErro('')
+                  setAviso('')
+                  setModo('recuperar')
+                }}
+              >
+                Esqueci minha senha
+              </button>
+            )}
+            {modo === 'recuperar' && (
+              <button className="text-suave underline" onClick={() => setModo('entrar')}>
+                Voltar
+              </button>
+            )}
+          </div>
         </div>
 
         <p className="mt-4 text-center text-sm text-suave">

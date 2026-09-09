@@ -19,12 +19,16 @@ import BannerConsentimento from './componentes/BannerConsentimento'
 // Fluxos com login carregam sob demanda — visitantes não baixam esse código.
 const DivulgueSeuEvento = lazy(() => import('./paginas/DivulgueSeuEvento'))
 const Entrar = lazy(() => import('./paginas/Entrar'))
+const RedefinirSenha = lazy(() => import('./paginas/RedefinirSenha'))
 const MinhaArea = lazy(() => import('./paginas/organizador/MinhaArea'))
 const NovoEvento = lazy(() => import('./paginas/organizador/NovoEvento'))
 const Painel = lazy(() => import('./paginas/painel/Painel'))
 const Moderacao = lazy(() => import('./paginas/painel/Moderacao'))
 const Destaques = lazy(() => import('./paginas/painel/Destaques'))
 const NovaCidade = lazy(() => import('./paginas/painel/NovaCidade'))
+const Mensagens = lazy(() => import('./paginas/painel/Mensagens'))
+const Termos = lazy(() => import('./paginas/Termos'))
+const Contato = lazy(() => import('./paginas/Contato'))
 
 function RolarAoTopo() {
   const { pathname } = useLocation()
@@ -56,7 +60,10 @@ export default function App() {
               <Route path="/divulgue" element={<DivulgueSeuEvento />} />
               <Route path="/sobre" element={<Sobre />} />
               <Route path="/privacidade" element={<Privacidade />} />
+              <Route path="/termos" element={<Termos />} />
+              <Route path="/contato" element={<Contato />} />
               <Route path="/entrar" element={<Entrar />} />
+              <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
               <Route
                 path="/organizador"
@@ -104,6 +111,14 @@ export default function App() {
                 element={
                   <RotaProtegida exige="equipe">
                     <NovaCidade />
+                  </RotaProtegida>
+                }
+              />
+              <Route
+                path="/painel/mensagens"
+                element={
+                  <RotaProtegida exige="equipe">
+                    <Mensagens />
                   </RotaProtegida>
                 }
               />

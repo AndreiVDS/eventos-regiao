@@ -21,11 +21,16 @@ export default function Moderacao() {
 
   useEffect(() => carregar(), [carregar])
 
-  async function decidir(id, status) {
+  const [recusandoId, setRecusandoId] = useState(null)
+  const [motivo, setMotivo] = useState('')
+
+  async function decidir(id, status, motivoTexto = '') {
     setProcessando(id)
     try {
-      await moderarEvento(id, status)
+      await moderarEvento(id, status, motivoTexto)
       setPendentes((lista) => lista.filter((e) => e.id !== id))
+      setRecusandoId(null)
+      setMotivo('')
     } finally {
       setProcessando(null)
     }
@@ -88,22 +93,59 @@ export default function Moderacao() {
                       Organização: {e.organizador_nome} — contato:{' '}
                       {e.organizador_contato || e.criado_por_email || '—'}
                     </p>
-                    <div className="mt-4 flex gap-3">
-                      <button
-                        className="btn-destaque !py-2 text-sm"
-                        disabled={processando === e.id}
-                        onClick={() => decidir(e.id, 'aprovado')}
-                      >
-                        Aprovar
-                      </button>
-                      <button
-                        className="btn-contorno !py-2 text-sm"
-                        disabled={processando === e.id}
-                        onClick={() => decidir(e.id, 'recusado')}
-                      >
-                        Recusar
-                      </button>
-                    </div>
+                    {recusandoId === e.id ? (
+                      <div className="mt-4 rounded-lg bg-texto/5 p-3">
+                        <label className="rotulo text-sm" htmlFor={`motivo-${e.id}`}>
+                          Motivo da recusa <span className="text-suave">(opcional, o organizador vê)</span>
+                        </label>
+                        <textarea
+                          id={`motivo-${e.id}`}
+                          rows="2"
+                          className="campo text-sm"
+                          value={motivo}
+                          onChange={(ev) => setMotivo(ev.target.value)}
+                          placeholder="Ex.: faltou o endereço completo; imagem com direitos de terceiros…"
+                        />
+                        <div className="mt-2 flex gap-3">
+                          <button
+                            className="btn-contorno !py-2 text-sm"
+                            disabled={processando === e.id}
+                            onClick={() => decidir(e.id, 'recusado', motivo)}
+                          >
+                            Confirmar recusa
+                          </button>
+                          <button
+                            className="btn-fantasma !py-2 text-sm"
+                            onClick={() => {
+                              setRecusandoId(null)
+                              setMotivo('')
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-4 flex gap-3">
+                        <button
+                          className="btn-destaque !py-2 text-sm"
+                          disabled={processando === e.id}
+                          onClick={() => decidir(e.id, 'aprovado')}
+                        >
+                          Aprovar
+                        </button>
+                        <button
+                          className="btn-contorno !py-2 text-sm"
+                          disabled={processando === e.id}
+                          onClick={() => {
+                            setRecusandoId(e.id)
+                            setMotivo('')
+                          }}
+                        >
+                          Recusar
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}
