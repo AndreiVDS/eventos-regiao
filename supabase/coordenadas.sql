@@ -1,0 +1,17 @@
+-- Preenche lat/lng das cidades (roda uma vez no SQL Editor do Supabase).
+update public.cidades set lat = -26.4851, lng = -49.0666 where slug = 'jaragua-do-sul';
+update public.cidades set lat = -26.9194, lng = -49.0661 where slug = 'blumenau';
+update public.cidades set lat = -27.5949, lng = -48.5482 where slug = 'florianopolis';
+update public.cidades set lat = -26.3045, lng = -48.8487 where slug = 'joinville';
+update public.cidades set lat = -25.4284, lng = -49.2733 where slug = 'curitiba';
+update public.cidades set lat = -19.4683, lng = -42.5369 where slug = 'ipatinga';
+update public.cidades set lat = -30.0346, lng = -51.2177 where slug = 'porto-alegre';
+update public.cidades set lat = -29.3747, lng = -50.876 where slug = 'gramado';
+update public.cidades set lat = -22.9068, lng = -43.1729 where slug = 'rio-de-janeiro';
+update public.cidades set lat = -23.5505, lng = -46.6333 where slug = 'sao-paulo';
+update public.cidades set lat = -23.2178, lng = -44.7131 where slug = 'paraty';
+update public.cidades set lat = -22.7392, lng = -45.5915 where slug = 'campos-do-jordao';
+update public.cidades set lat = -12.9777, lng = -38.5016 where slug = 'salvador';
+update public.cidades set lat = -8.0089, lng = -34.8553 where slug = 'olinda';
+update public.cidades set lat = -2.6283, lng = -56.7358 where slug = 'parintins';
+update public.cidades set lat = -20.3856, lng = -43.5035 where slug = 'ouro-preto';
