@@ -22,11 +22,15 @@ create table if not exists public.cidades (
   lat             double precision,
   lng             double precision,
   imagem_url      text,
-  site_prefeitura text
+  site_prefeitura text,
+  -- false = cidade sugerida por um organizador, ainda não publicada.
+  -- Vira true quando a equipe aprova (o evento que a trouxe, ou pelo painel).
+  aprovada        boolean not null default true
 );
 -- Se a tabela já existia sem estas colunas:
 alter table public.cidades add column if not exists lat double precision;
 alter table public.cidades add column if not exists lng double precision;
+alter table public.cidades add column if not exists aprovada boolean not null default true;
 alter table public.eventos add column if not exists formato text not null default 'presencial';
 alter table public.eventos add column if not exists destaque boolean not null default false;
 alter table public.eventos add column if not exists lat double precision;
@@ -97,15 +101,21 @@ alter table public.cidades enable row level security;
 alter table public.eventos enable row level security;
 alter table public.equipe  enable row level security;
 
--- cidades: leitura para todos; escrita só para a equipe
+-- cidades: leitura pública só das aprovadas (a equipe vê todas)
 drop policy if exists "cidades: leitura pública" on public.cidades;
 create policy "cidades: leitura pública"
-  on public.cidades for select using (true);
+  on public.cidades for select using (aprovada or public.is_equipe());
 
 drop policy if exists "cidades: equipe gerencia" on public.cidades;
 create policy "cidades: equipe gerencia"
   on public.cidades for all to authenticated
   using (public.is_equipe()) with check (public.is_equipe());
+
+-- um organizador logado pode SUGERIR uma cidade nova (sempre como não aprovada)
+drop policy if exists "cidades: organizador sugere" on public.cidades;
+create policy "cidades: organizador sugere"
+  on public.cidades for insert to authenticated
+  with check (aprovada = false);
 
 -- eventos: leitura
 --   * qualquer um vê os APROVADOS

@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
-import { listarCidades } from '../lib/api'
+import { listarCidades, CIDADE_NOVA } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { CATEGORIAS, ENTRADAS, FORMATOS } from '../lib/formatacao'
 import { buscarCep, formatarCep } from '../lib/cep'
 import { enviarImagem, validarImagem, DICA_IMAGEM } from '../lib/upload'
+
+const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
 export const EVENTO_VAZIO = {
   titulo: '',
@@ -12,6 +14,8 @@ export const EVENTO_VAZIO = {
   categoria: '',
   formato: 'presencial',
   cidade: '',
+  cidade_nova_nome: '',
+  cidade_nova_uf: '',
   cep: '',
   local: '',
   endereco: '',
@@ -85,6 +89,10 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
     if (form.descricao.trim().length < 20) e.descricao = 'Descreva com pelo menos 20 caracteres.'
     if (!form.categoria) e.categoria = 'Escolha uma categoria.'
     if (!form.cidade) e.cidade = 'Escolha a cidade.'
+    if (form.cidade === CIDADE_NOVA) {
+      if (!form.cidade_nova_nome.trim()) e.cidade_nova_nome = 'Informe o nome da cidade.'
+      if (!form.cidade_nova_uf) e.cidade_nova_uf = 'Escolha o estado.'
+    }
     if (!form.local.trim()) e.local = 'Informe o local.'
     if (!form.data_inicio) e.data_inicio = 'Informe a data de início.'
     if (form.data_fim && form.data_fim < form.data_inicio)
@@ -172,8 +180,28 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
           onChange={(e) => campo('cidade', e.target.value)} aria-invalid={inval('cidade')}>
           <option value="">Selecione…</option>
           {(cidades || []).map((c) => <option key={c.slug} value={c.slug}>{c.nome}/{c.uf}</option>)}
+          <option value={CIDADE_NOVA}>➕ Minha cidade não está na lista</option>
         </select>
       </Grupo>
+
+      {form.cidade === CIDADE_NOVA && (
+        <>
+          <Grupo rotulo="Nome da cidade" htmlFor="cidade_nova_nome" erro={erros.cidade_nova_nome}>
+            <input id="cidade_nova_nome" className="campo" value={form.cidade_nova_nome}
+              onChange={(e) => campo('cidade_nova_nome', e.target.value)} aria-invalid={inval('cidade_nova_nome')} />
+          </Grupo>
+          <Grupo rotulo="Estado (UF)" htmlFor="cidade_nova_uf" erro={erros.cidade_nova_uf}>
+            <select id="cidade_nova_uf" className="campo" value={form.cidade_nova_uf}
+              onChange={(e) => campo('cidade_nova_uf', e.target.value)} aria-invalid={inval('cidade_nova_uf')}>
+              <option value="">Selecione…</option>
+              {UFS.map((u) => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </Grupo>
+          <p className="sm:col-span-2 -mt-2 text-xs text-suave">
+            A cidade nova entra junto com o evento assim que a equipe aprovar.
+          </p>
+        </>
+      )}
 
       <Grupo rotulo="Local (nome do espaço)" htmlFor="local" erro={erros.local}>
         <input id="local" className="campo" value={form.local}

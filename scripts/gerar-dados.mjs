@@ -41,6 +41,11 @@ function fundoCidade(c) {
 for (const c of cidades) {
   writeFileSync(p('public/img/cidades', `${c.slug}.svg`), fundoCidade(c).trim())
 }
+// fundo genérico para cidades cadastradas depois (sem cor própria)
+writeFileSync(
+  p('public/img/cidades/_padrao.svg'),
+  fundoCidade({ cor: ['#334155', '#0f172a'] }).trim(),
+)
 
 // ---------- 2. cidades.json ----------
 const cidadesJson = cidades.map((c) => ({
@@ -53,6 +58,7 @@ const cidadesJson = cidades.map((c) => ({
   lng: c.lng ?? null,
   imagem_url: `/img/cidades/${c.slug}.svg`,
   site_prefeitura: c.site_prefeitura,
+  aprovada: true,
 }))
 writeFileSync(p('public/dados/cidades.json'), JSON.stringify(cidadesJson, null, 2) + '\n')
 
@@ -155,7 +161,7 @@ const q = (s) =>
     : typeof s === 'number' || typeof s === 'boolean'
       ? String(s)
       : `'${String(s).replace(/'/g, "''")}'`
-const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'lat', 'lng', 'imagem_url', 'site_prefeitura']
+const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'lat', 'lng', 'imagem_url', 'site_prefeitura', 'aprovada']
 const colsEvento = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade', 'cidade_nome', 'uf',
   'local', 'endereco', 'lat', 'lng', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto', 'destaque',
@@ -166,7 +172,7 @@ sql += '-- Dados de exemplo (eventos reais e recorrentes; datas ilustrativas).\n
 sql += `insert into public.cidades (${colsCidade.join(', ')}) values\n`
 sql += cidadesJson.map((c) => '  (' + colsCidade.map((k) => q(c[k])).join(', ') + ')').join(',\n')
 // atualiza coordenadas em bases que já tinham as cidades sem lat/lng
-sql += '\non conflict (slug) do update set lat = excluded.lat, lng = excluded.lng;\n\n'
+sql += '\non conflict (slug) do update set lat = excluded.lat, lng = excluded.lng, aprovada = true;\n\n'
 sql += `insert into public.eventos (${colsEvento.join(', ')}) values\n`
 sql += eventosJson.map((e) => '  (' + colsEvento.map((k) => q(e[k])).join(', ') + ')').join(',\n')
 // atualiza as coordenadas do local em bases que já tinham os eventos

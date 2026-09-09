@@ -28,11 +28,15 @@ create table if not exists public.cidades (
   lat             double precision,
   lng             double precision,
   imagem_url      text,
-  site_prefeitura text
+  site_prefeitura text,
+  -- false = cidade sugerida por um organizador, ainda não publicada.
+  -- Vira true quando a equipe aprova (o evento que a trouxe, ou pelo painel).
+  aprovada        boolean not null default true
 );
 -- Se a tabela já existia sem estas colunas:
 alter table public.cidades add column if not exists lat double precision;
 alter table public.cidades add column if not exists lng double precision;
+alter table public.cidades add column if not exists aprovada boolean not null default true;
 alter table public.eventos add column if not exists formato text not null default 'presencial';
 alter table public.eventos add column if not exists destaque boolean not null default false;
 alter table public.eventos add column if not exists lat double precision;
@@ -103,15 +107,21 @@ alter table public.cidades enable row level security;
 alter table public.eventos enable row level security;
 alter table public.equipe  enable row level security;
 
--- cidades: leitura para todos; escrita só para a equipe
+-- cidades: leitura pública só das aprovadas (a equipe vê todas)
 drop policy if exists "cidades: leitura pública" on public.cidades;
 create policy "cidades: leitura pública"
-  on public.cidades for select using (true);
+  on public.cidades for select using (aprovada or public.is_equipe());
 
 drop policy if exists "cidades: equipe gerencia" on public.cidades;
 create policy "cidades: equipe gerencia"
   on public.cidades for all to authenticated
   using (public.is_equipe()) with check (public.is_equipe());
+
+-- um organizador logado pode SUGERIR uma cidade nova (sempre como não aprovada)
+drop policy if exists "cidades: organizador sugere" on public.cidades;
+create policy "cidades: organizador sugere"
+  on public.cidades for insert to authenticated
+  with check (aprovada = false);
 
 -- eventos: leitura
 --   * qualquer um vê os APROVADOS
@@ -199,24 +209,24 @@ create or replace view public.eventos_publicos as
 -- Seed gerado por scripts/gerar-dados.mjs — não edite à mão.
 -- Dados de exemplo (eventos reais e recorrentes; datas ilustrativas).
 
-insert into public.cidades (slug, nome, uf, regiao, descricao, lat, lng, imagem_url, site_prefeitura) values
-  ('jaragua-do-sul', 'Jaraguá do Sul', 'SC', 'Norte de Santa Catarina', 'Cidade de colonização alemã e italiana no Vale do Itapocu, conhecida pelo parque fabril, pelo empreendedorismo e por festas como a Schützenfest, que celebra o tiro esportivo, a dança e a gastronomia germânica.', -26.4851, -49.0666, '/img/cidades/jaragua-do-sul.svg', 'https://www.jaraguadosul.sc.gov.br'),
-  ('blumenau', 'Blumenau', 'SC', 'Vale do Itajaí', 'Fundada por imigrantes alemães em 1850, mantém viva a arquitetura enxaimel, a produção de cervejas artesanais e a Oktoberfest, uma das maiores festas populares do país.', -26.9194, -49.0661, '/img/cidades/blumenau.svg', 'https://www.blumenau.sc.gov.br'),
-  ('florianopolis', 'Florianópolis', 'SC', 'Grande Florianópolis', 'Capital de Santa Catarina, a Ilha da Magia reúne cultura açoriana, praias, o boi de mamão, a renda de bilro e uma cena vibrante de música, tecnologia e economia criativa.', -27.5949, -48.5482, '/img/cidades/florianopolis.svg', 'https://www.pmf.sc.gov.br'),
-  ('joinville', 'Joinville', 'SC', 'Norte de Santa Catarina', 'Maior cidade catarinense, a Cidade das Flores e das Bicicletas é polo industrial e sede do Festival de Dança de Joinville, o maior do mundo em número de participantes.', -26.3045, -48.8487, '/img/cidades/joinville.svg', 'https://www.joinville.sc.gov.br'),
-  ('curitiba', 'Curitiba', 'PR', 'Região Metropolitana de Curitiba', 'Capital do Paraná, referência em planejamento urbano, parques e teatros, com uma agenda cultural intensa que mistura tradições de imigrantes europeus e a cultura paranaense.', -25.4284, -49.2733, '/img/cidades/curitiba.svg', 'https://www.curitiba.pr.gov.br'),
-  ('ipatinga', 'Ipatinga', 'MG', 'Vale do Aço — Minas Gerais', 'Coração do Vale do Aço mineiro, cresceu ao redor da siderurgia e hoje se destaca pelo Parque Ipanema, por feiras de economia criativa e por uma agenda que valoriza a identidade do interior de Minas.', -19.4683, -42.5369, '/img/cidades/ipatinga.svg', 'https://www.ipatinga.mg.gov.br'),
-  ('porto-alegre', 'Porto Alegre', 'RS', 'Região Metropolitana de Porto Alegre', 'Capital gaúcha às margens do Guaíba, terra do chimarrão e do tradicionalismo, com forte cena literária, o Acampamento Farroupilha e uma das feiras de livro mais antigas do continente.', -30.0346, -51.2177, '/img/cidades/porto-alegre.svg', 'https://prefeitura.poa.br'),
-  ('gramado', 'Gramado', 'RS', 'Serra Gaúcha', 'Na Serra Gaúcha, de arquitetura europeia e clima frio, é destino de turismo o ano todo — do Natal Luz, o mais longo do mundo, ao Festival de Cinema.', -29.3747, -50.876, '/img/cidades/gramado.svg', 'https://www.gramado.rs.gov.br'),
-  ('rio-de-janeiro', 'Rio de Janeiro', 'RJ', 'Região Metropolitana do Rio de Janeiro', 'A Cidade Maravilhosa reúne praias, samba, o maior Réveillon do mundo em Copacabana, o Carnaval e uma agenda de grandes festivais de música e esporte.', -22.9068, -43.1729, '/img/cidades/rio-de-janeiro.svg', 'https://prefeitura.rio'),
-  ('sao-paulo', 'São Paulo', 'SP', 'Região Metropolitana de São Paulo', 'A maior metrópole do país concentra teatros, museus, a Virada Cultural, a Corrida de São Silvestre e uma diversidade cultural que reflete migrações de todo o mundo.', -23.5505, -46.6333, '/img/cidades/sao-paulo.svg', 'https://www.capital.sp.gov.br'),
-  ('paraty', 'Paraty', 'RJ', 'Costa Verde — Rio de Janeiro', 'Cidade histórica tombada, de ruas de pedra e casario colonial entre a serra e o mar, sede da Flip — Festa Literária Internacional de Paraty.', -23.2178, -44.7131, '/img/cidades/paraty.svg', 'https://www.paraty.rj.gov.br'),
-  ('campos-do-jordao', 'Campos do Jordão', 'SP', 'Serra da Mantiqueira — São Paulo', 'A "Suíça brasileira" na Serra da Mantiqueira, conhecida pelo inverno rigoroso e por sediar o Festival Internacional de Inverno, maior evento de música clássica do país.', -22.7392, -45.5915, '/img/cidades/campos-do-jordao.svg', 'https://www.camposdojordao.sp.gov.br'),
-  ('salvador', 'Salvador', 'BA', 'Região Metropolitana de Salvador', 'Primeira capital do Brasil, centro da cultura afro-brasileira: Pelourinho, capoeira, candomblé, a Festa de Iemanjá, a Lavagem do Bonfim e um dos maiores Carnavais do mundo.', -12.9777, -38.5016, '/img/cidades/salvador.svg', 'https://www.salvador.ba.gov.br'),
-  ('olinda', 'Olinda', 'PE', 'Região Metropolitana do Recife', 'Patrimônio Mundial pela Unesco, cidade do frevo e do maracatu, famosa pelos bonecos gigantes e por um Carnaval de rua tradicional e gratuito.', -8.0089, -34.8553, '/img/cidades/olinda.svg', 'https://www.olinda.pe.gov.br'),
-  ('parintins', 'Parintins', 'AM', 'Baixo Amazonas', 'Ilha no meio do Rio Amazonas, palco do Festival Folclórico de Parintins, em que os bois-bumbás Garantido e Caprichoso encenam lendas indígenas e ribeirinhas para um público de milhares no Bumbódromo.', -2.6283, -56.7358, '/img/cidades/parintins.svg', 'https://www.parintins.am.gov.br'),
-  ('ouro-preto', 'Ouro Preto', 'MG', 'Região Central de Minas Gerais', 'Primeiro sítio brasileiro reconhecido como Patrimônio Mundial, joia do barroco mineiro, das igrejas de Aleijadinho, da Semana Santa e de festivais de inverno e de literatura.', -20.3856, -43.5035, '/img/cidades/ouro-preto.svg', 'https://www.ouropreto.mg.gov.br')
-on conflict (slug) do update set lat = excluded.lat, lng = excluded.lng;
+insert into public.cidades (slug, nome, uf, regiao, descricao, lat, lng, imagem_url, site_prefeitura, aprovada) values
+  ('jaragua-do-sul', 'Jaraguá do Sul', 'SC', 'Norte de Santa Catarina', 'Cidade de colonização alemã e italiana no Vale do Itapocu, conhecida pelo parque fabril, pelo empreendedorismo e por festas como a Schützenfest, que celebra o tiro esportivo, a dança e a gastronomia germânica.', -26.4851, -49.0666, '/img/cidades/jaragua-do-sul.svg', 'https://www.jaraguadosul.sc.gov.br', true),
+  ('blumenau', 'Blumenau', 'SC', 'Vale do Itajaí', 'Fundada por imigrantes alemães em 1850, mantém viva a arquitetura enxaimel, a produção de cervejas artesanais e a Oktoberfest, uma das maiores festas populares do país.', -26.9194, -49.0661, '/img/cidades/blumenau.svg', 'https://www.blumenau.sc.gov.br', true),
+  ('florianopolis', 'Florianópolis', 'SC', 'Grande Florianópolis', 'Capital de Santa Catarina, a Ilha da Magia reúne cultura açoriana, praias, o boi de mamão, a renda de bilro e uma cena vibrante de música, tecnologia e economia criativa.', -27.5949, -48.5482, '/img/cidades/florianopolis.svg', 'https://www.pmf.sc.gov.br', true),
+  ('joinville', 'Joinville', 'SC', 'Norte de Santa Catarina', 'Maior cidade catarinense, a Cidade das Flores e das Bicicletas é polo industrial e sede do Festival de Dança de Joinville, o maior do mundo em número de participantes.', -26.3045, -48.8487, '/img/cidades/joinville.svg', 'https://www.joinville.sc.gov.br', true),
+  ('curitiba', 'Curitiba', 'PR', 'Região Metropolitana de Curitiba', 'Capital do Paraná, referência em planejamento urbano, parques e teatros, com uma agenda cultural intensa que mistura tradições de imigrantes europeus e a cultura paranaense.', -25.4284, -49.2733, '/img/cidades/curitiba.svg', 'https://www.curitiba.pr.gov.br', true),
+  ('ipatinga', 'Ipatinga', 'MG', 'Vale do Aço — Minas Gerais', 'Coração do Vale do Aço mineiro, cresceu ao redor da siderurgia e hoje se destaca pelo Parque Ipanema, por feiras de economia criativa e por uma agenda que valoriza a identidade do interior de Minas.', -19.4683, -42.5369, '/img/cidades/ipatinga.svg', 'https://www.ipatinga.mg.gov.br', true),
+  ('porto-alegre', 'Porto Alegre', 'RS', 'Região Metropolitana de Porto Alegre', 'Capital gaúcha às margens do Guaíba, terra do chimarrão e do tradicionalismo, com forte cena literária, o Acampamento Farroupilha e uma das feiras de livro mais antigas do continente.', -30.0346, -51.2177, '/img/cidades/porto-alegre.svg', 'https://prefeitura.poa.br', true),
+  ('gramado', 'Gramado', 'RS', 'Serra Gaúcha', 'Na Serra Gaúcha, de arquitetura europeia e clima frio, é destino de turismo o ano todo — do Natal Luz, o mais longo do mundo, ao Festival de Cinema.', -29.3747, -50.876, '/img/cidades/gramado.svg', 'https://www.gramado.rs.gov.br', true),
+  ('rio-de-janeiro', 'Rio de Janeiro', 'RJ', 'Região Metropolitana do Rio de Janeiro', 'A Cidade Maravilhosa reúne praias, samba, o maior Réveillon do mundo em Copacabana, o Carnaval e uma agenda de grandes festivais de música e esporte.', -22.9068, -43.1729, '/img/cidades/rio-de-janeiro.svg', 'https://prefeitura.rio', true),
+  ('sao-paulo', 'São Paulo', 'SP', 'Região Metropolitana de São Paulo', 'A maior metrópole do país concentra teatros, museus, a Virada Cultural, a Corrida de São Silvestre e uma diversidade cultural que reflete migrações de todo o mundo.', -23.5505, -46.6333, '/img/cidades/sao-paulo.svg', 'https://www.capital.sp.gov.br', true),
+  ('paraty', 'Paraty', 'RJ', 'Costa Verde — Rio de Janeiro', 'Cidade histórica tombada, de ruas de pedra e casario colonial entre a serra e o mar, sede da Flip — Festa Literária Internacional de Paraty.', -23.2178, -44.7131, '/img/cidades/paraty.svg', 'https://www.paraty.rj.gov.br', true),
+  ('campos-do-jordao', 'Campos do Jordão', 'SP', 'Serra da Mantiqueira — São Paulo', 'A "Suíça brasileira" na Serra da Mantiqueira, conhecida pelo inverno rigoroso e por sediar o Festival Internacional de Inverno, maior evento de música clássica do país.', -22.7392, -45.5915, '/img/cidades/campos-do-jordao.svg', 'https://www.camposdojordao.sp.gov.br', true),
+  ('salvador', 'Salvador', 'BA', 'Região Metropolitana de Salvador', 'Primeira capital do Brasil, centro da cultura afro-brasileira: Pelourinho, capoeira, candomblé, a Festa de Iemanjá, a Lavagem do Bonfim e um dos maiores Carnavais do mundo.', -12.9777, -38.5016, '/img/cidades/salvador.svg', 'https://www.salvador.ba.gov.br', true),
+  ('olinda', 'Olinda', 'PE', 'Região Metropolitana do Recife', 'Patrimônio Mundial pela Unesco, cidade do frevo e do maracatu, famosa pelos bonecos gigantes e por um Carnaval de rua tradicional e gratuito.', -8.0089, -34.8553, '/img/cidades/olinda.svg', 'https://www.olinda.pe.gov.br', true),
+  ('parintins', 'Parintins', 'AM', 'Baixo Amazonas', 'Ilha no meio do Rio Amazonas, palco do Festival Folclórico de Parintins, em que os bois-bumbás Garantido e Caprichoso encenam lendas indígenas e ribeirinhas para um público de milhares no Bumbódromo.', -2.6283, -56.7358, '/img/cidades/parintins.svg', 'https://www.parintins.am.gov.br', true),
+  ('ouro-preto', 'Ouro Preto', 'MG', 'Região Central de Minas Gerais', 'Primeiro sítio brasileiro reconhecido como Patrimônio Mundial, joia do barroco mineiro, das igrejas de Aleijadinho, da Semana Santa e de festivais de inverno e de literatura.', -20.3856, -43.5035, '/img/cidades/ouro-preto.svg', 'https://www.ouropreto.mg.gov.br', true)
+on conflict (slug) do update set lat = excluded.lat, lng = excluded.lng, aprovada = true;
 
 insert into public.eventos (id, titulo, descricao, descricao_completa, categoria, formato, cidade, cidade_nome, uf, local, endereco, lat, lng, data_inicio, data_fim, horario, entrada, preco_texto, destaque, imagem_url, link_oficial, organizador_nome, status, criado_em) values
   ('schutzenfest-2026', '34ª Schützenfest', 'A tradicional festa do tiro esportivo, da dança e da gastronomia germânica de Jaraguá do Sul, com desfiles, bandinhas típicas e concursos de tiro ao alvo.', 'A Schützenfest resgata a cultura das sociedades de tiro trazidas pelos imigrantes alemães. Dias de programação com desfile de abertura, grupos folclóricos, praça de alimentação típica (marreco, eisbein, chucrute e cucas), chopp artesanal e o concurso que elege o Rei e a Rainha do Tiro. Entrada gratuita em vários dias; consulte a tabela oficial.', 'cultura', 'presencial', 'jaragua-do-sul', 'Jaraguá do Sul', 'SC', 'Parque Municipal de Eventos', 'Rua Prefeito Waldemar Grubba, 1447 - Vila Baependi', -26.5018, -49.0908, '2026-10-08', '2026-10-18', 'A partir das 18h nos dias úteis; a partir das 12h aos finais de semana', 'misto', 'Gratuito em vários dias; ingressos de R$ 10 a R$ 20 nos demais', true, '/img/1122.png', 'https://www.jaraguadosul.sc.gov.br', 'Prefeitura de Jaraguá do Sul', 'aprovado', '2026-08-01T12:00:00.000Z'),

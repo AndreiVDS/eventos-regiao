@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Carregando from '../../componentes/Carregando'
 import EstadoVazio from '../../componentes/EstadoVazio'
 import { AbasPainel } from './Painel'
-import { listarEventosPendentes, moderarEvento } from '../../lib/api'
+import { listarEventosPendentes, moderarEvento, listarCidades } from '../../lib/api'
 import { useAuth } from '../../lib/auth'
 import { formatarPeriodo, rotuloCategoria, rotuloEntrada } from '../../lib/formatacao'
 
@@ -10,9 +10,13 @@ export default function Moderacao() {
   const { sair } = useAuth()
   const [pendentes, setPendentes] = useState(null)
   const [processando, setProcessando] = useState(null)
+  const [cidadesPendentes, setCidadesPendentes] = useState(new Set())
 
   const carregar = useCallback(() => {
     listarEventosPendentes().then(setPendentes).catch(() => setPendentes([]))
+    listarCidades({ todas: true })
+      .then((cs) => setCidadesPendentes(new Set(cs.filter((c) => c.aprovada === false).map((c) => c.slug))))
+      .catch(() => {})
   }, [])
 
   useEffect(() => carregar(), [carregar])
@@ -74,6 +78,11 @@ export default function Moderacao() {
                       {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf} ·{' '}
                       {formatarPeriodo(e.data_inicio, e.data_fim)} · {rotuloEntrada(e.entrada)}
                     </p>
+                    {cidadesPendentes.has(e.cidade) && (
+                      <p className="mt-1 inline-block rounded bg-destaque/15 px-2 py-0.5 text-xs font-semibold text-texto">
+                        🆕 Cidade nova: {e.cidade_nome}/{e.uf} — entra no ar ao aprovar
+                      </p>
+                    )}
                     <p className="mt-2 text-sm text-suave">{e.descricao}</p>
                     <p className="mt-2 text-xs text-suave">
                       Organização: {e.organizador_nome} — contato:{' '}

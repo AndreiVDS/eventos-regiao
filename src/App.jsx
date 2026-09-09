@@ -24,6 +24,7 @@ const NovoEvento = lazy(() => import('./paginas/organizador/NovoEvento'))
 const Painel = lazy(() => import('./paginas/painel/Painel'))
 const Moderacao = lazy(() => import('./paginas/painel/Moderacao'))
 const Destaques = lazy(() => import('./paginas/painel/Destaques'))
+const NovaCidade = lazy(() => import('./paginas/painel/NovaCidade'))
 
 function RolarAoTopo() {
   const { pathname } = useLocation()
@@ -95,6 +96,14 @@ export default function App() {
                 element={
                   <RotaProtegida exige="equipe">
                     <Destaques />
+                  </RotaProtegida>
+                }
+              />
+              <Route
+                path="/painel/cidades"
+                element={
+                  <RotaProtegida exige="equipe">
+                    <NovaCidade />
                   </RotaProtegida>
                 }
               />

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizar, aplicarFiltros, gerarSlug, montarRegistroEvento, ehDestaque } from './api'
+import { normalizar, aplicarFiltros, gerarSlug, slugCidade, montarRegistroEvento, ehDestaque } from './api'
 
 const base = [
   { id: 'a', titulo: 'Festival de Cinema', descricao: '', cidade_nome: 'Gramado', local: 'Palácio',
@@ -140,6 +140,14 @@ describe('ehDestaque', () => {
   it('override local tem prioridade (modo demonstração)', () => {
     expect(ehDestaque({ id: 'a', destaque: true }, { a: false })).toBe(false)
     expect(ehDestaque({ id: 'b', destaque: false }, { b: true })).toBe(true)
+  })
+})
+
+describe('slugCidade', () => {
+  it('normaliza acentos e espaços, sem sufixo aleatório', () => {
+    expect(slugCidade('Brasília')).toBe('brasilia')
+    expect(slugCidade('São João del-Rei')).toBe('sao-joao-del-rei')
+    expect(slugCidade('  Foz do Iguaçu  ')).toBe('foz-do-iguacu')
   })
 })
 

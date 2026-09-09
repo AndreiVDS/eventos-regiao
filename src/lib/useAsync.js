@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 /**
- * Executa uma função assíncrona e devolve { dados, carregando, erro }.
- * Reexecuta sempre que uma das dependências muda.
+ * Executa uma função assíncrona e devolve { dados, carregando, erro, recarregar }.
+ * Reexecuta sempre que uma das dependências muda — ou quando `recarregar()` é chamado.
  */
 export function useAsync(fn, deps = []) {
   const [estado, setEstado] = useState({ dados: null, carregando: true, erro: null })
+  const [tick, setTick] = useState(0)
+  const recarregar = useCallback(() => setTick((t) => t + 1), [])
 
   useEffect(() => {
     let ativo = true
@@ -20,7 +22,7 @@ export function useAsync(fn, deps = []) {
       ativo = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
+  }, [...deps, tick])
 
-  return estado
+  return { ...estado, recarregar }
 }

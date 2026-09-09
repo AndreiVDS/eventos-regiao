@@ -13,6 +13,7 @@ import { geocodificarEvento } from './geocode'
  */
 
 const CHAVE_ENVIADOS = 'eventos_enviados'
+const CHAVE_CIDADES = 'cidades_enviadas' // modo demonstração: cidades sugeridas/criadas
 
 let cacheLocal = null
 async function carregarDadosLocais() {
@@ -34,6 +35,30 @@ function lerEnviados() {
 }
 function gravarEnviados(lista) {
   localStorage.setItem(CHAVE_ENVIADOS, JSON.stringify(lista))
+}
+function lerCidadesLocais() {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_CIDADES) || '[]')
+  } catch {
+    return []
+  }
+}
+function gravarCidadesLocais(lista) {
+  try {
+    localStorage.setItem(CHAVE_CIDADES, JSON.stringify(lista))
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Slug limpo e estável a partir do nome da cidade (sem sufixo aleatório). */
+export function slugCidade(nome = '') {
+  return nome
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }
 
 export function normalizar(texto = '') {
@@ -107,24 +132,86 @@ export function aplicarFiltros(eventos, filtros = {}) {
 
 /* ============================ Cidades ============================ */
 
-export async function listarCidades() {
+const ordenarNome = (a, b) => a.nome.localeCompare(b.nome, 'pt-BR')
+
+/**
+ * Lista de cidades. Por padrão só as aprovadas (o que aparece no site).
+ * `{ todas: true }` inclui as sugeridas ainda não publicadas — só a equipe usa.
+ */
+export async function listarCidades({ todas = false } = {}) {
   if (supabaseConfigurado) {
-    const { data, error } = await supabase.from('cidades').select('*').order('nome')
+    let q = supabase.from('cidades').select('*').order('nome')
+    if (!todas) q = q.eq('aprovada', true)
+    const { data, error } = await q
     if (error) throw error
     return data
   }
   const { cidades } = await carregarDadosLocais()
-  return [...cidades].sort((a, b) => a.nome.localeCompare(b.nome))
+  const juntas = [...cidades, ...lerCidadesLocais()]
+  return juntas.filter((c) => todas || c.aprovada !== false).sort(ordenarNome)
 }
 
 export async function obterCidade(slug) {
   if (supabaseConfigurado) {
-    const { data, error } = await supabase.from('cidades').select('*').eq('slug', slug).single()
+    const { data, error } = await supabase.from('cidades').select('*').eq('slug', slug).maybeSingle()
     if (error) throw error
     return data
   }
   const { cidades } = await carregarDadosLocais()
-  return cidades.find((c) => c.slug === slug) || null
+  return [...cidades, ...lerCidadesLocais()].find((c) => c.slug === slug) || null
+}
+
+/**
+ * Cria (ou reaproveita) uma cidade. `aprovada: false` = sugestão de organizador
+ * que só aparece no site depois que a equipe aprova. `aprovada: true` = cadastro
+ * direto pelo painel da equipe. Geocodifica o centro da cidade em segundo plano.
+ */
+export async function criarCidade(dados, { aprovada = false } = {}) {
+  const nome = (dados.nome || '').trim()
+  const uf = (dados.uf || '').trim().toUpperCase()
+  if (!nome || uf.length !== 2) throw new Error('Informe o nome da cidade e o estado (UF).')
+
+  // já existe uma cidade com esse nome/UF? reaproveita.
+  const existentes = await listarCidades({ todas: true })
+  const jaTem = existentes.find(
+    (c) => normalizar(c.nome) === normalizar(nome) && c.uf?.toUpperCase() === uf,
+  )
+  if (jaTem) return jaTem
+
+  let slug = slugCidade(nome)
+  if (existentes.some((c) => c.slug === slug)) slug = `${slug}-${uf.toLowerCase()}`
+
+  const co = await geocodificarEvento({ local: nome, cidade_nome: nome, uf })
+  const registro = {
+    slug,
+    nome,
+    uf,
+    regiao: (dados.regiao || '').trim() || uf,
+    descricao: (dados.descricao || '').trim(),
+    site_prefeitura: (dados.site_prefeitura || '').trim() || null,
+    lat: co?.lat ?? null,
+    lng: co?.lng ?? null,
+    imagem_url: '/img/cidades/_padrao.svg',
+    aprovada,
+  }
+
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.from('cidades').insert(registro).select().single()
+    if (error) throw error
+    return data
+  }
+  gravarCidadesLocais([...lerCidadesLocais().filter((c) => c.slug !== slug), registro])
+  return registro
+}
+
+/** Marca uma cidade sugerida como publicada (ação da equipe). */
+export async function aprovarCidade(slug) {
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('cidades').update({ aprovada: true }).eq('slug', slug)
+    if (error) throw error
+    return
+  }
+  gravarCidadesLocais(lerCidadesLocais().map((c) => (c.slug === slug ? { ...c, aprovada: true } : c)))
 }
 
 /* ===================== Eventos (público) ===================== */
@@ -204,6 +291,8 @@ export function montarRegistroEvento(dados) {
  * Envia um evento para moderação (status "pendente").
  * `usuario` (opcional) associa o evento a quem o cadastrou.
  */
+export const CIDADE_NOVA = '__nova__'
+
 export async function enviarEvento(dados, usuario = null) {
   const completo = {
     ...dados,
@@ -213,6 +302,18 @@ export async function enviarEvento(dados, usuario = null) {
     status: 'pendente',
     criado_em: new Date().toISOString(),
     criado_por: usuario?.id || null,
+  }
+
+  // Cidade fora da lista: cria como "sugerida" (só entra no site quando a equipe
+  // aprova o evento) e aponta o evento para ela.
+  if (dados.cidade === CIDADE_NOVA) {
+    const nova = await criarCidade(
+      { nome: dados.cidade_nova_nome, uf: dados.cidade_nova_uf },
+      { aprovada: false },
+    )
+    completo.cidade = nova.slug
+    completo.cidade_nome = nova.nome
+    completo.uf = nova.uf
   }
 
   // Descobre a lat/lng do local pelo endereço, para a distância "perto de mim".
@@ -295,9 +396,22 @@ export async function listarTodosEventos() {
 
 export async function moderarEvento(id, status) {
   if (!supabaseConfigurado) {
-    const lista = lerEnviados().map((e) => (e.id === id ? { ...e, status } : e))
+    let slugCid = null
+    const lista = lerEnviados().map((e) => {
+      if (e.id !== id) return e
+      slugCid = e.cidade
+      return { ...e, status }
+    })
     gravarEnviados(lista)
+    if (status === 'aprovado' && slugCid) await aprovarCidade(slugCid)
     return
+  }
+  // aprovar o evento também publica a cidade dele, se ela ainda era só uma sugestão
+  if (status === 'aprovado') {
+    const { data: ev } = await supabase.from('eventos').select('cidade').eq('id', id).maybeSingle()
+    if (ev?.cidade) {
+      await supabase.from('cidades').update({ aprovada: true }).eq('slug', ev.cidade)
+    }
   }
   const { error } = await supabase.from('eventos').update({ status }).eq('id', id)
   if (error) throw error
