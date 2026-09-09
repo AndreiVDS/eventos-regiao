@@ -1,8 +1,10 @@
 /** Utilidades de compartilhamento de um evento. */
+import { SITE_URL } from './meta'
 
+/** Sempre o endereço de produção — mesmo se a pessoa abriu por um link de
+ *  preview da Vercel (que é protegido por login e quebra o preview). */
 export function urlDoEvento(evento) {
-  if (typeof window === 'undefined') return ''
-  return `${window.location.origin}/eventos/${evento.id}`
+  return `${SITE_URL}/eventos/${evento.id}`
 }
 
 function textoConvite(evento) {
