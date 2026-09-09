@@ -9,12 +9,15 @@ import {
   eventoJaPassou,
 } from '../lib/formatacao'
 
-export default function CardEvento({ evento }) {
+export default function CardEvento({ evento, indice = 0 }) {
   const { dia, mes } = carimboData(evento.data_inicio)
   const passou = eventoJaPassou(evento)
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
+    <article
+      className="surgir group flex flex-col overflow-hidden rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
+      style={{ '--atraso': `${Math.min(indice, 8) * 60}ms` }}
+    >
       <div className="relative overflow-hidden">
         <img
           src={evento.imagem_url}

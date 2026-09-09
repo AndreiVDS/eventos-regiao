@@ -57,8 +57,8 @@ export default function Cidade() {
           <Carregando />
         ) : eventos.length > 0 ? (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {eventos.map((evento) => (
-              <CardEvento key={evento.id} evento={evento} />
+            {eventos.map((evento, i) => (
+              <CardEvento key={evento.id} evento={evento} indice={i} />
             ))}
           </div>
         ) : (

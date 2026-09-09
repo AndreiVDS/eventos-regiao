@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import CardEvento from '../componentes/CardEvento'
 import EsqueletoCards from '../componentes/EsqueletoCards'
+import CarrosselDestaque from '../componentes/CarrosselDestaque'
+import Contador from '../componentes/Contador'
+import Secao from '../componentes/Secao'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual } from '../lib/cidade'
@@ -58,13 +61,16 @@ export default function Home() {
           }}
         />
         <div className="container-pagina py-20 sm:py-28">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-creme/25 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-creme/80">
+          <p
+            className="surgir mb-3 inline-flex items-center gap-2 rounded-full border border-creme/25 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-creme/80"
+            style={{ '--atraso': '0ms' }}
+          >
             Turismo · Cultura · Economia local
           </p>
-          <h1 className="max-w-3xl text-4xl leading-[1.05] sm:text-6xl">
+          <h1 className="surgir max-w-3xl text-4xl leading-[1.05] sm:text-6xl" style={{ '--atraso': '80ms' }}>
             Eventos que celebram a cultura da sua região
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-creme/80">
+          <p className="surgir mt-4 max-w-2xl text-lg text-creme/80" style={{ '--atraso': '160ms' }}>
             Descubra festivais, feiras, shows, cursos e encontros comunitários perto de você — e
             ajude organizadores locais a alcançar mais gente.
           </p>
@@ -72,7 +78,8 @@ export default function Home() {
           <form
             onSubmit={pesquisar}
             role="search"
-            className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row"
+            className="surgir mt-8 flex max-w-xl flex-col gap-3 sm:flex-row"
+            style={{ '--atraso': '240ms' }}
           >
             <label htmlFor="busca-home" className="sr-only">Buscar eventos</label>
             <input
@@ -86,7 +93,7 @@ export default function Home() {
             <button type="submit" className="btn-destaque">Buscar eventos</button>
           </form>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="surgir mt-6 flex flex-wrap gap-2" style={{ '--atraso': '320ms' }}>
             {CATEGORIAS.map((c) => (
               <Link
                 key={c.valor}
@@ -110,7 +117,9 @@ export default function Home() {
                 ['Gratuitos', numeros.gratuitos],
               ].map(([rotulo, valor]) => (
                 <div key={rotulo}>
-                  <dd className="font-titulo text-3xl text-destaque">{valor}</dd>
+                  <dd className="font-titulo text-3xl text-destaque">
+                    <Contador alvo={valor} />
+                  </dd>
                   <dt className="text-xs uppercase tracking-wide text-creme/70">{rotulo}</dt>
                 </div>
               ))}
@@ -119,8 +128,11 @@ export default function Home() {
         )}
       </section>
 
-      {/* Eventos em destaque */}
-      <section className="container-pagina py-14">
+      {/* Carrossel de destaques */}
+      {!carregando && destaques.length >= 2 && <CarrosselDestaque eventos={daCidade} />}
+
+      {/* Próximos eventos */}
+      <Secao className="container-pagina py-14">
         <div className="flex items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl">
@@ -144,8 +156,8 @@ export default function Home() {
           <EsqueletoCards />
         ) : destaques.length > 0 ? (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {destaques.map((evento) => (
-              <CardEvento key={evento.id} evento={evento} />
+            {destaques.map((evento, i) => (
+              <CardEvento key={evento.id} evento={evento} indice={i} />
             ))}
           </div>
         ) : (
@@ -156,11 +168,11 @@ export default function Home() {
             </Link>
           </p>
         )}
-      </section>
+      </Secao>
 
       {/* Neste fim de semana */}
       {!carregando && fimDeSemana.length > 0 && (
-        <section className="bg-superficie py-14">
+        <Secao className="bg-superficie py-14">
           <div className="container-pagina">
             <div className="flex items-end justify-between gap-4">
               <div>
@@ -177,17 +189,17 @@ export default function Home() {
               </Link>
             </div>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {fimDeSemana.map((evento) => (
-                <CardEvento key={evento.id} evento={evento} />
+              {fimDeSemana.map((evento, i) => (
+                <CardEvento key={evento.id} evento={evento} indice={i} />
               ))}
             </div>
           </div>
-        </section>
+        </Secao>
       )}
 
       {/* Cidades */}
       {cidades && (
-        <section className="py-14">
+        <Secao className="py-14">
           <div className="container-pagina">
             <h2 className="text-3xl">Explore por cidade</h2>
             <p className="text-suave">
@@ -220,11 +232,11 @@ export default function Home() {
               <Link to="/cidades" className="btn-contorno !py-2 text-sm">Ver todas as cidades</Link>
             </div>
           </div>
-        </section>
+        </Secao>
       )}
 
       {/* Como funciona */}
-      <section className="container-pagina py-14">
+      <Secao className="container-pagina py-14">
         <h2 className="text-3xl">Como funciona</h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
@@ -232,7 +244,7 @@ export default function Home() {
             { n: '2', t: 'Participe', d: 'Veja detalhes, local no mapa e link oficial para ingressos ou inscrição.' },
             { n: '3', t: 'Divulgue', d: 'É organizador? Cadastre seu evento gratuitamente e alcance moradores e turistas.' },
           ].map((p) => (
-            <div key={p.n} className="cartao p-6">
+            <div key={p.n} className="cartao p-6 transition-transform hover:-translate-y-1">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-destaque font-titulo text-xl text-tinta">
                 {p.n}
               </span>
@@ -241,7 +253,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </Secao>
 
       {/* Chamada para organizadores */}
       <section className="bg-destaque">
