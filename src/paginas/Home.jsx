@@ -5,6 +5,7 @@ import EsqueletoCards from '../componentes/EsqueletoCards'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual } from '../lib/cidade'
+import { eventosDoFimDeSemana } from '../lib/agenda'
 import { CATEGORIAS } from '../lib/formatacao'
 
 export default function Home() {
@@ -20,6 +21,7 @@ export default function Home() {
     ? (eventos || []).filter((e) => e.cidade === cidadeSlug)
     : eventos || []
   const destaques = daCidade.slice(0, 6)
+  const fimDeSemana = eventosDoFimDeSemana(daCidade).slice(0, 3)
 
   const numeros = useMemo(() => {
     const lista = eventos || []
@@ -156,9 +158,36 @@ export default function Home() {
         )}
       </section>
 
+      {/* Neste fim de semana */}
+      {!carregando && fimDeSemana.length > 0 && (
+        <section className="bg-superficie py-14">
+          <div className="container-pagina">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-3xl">Neste fim de semana</h2>
+                <p className="text-suave">
+                  O que rola no sábado e no domingo{cidadeAtual ? ` em ${cidadeAtual.nome}` : ''}.
+                </p>
+              </div>
+              <Link
+                to={`/eventos?quando=semana${cidadeSlug ? `&cidade=${cidadeSlug}` : ''}`}
+                className="btn-contorno !py-2 text-sm"
+              >
+                Ver mais
+              </Link>
+            </div>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {fimDeSemana.map((evento) => (
+                <CardEvento key={evento.id} evento={evento} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Cidades */}
       {cidades && (
-        <section className="bg-superficie py-14">
+        <section className="py-14">
           <div className="container-pagina">
             <h2 className="text-3xl">Explore por cidade</h2>
             <p className="text-suave">

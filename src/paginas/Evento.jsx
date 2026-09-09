@@ -1,10 +1,12 @@
 import { Link, useParams } from 'react-router-dom'
 import Selo from '../componentes/Selo'
 import AcoesEvento from '../componentes/AcoesEvento'
+import CardEvento from '../componentes/CardEvento'
 import Carregando from '../componentes/Carregando'
 import NaoEncontrado from './NaoEncontrado'
-import { obterEvento } from '../lib/api'
+import { obterEvento, listarEventos } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
+import { eventosRelacionados } from '../lib/agenda'
 import {
   emojiCategoria,
   rotuloCategoria,
@@ -16,9 +18,12 @@ import {
 export default function Evento() {
   const { id } = useParams()
   const { dados: evento, carregando } = useAsync(() => obterEvento(id), [id])
+  const { dados: agenda } = useAsync(() => listarEventos({ quando: '' }), [])
 
   if (carregando) return <Carregando />
   if (!evento) return <NaoEncontrado />
+
+  const relacionados = eventosRelacionados(evento, agenda || [], 3)
 
   const consultaMapa = encodeURIComponent(
     `${evento.local}, ${evento.endereco}, ${evento.cidade_nome}`,
@@ -143,6 +148,20 @@ export default function Evento() {
           )}
         </aside>
       </div>
+
+      {relacionados.length > 0 && (
+        <section className="bg-superficie">
+          <div className="container-pagina py-12">
+            <h2 className="text-2xl">Eventos relacionados</h2>
+            <p className="mt-1 text-suave">Mais em {evento.cidade_nome} ou na mesma categoria.</p>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {relacionados.map((e) => (
+                <CardEvento key={e.id} evento={e} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </article>
   )
 }
