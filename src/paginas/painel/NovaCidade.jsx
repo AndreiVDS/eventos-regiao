@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AbasPainel } from './Painel'
 import Selo from '../../componentes/Selo'
 import { listarCidades, criarCidade, aprovarCidade } from '../../lib/api'
 import { useAsync } from '../../lib/useAsync'
+import { UFS, municipiosDoEstado } from '../../lib/municipios'
 
-const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 const VAZIO = { nome: '', uf: '', regiao: '', descricao: '', site_prefeitura: '' }
 
 export default function NovaCidade() {
@@ -12,8 +12,16 @@ export default function NovaCidade() {
   const [form, setForm] = useState(VAZIO)
   const [msg, setMsg] = useState(null)
   const [salvando, setSalvando] = useState(false)
+  const [municipios, setMunicipios] = useState([])
 
   const campo = (k, v) => setForm((f) => ({ ...f, [k]: v }))
+
+  useEffect(() => {
+    let ativo = true
+    if (!form.uf) return setMunicipios([])
+    municipiosDoEstado(form.uf).then((l) => ativo && setMunicipios(l)).catch(() => {})
+    return () => { ativo = false }
+  }, [form.uf])
 
   async function enviar(e) {
     e.preventDefault()
@@ -89,14 +97,30 @@ export default function NovaCidade() {
             </p>
           )}
           <div>
-            <label className="rotulo" htmlFor="nc-nome">Nome</label>
-            <input id="nc-nome" className="campo" value={form.nome} onChange={(e) => campo('nome', e.target.value)} />
-          </div>
-          <div>
-            <label className="rotulo" htmlFor="nc-uf">Estado (UF)</label>
-            <select id="nc-uf" className="campo" value={form.uf} onChange={(e) => campo('uf', e.target.value)}>
+            <label className="rotulo" htmlFor="nc-uf">Estado</label>
+            <select
+              id="nc-uf"
+              className="campo"
+              value={form.uf}
+              onChange={(e) => setForm((f) => ({ ...f, uf: e.target.value, nome: '' }))}
+            >
               <option value="">Selecione…</option>
               {UFS.map((u) => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="rotulo" htmlFor="nc-nome">Município</label>
+            <select
+              id="nc-nome"
+              className="campo"
+              value={form.nome}
+              disabled={!form.uf || municipios.length === 0}
+              onChange={(e) => campo('nome', e.target.value)}
+            >
+              <option value="">
+                {!form.uf ? '—' : municipios.length === 0 ? 'Carregando…' : 'Selecione…'}
+              </option>
+              {municipios.map((m) => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
           <div>

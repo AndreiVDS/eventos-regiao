@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "vitest run",
-    "gerar-dados": "node scripts/gerar-dados.mjs"
+    "gerar-dados": "node scripts/gerar-dados.mjs",
+    "gerar-municipios": "node scripts/gerar-municipios.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

@@ -1,11 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { listarCidades, CIDADE_NOVA } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { CATEGORIAS, ENTRADAS, FORMATOS } from '../lib/formatacao'
 import { buscarCep, formatarCep } from '../lib/cep'
 import { enviarImagem, validarImagem, DICA_IMAGEM } from '../lib/upload'
-
-const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
+import { UFS, municipiosDoEstado } from '../lib/municipios'
 
 export const EVENTO_VAZIO = {
   titulo: '',
@@ -39,10 +38,26 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
   const [cepStatus, setCepStatus] = useState(null) // null | 'buscando' | 'ok' | 'erro'
   const [imgStatus, setImgStatus] = useState(null) // null | 'enviando' | 'ok' | 'erro'
   const [imgPreview, setImgPreview] = useState(valorInicial.imagem_url || '')
+  const [municipios, setMunicipios] = useState([]) // lista do IBGE do estado escolhido
   const arquivoRef = useRef(null)
 
   const campo = (nome, valor) => setForm((f) => ({ ...f, [nome]: valor }))
   const inval = (nome) => (erros[nome] ? 'true' : undefined)
+
+  // ao escolher a UF na "cidade nova", carrega os municípios daquele estado
+  useEffect(() => {
+    let ativo = true
+    if (form.cidade !== CIDADE_NOVA || !form.cidade_nova_uf) {
+      setMunicipios([])
+      return
+    }
+    municipiosDoEstado(form.cidade_nova_uf)
+      .then((l) => ativo && setMunicipios(l))
+      .catch(() => ativo && setMunicipios([]))
+    return () => {
+      ativo = false
+    }
+  }, [form.cidade, form.cidade_nova_uf])
 
   async function aoDigitarCep(v) {
     const fmt = formatarCep(v)
@@ -186,19 +201,40 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
 
       {form.cidade === CIDADE_NOVA && (
         <>
-          <Grupo rotulo="Nome da cidade" htmlFor="cidade_nova_nome" erro={erros.cidade_nova_nome}>
-            <input id="cidade_nova_nome" className="campo" value={form.cidade_nova_nome}
-              onChange={(e) => campo('cidade_nova_nome', e.target.value)} aria-invalid={inval('cidade_nova_nome')} />
-          </Grupo>
-          <Grupo rotulo="Estado (UF)" htmlFor="cidade_nova_uf" erro={erros.cidade_nova_uf}>
-            <select id="cidade_nova_uf" className="campo" value={form.cidade_nova_uf}
-              onChange={(e) => campo('cidade_nova_uf', e.target.value)} aria-invalid={inval('cidade_nova_uf')}>
+          <Grupo rotulo="Estado" htmlFor="cidade_nova_uf" erro={erros.cidade_nova_uf}>
+            <select
+              id="cidade_nova_uf"
+              className="campo"
+              value={form.cidade_nova_uf}
+              onChange={(e) => setForm((f) => ({ ...f, cidade_nova_uf: e.target.value, cidade_nova_nome: '' }))}
+              aria-invalid={inval('cidade_nova_uf')}
+            >
               <option value="">Selecione…</option>
               {UFS.map((u) => <option key={u} value={u}>{u}</option>)}
             </select>
           </Grupo>
+          <Grupo rotulo="Município" htmlFor="cidade_nova_nome" erro={erros.cidade_nova_nome}
+            dica={!form.cidade_nova_uf ? 'Escolha o estado primeiro.' : undefined}>
+            <select
+              id="cidade_nova_nome"
+              className="campo"
+              value={form.cidade_nova_nome}
+              disabled={!form.cidade_nova_uf || municipios.length === 0}
+              onChange={(e) => campo('cidade_nova_nome', e.target.value)}
+              aria-invalid={inval('cidade_nova_nome')}
+            >
+              <option value="">
+                {!form.cidade_nova_uf
+                  ? '—'
+                  : municipios.length === 0
+                    ? 'Carregando…'
+                    : `Selecione… (${municipios.length} cidades)`}
+              </option>
+              {municipios.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </Grupo>
           <p className="sm:col-span-2 -mt-2 text-xs text-suave">
-            A cidade nova entra junto com o evento assim que a equipe aprovar.
+            Lista oficial do IBGE. A cidade entra no site junto com o evento, assim que a equipe aprovar.
           </p>
         </>
       )}
