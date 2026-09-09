@@ -131,6 +131,8 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
         </p>
       )}
 
+      <Titulo>Sobre o evento</Titulo>
+
       <Grupo className="sm:col-span-2" rotulo="Nome do evento" htmlFor="titulo" erro={erros.titulo}>
         <input id="titulo" className="campo" value={form.titulo}
           onChange={(e) => campo('titulo', e.target.value)} aria-invalid={inval('titulo')} />
@@ -147,6 +149,8 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
         <textarea id="descricao_completa" rows="5" className="campo" value={form.descricao_completa}
           onChange={(e) => campo('descricao_completa', e.target.value)} />
       </Grupo>
+
+      <Titulo>Local, data e valores</Titulo>
 
       <Grupo rotulo="Categoria" htmlFor="categoria" erro={erros.categoria}>
         <select id="categoria" className="campo" value={form.categoria}
@@ -234,6 +238,8 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
         <input id="link_oficial" type="url" className="campo" placeholder="https://" value={form.link_oficial}
           onChange={(e) => campo('link_oficial', e.target.value)} aria-invalid={inval('link_oficial')} />
       </Grupo>
+
+      <Titulo>Imagem e contato</Titulo>
 
       <div className="sm:col-span-2">
         <span className="rotulo">Imagem do evento (opcional)</span>
@@ -360,6 +366,14 @@ function mensagemErro(err) {
   if (bruto.includes('failed to fetch') || bruto.includes('network'))
     return 'Sem conexão com o servidor. Verifique a internet e tente de novo.'
   return 'Não foi possível enviar agora. Tente novamente em instantes.'
+}
+
+function Titulo({ children }) {
+  return (
+    <h2 className="sm:col-span-2 mb-1 mt-4 border-b border-borda/10 pb-1 text-sm font-bold uppercase tracking-wide text-suave first:mt-0">
+      {children}
+    </h2>
+  )
 }
 
 function Grupo({ rotulo, htmlFor, erro, dica, children, className = '' }) {
