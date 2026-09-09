@@ -43,13 +43,11 @@ export default function Painel() {
         <AbasPainel />
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatTile rotulo="Eventos publicados" valor={m.total} tom="escuro" />
         <StatTile rotulo="Aguardando revisão" valor={m.pendentes} tom={m.pendentes ? 'destaque' : 'claro'} />
         <StatTile rotulo="Cidades ativas" valor={m.cidadesAtivas} detalhe={`${m.estadosAtivos} estados`} />
         <StatTile rotulo="Nos próximos 30 dias" valor={m.proximos30} />
-      </div>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile rotulo="Gratuitos" valor={m.pctGratuitos} sufixo="%" detalhe="do total publicado" />
         <StatTile rotulo="Recusados" valor={m.recusados} />
       </div>

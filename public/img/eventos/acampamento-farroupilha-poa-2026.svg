@@ -1,10 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" font-family="Bebas Neue, Arial, sans-serif">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c92a2a"/><stop offset="1" stop-color="#4a0f0f"/></linearGradient></defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#3b0764"/>
+    </linearGradient>
+    <pattern id="pontos" width="36" height="36" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="2" fill="#ffffff" opacity="0.06"/>
+    </pattern>
+  </defs>
   <rect width="1200" height="750" fill="url(#g)"/>
-  <g fill="#ffffff" opacity="0.08"><circle cx="1030" cy="120" r="260"/><circle cx="140" cy="700" r="200"/></g>
-  <text x="70" y="150" fill="#f4b400" font-size="120" opacity="0.9">♪</text>
-  <text x="70" y="380" fill="#ffffff" font-size="80" letter-spacing="1">ACAMPAMENTO</text>
-  <text x="70" y="470" fill="#ffffff" font-size="80" letter-spacing="1">FARROUPILHA 2026</text>
-  <text x="74" y="620" fill="#f4b400" font-size="42" letter-spacing="4">PORTO ALEGRE · RS</text>
-  <text x="74" y="680" fill="#ffffff" opacity="0.7" font-size="30" letter-spacing="3">EVENTOS REGIÃO</text>
+  <rect width="1200" height="750" fill="url(#pontos)"/>
+  <circle cx="1010" cy="140" r="300" fill="#ffffff" opacity="0.05"/>
+  <g transform="translate(470 195) scale(5)" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="4" stroke-linejoin="round">
+    <path d="M60 20 L74 48 L104 52 L82 74 L88 104 L60 90 L32 104 L38 74 L16 52 L46 48 Z"/>
+  </g>
 </svg>

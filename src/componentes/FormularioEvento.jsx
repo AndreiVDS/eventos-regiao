@@ -71,37 +71,32 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
       })
     } catch (err) {
       console.error(err)
-      const detalhe = err?.message || err?.error_description || err?.hint
-      setErros({
-        geral: detalhe
-          ? `Não foi possível enviar: ${detalhe}`
-          : 'Não foi possível enviar agora. Tente novamente em instantes.',
-      })
+      setErros({ geral: mensagemErro(err) })
     } finally {
       setEnviando(false)
     }
   }
 
   return (
-    <form onSubmit={enviar} noValidate className="grid gap-6 lg:grid-cols-2">
+    <form onSubmit={enviar} noValidate className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
       {erros.geral && (
-        <p className="lg:col-span-2 rounded-lg bg-red-100 p-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200" role="alert">
+        <p className="sm:col-span-2 rounded-lg bg-red-100 p-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200" role="alert">
           {erros.geral}
         </p>
       )}
 
-      <Grupo className="lg:col-span-2" rotulo="Nome do evento" htmlFor="titulo" erro={erros.titulo}>
+      <Grupo className="sm:col-span-2" rotulo="Nome do evento" htmlFor="titulo" erro={erros.titulo}>
         <input id="titulo" className="campo" value={form.titulo}
           onChange={(e) => campo('titulo', e.target.value)} aria-invalid={inval('titulo')} />
       </Grupo>
 
-      <Grupo className="lg:col-span-2" rotulo="Resumo" htmlFor="descricao" erro={erros.descricao}
+      <Grupo className="sm:col-span-2" rotulo="Resumo" htmlFor="descricao" erro={erros.descricao}
         dica="Frase curta que aparece na listagem (o que é, para quem, por que ir).">
         <textarea id="descricao" rows="3" className="campo" value={form.descricao}
           onChange={(e) => campo('descricao', e.target.value)} aria-invalid={inval('descricao')} />
       </Grupo>
 
-      <Grupo className="lg:col-span-2" rotulo="Descrição completa (opcional)" htmlFor="descricao_completa"
+      <Grupo className="sm:col-span-2" rotulo="Descrição completa (opcional)" htmlFor="descricao_completa"
         dica="Texto exibido na página do evento.">
         <textarea id="descricao_completa" rows="5" className="campo" value={form.descricao_completa}
           onChange={(e) => campo('descricao_completa', e.target.value)} />
@@ -189,7 +184,7 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
           onChange={(e) => campo('organizador_contato', e.target.value)} aria-invalid={inval('organizador_contato')} />
       </Grupo>
 
-      <div className="lg:col-span-2">
+      <div className="sm:col-span-2">
         <label className="flex items-start gap-3 text-sm">
           <input type="checkbox" className="mt-1 h-5 w-5" checked={form.aceite}
             onChange={(e) => campo('aceite', e.target.checked)} aria-invalid={inval('aceite')} />
@@ -201,13 +196,32 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
         {erros.aceite && <p className="mt-1 text-sm text-red-700 dark:text-red-400" role="alert">{erros.aceite}</p>}
       </div>
 
-      <div className="lg:col-span-2">
+      <div className="sm:col-span-2">
         <button type="submit" className="btn-destaque" disabled={enviando}>
           {enviando ? 'Enviando…' : textoBotao}
         </button>
       </div>
     </form>
   )
+}
+
+/** Traduz o erro técnico do banco numa frase que o organizador entende. */
+function mensagemErro(err) {
+  const bruto = (err?.message || err?.error_description || err?.hint || '').toLowerCase()
+  if (!bruto) return 'Não foi possível enviar agora. Tente novamente em instantes.'
+  if (bruto.includes('duplicate key') || bruto.includes('already exists'))
+    return 'Já existe um evento com esse nome. Mude um pouco o título e tente de novo.'
+  if (bruto.includes('violates not-null') || bruto.includes('null value'))
+    return 'Faltou preencher um campo obrigatório. Revise o formulário e tente de novo.'
+  if (bruto.includes('violates check constraint'))
+    return 'Algum valor não é aceito (categoria, formato ou tipo de entrada). Revise e tente de novo.'
+  if (bruto.includes('violates foreign key'))
+    return 'A cidade selecionada não está cadastrada. Escolha outra da lista.'
+  if (bruto.includes('row-level security') || bruto.includes('permission'))
+    return 'Você precisa estar logado para enviar um evento. Entre e tente de novo.'
+  if (bruto.includes('failed to fetch') || bruto.includes('network'))
+    return 'Sem conexão com o servidor. Verifique a internet e tente de novo.'
+  return 'Não foi possível enviar agora. Tente novamente em instantes.'
 }
 
 function Grupo({ rotulo, htmlFor, erro, dica, children, className = '' }) {

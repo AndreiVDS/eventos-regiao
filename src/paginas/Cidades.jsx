@@ -21,20 +21,27 @@ export default function Cidades() {
           {cidades.map((c) => (
             <article
               key={c.slug}
-              className="flex flex-col overflow-hidden rounded-xl bg-superficie shadow-sm ring-1 ring-borda/10"
+              className="group flex flex-col overflow-hidden rounded-2xl bg-superficie shadow-suave ring-1 ring-borda/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-alta"
             >
-              <img
-                src={c.imagem_url}
-                alt={`Foto de ${c.nome}`}
-                className="h-52 w-full object-cover"
-                loading="lazy"
-              />
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={c.imagem_url}
+                  alt=""
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-tinta/85 via-tinta/20 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4 text-creme">
+                  <h2 className="text-3xl leading-none">
+                    {c.nome} <span className="text-lg text-creme/75">/{c.uf}</span>
+                  </h2>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-destaque">
+                    {c.regiao}
+                  </p>
+                </div>
+              </div>
               <div className="flex flex-1 flex-col p-5">
-                <h2 className="text-2xl">
-                  {c.nome} <span className="text-base text-suave">/{c.uf}</span>
-                </h2>
-                <p className="text-sm font-semibold text-suave">{c.regiao}</p>
-                <p className="mt-2 flex-1 text-sm text-suave">{c.descricao}</p>
+                <p className="flex-1 text-sm text-suave">{c.descricao}</p>
                 <Link to={`/cidades/${c.slug}`} className="btn-contorno mt-4 !py-2 text-sm">
                   Ver eventos em {c.nome}
                 </Link>

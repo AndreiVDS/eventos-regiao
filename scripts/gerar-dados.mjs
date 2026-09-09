@@ -12,20 +12,34 @@ const p = (...partes) => resolve(raiz, ...partes)
 // lat/lng no próprio objeto em dados.mjs — isso tem prioridade.
 const coordsEvento = JSON.parse(readFileSync(p('scripts/coordenadas-eventos.json'), 'utf8'))
 
-// ---------- 1. Postais SVG das cidades ----------
+// ---------- 1. Fundos SVG das cidades ----------
+// Sem texto embutido: o nome da cidade é HTML por cima (fica nítido e nunca
+// corta). Aqui é só uma arte de fundo: gradiente + malha suave + relevo.
 mkdirSync(p('public/img/cidades'), { recursive: true })
-for (const c of cidades) {
+function fundoCidade(c) {
   const [a, b] = c.cor
-  const regiao = c.regiao.length > 34 ? c.uf : `${c.uf} · ${c.regiao.toUpperCase()}`
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" font-family="Bebas Neue, Arial, sans-serif">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
-  <rect width="1200" height="500" fill="url(#g)"/>
-  <g fill="#ffffff" opacity="0.09"><circle cx="1000" cy="90" r="210"/><circle cx="120" cy="470" r="170"/></g>
-  <path d="M0 360 L200 280 L400 350 L600 260 L800 340 L1000 250 L1200 330 L1200 500 L0 500 Z" fill="#000" opacity="0.2"/>
-  <text x="80" y="250" fill="#fff" font-size="120" letter-spacing="3">${c.nome.toUpperCase()}</text>
-  <text x="86" y="310" fill="#f4b400" font-size="40" letter-spacing="5">${regiao}</text>
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/>
+    </linearGradient>
+    <radialGradient id="brilho" cx="0.2" cy="0.1" r="0.9">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="pontos" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="2" fill="#ffffff" opacity="0.07"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <rect width="1200" height="630" fill="url(#pontos)"/>
+  <rect width="1200" height="630" fill="url(#brilho)"/>
+  <circle cx="1040" cy="80" r="260" fill="#ffffff" opacity="0.06"/>
+  <path d="M0 470 C 220 400 360 520 600 450 C 840 380 980 500 1200 430 L1200 630 L0 630 Z" fill="#000000" opacity="0.16"/>
+  <path d="M0 540 C 260 480 380 590 640 520 C 900 450 1020 560 1200 500 L1200 630 L0 630 Z" fill="#000000" opacity="0.12"/>
 </svg>`
-  writeFileSync(p('public/img/cidades', `${c.slug}.svg`), svg.trim())
+}
+for (const c of cidades) {
+  writeFileSync(p('public/img/cidades', `${c.slug}.svg`), fundoCidade(c).trim())
 }
 
 // ---------- 2. cidades.json ----------
@@ -43,39 +57,50 @@ const cidadesJson = cidades.map((c) => ({
 writeFileSync(p('public/dados/cidades.json'), JSON.stringify(cidadesJson, null, 2) + '\n')
 
 // ---------- 3. Banners SVG para eventos sem foto (imagem_url: 'auto') ----------
+// Também sem título embutido — o card já mostra o título em HTML. Aqui é só um
+// fundo com a cor da categoria e um símbolo grande de marca d'água.
 mkdirSync(p('public/img/eventos'), { recursive: true })
-const EMOJI_CAT = {
-  cultura: '♪', esporte: '▲', comunitario: '✦', educacao: '❖', negocios: '◆', gastronomia: '✺',
+const COR_CAT = {
+  cultura: ['#7c3aed', '#3b0764'],
+  esporte: ['#0891b2', '#083344'],
+  comunitario: ['#e0532f', '#5a1c0e'],
+  educacao: ['#2563eb', '#0b2a4a'],
+  negocios: ['#0f766e', '#053b36'],
+  gastronomia: ['#d97706', '#5a3407'],
 }
-function bannerEvento(e, cidade) {
-  const [a, b] = cidade.cor
-  // quebra o título em até 2 linhas (~22 caracteres por linha)
-  const linhas = ['', '']
-  for (const w of e.titulo.split(' ')) {
-    const i = linhas[1] || (linhas[0].length && (linhas[0] + ' ' + w).length > 22) ? 1 : 0
-    linhas[i] = (linhas[i] ? linhas[i] + ' ' : '') + w
-  }
-  if (linhas[1].length > 26) linhas[1] = linhas[1].slice(0, 24) + '…'
-  const esc = (x) => x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" font-family="Bebas Neue, Arial, sans-serif">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
+const GLIFO_CAT = {
+  cultura: 'M60 20 L74 48 L104 52 L82 74 L88 104 L60 90 L32 104 L38 74 L16 52 L46 48 Z',
+  esporte: 'M60 12 L108 96 L12 96 Z',
+  comunitario: 'M60 20 a40 40 0 1 0 0.1 0 M40 55 a12 12 0 1 0 0.1 0 M80 55 a12 12 0 1 0 0.1 0',
+  educacao: 'M10 44 L60 20 L110 44 L60 68 Z M28 54 L28 84 Q60 104 92 84 L92 54',
+  negocios: 'M20 40 h80 v60 h-80 Z M44 40 v-14 h32 v14',
+  gastronomia: 'M60 16 a44 44 0 1 0 0.1 0 M60 34 a26 26 0 1 0 0.1 0',
+}
+function bannerEvento(e) {
+  const [a, b] = COR_CAT[e.categoria] || ['#1f6feb', '#0b2a4a']
+  const glifo = GLIFO_CAT[e.categoria] || GLIFO_CAT.comunitario
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/>
+    </linearGradient>
+    <pattern id="pontos" width="36" height="36" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="2" fill="#ffffff" opacity="0.06"/>
+    </pattern>
+  </defs>
   <rect width="1200" height="750" fill="url(#g)"/>
-  <g fill="#ffffff" opacity="0.08"><circle cx="1030" cy="120" r="260"/><circle cx="140" cy="700" r="200"/></g>
-  <text x="70" y="150" fill="#f4b400" font-size="120" opacity="0.9">${EMOJI_CAT[e.categoria] || '★'}</text>
-  <text x="70" y="380" fill="#ffffff" font-size="80" letter-spacing="1">${esc(linhas[0].toUpperCase())}</text>
-  <text x="70" y="470" fill="#ffffff" font-size="80" letter-spacing="1">${esc(linhas[1].toUpperCase())}</text>
-  <text x="74" y="620" fill="#f4b400" font-size="42" letter-spacing="4">${esc(cidade.nome.toUpperCase())} · ${cidade.uf}</text>
-  <text x="74" y="680" fill="#ffffff" opacity="0.7" font-size="30" letter-spacing="3">EVENTOS REGIÃO</text>
+  <rect width="1200" height="750" fill="url(#pontos)"/>
+  <circle cx="1010" cy="140" r="300" fill="#ffffff" opacity="0.05"/>
+  <g transform="translate(470 195) scale(5)" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="4" stroke-linejoin="round">
+    <path d="${glifo}"/>
+  </g>
 </svg>`
 }
 
 // banner genérico usado quando um evento é cadastrado sem imagem
 writeFileSync(
   p('public/img/eventos/_padrao.svg'),
-  bannerEvento(
-    { titulo: 'Evento na sua região', categoria: 'comunitario' },
-    { cor: ['#1f6feb', '#0b2a4a'], nome: 'Eventos Região', uf: 'BR' },
-  ).trim(),
+  bannerEvento({ categoria: 'comunitario' }).trim(),
 )
 
 // ---------- 4. eventos.json ----------
@@ -86,7 +111,7 @@ const eventosJson = eventos.map((e, i) => {
 
   let imagem_url = e.imagem_url
   if (imagem_url === 'auto') {
-    writeFileSync(p('public/img/eventos', `${e.id}.svg`), bannerEvento(e, cidade).trim())
+    writeFileSync(p('public/img/eventos', `${e.id}.svg`), bannerEvento(e).trim())
     imagem_url = `/img/eventos/${e.id}.svg`
   }
 

@@ -101,25 +101,39 @@ export default function CarrosselDestaque({ eventos = [] }) {
               <img
                 src={e.imagem_url}
                 alt=""
-                className="absolute inset-0 h-full w-full object-cover opacity-60"
+                className="absolute inset-0 h-full w-full object-cover opacity-70"
                 style={{
-                  filter: 'blur(22px) saturate(1.2)',
+                  filter: 'blur(18px) saturate(1.25)',
                   transform: 'scale(1.15)',
                   animation: ativo && !reduzido ? 'ken-burns 6s ease-out both' : 'none',
                 }}
                 loading={idx === 0 ? 'eager' : 'lazy'}
               />
+              {/* pôster nítido à direita no desktop */}
+              <img
+                src={e.imagem_url}
+                alt=""
+                className="absolute inset-y-0 right-0 hidden h-full w-1/2 object-contain object-right p-4 sm:block"
+                loading={idx === 0 ? 'eager' : 'lazy'}
+              />
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 sm:hidden"
                 style={{
                   background:
-                    'linear-gradient(90deg, rgba(20,19,20,0.95) 0%, rgba(20,19,20,0.78) 40%, rgba(20,19,20,0.4) 100%)',
+                    'linear-gradient(180deg, rgba(20,19,20,0.35) 0%, rgba(20,19,20,0.55) 55%, rgba(20,19,20,0.95) 100%)',
+                }}
+              />
+              <div
+                className="absolute inset-0 hidden sm:block"
+                style={{
+                  background:
+                    'linear-gradient(90deg, rgba(20,19,20,0.96) 0%, rgba(20,19,20,0.82) 42%, rgba(20,19,20,0.15) 100%)',
                 }}
               />
               {ativo && (
                 <div
                   key={i}
-                  className="relative flex h-full flex-col justify-end gap-3 p-6 sm:p-10"
+                  className="relative flex h-full flex-col justify-end gap-3 p-6 sm:max-w-[58%] sm:p-10"
                 >
                   <div className="surgir flex flex-wrap gap-2" style={{ '--atraso': '60ms' }}>
                     <Selo tom="destaque">
@@ -151,11 +165,12 @@ export default function CarrosselDestaque({ eventos = [] }) {
 
         {itens.length > 1 && (
           <>
+            {/* setas só no desktop; no celular vale o arrastar + as bolinhas */}
             <button
               type="button"
               onClick={() => ir(i - 1)}
               aria-label="Anterior"
-              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-tinta/60 p-2 text-creme backdrop-blur transition-all hover:scale-110 hover:bg-tinta"
+              className="absolute left-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-tinta/60 p-2 text-creme backdrop-blur transition-all hover:scale-110 hover:bg-tinta sm:block"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
@@ -165,7 +180,7 @@ export default function CarrosselDestaque({ eventos = [] }) {
               type="button"
               onClick={() => ir(i + 1)}
               aria-label="Próximo"
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-tinta/60 p-2 text-creme backdrop-blur transition-all hover:scale-110 hover:bg-tinta"
+              className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-tinta/60 p-2 text-creme backdrop-blur transition-all hover:scale-110 hover:bg-tinta sm:block"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />

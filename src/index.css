@@ -345,4 +345,41 @@
   .esqueleto {
     @apply animate-pulse rounded-lg bg-borda/10;
   }
+
+  /* No celular: trilha que rola de lado (estilo Sympla). No desktop: grade. */
+  .trilha-cards {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-inline: -1rem;
+    padding: 0.25rem 1rem 0.75rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .trilha-cards::-webkit-scrollbar {
+    display: none;
+  }
+  .trilha-cards > * {
+    min-width: 80%;
+    scroll-snap-align: start;
+  }
+  @media (min-width: 640px) {
+    .trilha-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+      overflow: visible;
+      margin-inline: 0;
+      padding: 0;
+    }
+    .trilha-cards > * {
+      min-width: 0;
+    }
+  }
+  @media (min-width: 1024px) {
+    .trilha-cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
 }

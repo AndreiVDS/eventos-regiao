@@ -176,7 +176,7 @@ export default function Home() {
         {carregando ? (
           <EsqueletoCards />
         ) : destaques.length > 0 ? (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 trilha-cards">
             {destaques.map((evento, i) => (
               <CardEvento key={evento.id} evento={evento} indice={i} />
             ))}
@@ -209,7 +209,7 @@ export default function Home() {
                 Ver mais
               </Link>
             </div>
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 trilha-cards">
               {fimDeSemana.map((evento, i) => (
                 <CardEvento key={evento.id} evento={evento} indice={i} />
               ))}
@@ -226,7 +226,7 @@ export default function Home() {
             <p className="text-suave">
               Cada cidade tem sua identidade, suas tradições e sua própria agenda.
             </p>
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 trilha-cards">
               {cidades.slice(0, 9).map((c) => (
                 <Link
                   key={c.slug}

@@ -209,6 +209,7 @@ export async function enviarEvento(dados, usuario = null) {
     ...dados,
     id: dados.id || gerarSlug(dados.titulo),
     formato: dados.formato || 'presencial',
+    destaque: dados.destaque === true, // nunca null: a coluna é not null
     status: 'pendente',
     criado_em: new Date().toISOString(),
     criado_por: usuario?.id || null,
@@ -230,7 +231,12 @@ export async function enviarEvento(dados, usuario = null) {
   registro.criado_por_email = usuario?.email || dados.organizador_contato || null
 
   if (supabaseConfigurado) {
-    const { criado_por_email, ...paraBanco } = registro
+    const { criado_por_email, ...resto } = registro
+    // remove os campos nulos para as colunas com DEFAULT no banco assumirem o
+    // valor padrão (enviar null explícito quebra colunas "not null default …").
+    const paraBanco = Object.fromEntries(
+      Object.entries(resto).filter(([, v]) => v !== null),
+    )
     const { error } = await supabase.from('eventos').insert(paraBanco)
     if (error) throw error
     return registro

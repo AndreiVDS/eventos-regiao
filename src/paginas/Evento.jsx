@@ -163,7 +163,7 @@ export default function Evento() {
           <div className="container-pagina py-12">
             <h2 className="text-2xl">Eventos relacionados</h2>
             <p className="mt-1 text-suave">Mais em {evento.cidade_nome} ou na mesma categoria.</p>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-6 trilha-cards">
               {relacionados.map((e) => (
                 <CardEvento key={e.id} evento={e} />
               ))}

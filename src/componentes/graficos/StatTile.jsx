@@ -6,13 +6,13 @@ export default function StatTile({ rotulo, valor, sufixo = '', detalhe, tom = 'c
     destaque: 'bg-destaque text-tinta',
   }
   return (
-    <div className={`rounded-xl p-5 ${tons[tom]}`}>
-      <p className="text-sm font-semibold uppercase tracking-wide opacity-70">{rotulo}</p>
-      <p className="mt-1 font-titulo text-4xl leading-none tabular-nums">
+    <div className={`rounded-xl p-4 sm:p-5 ${tons[tom]}`}>
+      <p className="text-xs font-semibold uppercase tracking-wide opacity-70 sm:text-sm">{rotulo}</p>
+      <p className="mt-1 font-titulo text-3xl leading-none tabular-nums sm:text-4xl">
         {valor}
-        {sufixo && <span className="text-2xl opacity-80">{sufixo}</span>}
+        {sufixo && <span className="text-xl opacity-80 sm:text-2xl">{sufixo}</span>}
       </p>
-      {detalhe && <p className="mt-1 text-sm opacity-70">{detalhe}</p>}
+      {detalhe && <p className="mt-1 text-xs opacity-70 sm:text-sm">{detalhe}</p>}
     </div>
   )
 }
