@@ -85,7 +85,12 @@ export default function Evento() {
     `${evento.local}, ${evento.endereco}, ${evento.cidade_nome}`,
   )
   const mapa = `https://www.google.com/maps?q=${consultaMapa}&output=embed`
-  const mapaLink = `https://www.google.com/maps/search/?api=1&query=${consultaMapa}`
+  // rota a partir da localização de quem abre — usa a coordenada exata quando existe
+  const destinoRota =
+    evento.lat != null && evento.lng != null
+      ? `${evento.lat},${evento.lng}`
+      : `${evento.local}, ${evento.endereco || ''}, ${evento.cidade_nome}/${evento.uf}`
+  const trajetoLink = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinoRota)}`
 
   return (
     <article>
@@ -150,7 +155,7 @@ export default function Evento() {
             <br />
             {evento.endereco} — {evento.cidade_nome}/{evento.uf}
           </p>
-          <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-borda/10">
+          <div className="relative mt-4 overflow-hidden rounded-xl ring-1 ring-borda/10">
             <iframe
               title={`Mapa de ${evento.local}`}
               src={mapa}
@@ -158,15 +163,24 @@ export default function Evento() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
+            <a
+              href={trajetoLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-tinta absolute bottom-3 right-3 !px-4 !py-2 text-sm shadow-media"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M12 21s7-6.3 7-12a7 7 0 10-14 0c0 5.7 7 12 7 12z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              Ver trajeto
+            </a>
           </div>
-          <a
-            href={mapaLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-block text-sm text-texto underline hover:text-suave"
-          >
-            Abrir no Google Maps
-          </a>
         </div>
 
         <aside className="h-fit rounded-xl bg-superficie p-6 shadow-sm ring-1 ring-borda/10">
