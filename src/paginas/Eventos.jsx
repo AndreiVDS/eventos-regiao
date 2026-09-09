@@ -73,6 +73,18 @@ export default function Eventos() {
           : `${eventos?.length || 0} evento${eventos?.length === 1 ? '' : 's'} encontrado${
               eventos?.length === 1 ? '' : 's'
             }`}
+        {filtros.quando !== 'encerrados' ? (
+          <>
+            {' · '}
+            <button
+              type="button"
+              className="underline hover:text-texto"
+              onClick={() => aplicar({ ...filtros, quando: 'encerrados', de: '', ate: '' })}
+            >
+              ver encerrados
+            </button>
+          </>
+        ) : null}
       </p>
 
       <div className="mt-6">

@@ -40,6 +40,9 @@ describe('aplicarFiltros', () => {
   it('quando=futuros esconde eventos encerrados', () => {
     expect(aplicarFiltros(base, { quando: 'futuros' }).map((e) => e.id).sort()).toEqual(['a', 'b'])
   })
+  it('quando=encerrados mostra apenas os que já terminaram', () => {
+    expect(aplicarFiltros(base, { quando: 'encerrados' }).map((e) => e.id)).toEqual(['c'])
+  })
   it('ordena por data de início', () => {
     const r = aplicarFiltros(base, { quando: 'futuros' })
     expect(r[0].id).toBe('a')

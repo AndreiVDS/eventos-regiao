@@ -67,6 +67,7 @@ export function aplicarFiltros(eventos, filtros = {}) {
         if (ate && inicio > new Date(ate)) return false
       } else if (quando) {
         if (quando === 'futuros' && fim < hoje) return false
+        if (quando === 'encerrados' && fim >= hoje) return false
         if (quando === 'semana') {
           const em7dias = new Date(hoje)
           em7dias.setDate(em7dias.getDate() + 7)
@@ -84,6 +85,9 @@ export function aplicarFiltros(eventos, filtros = {}) {
   if (ordenar === 'nome') return lista.sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR'))
   if (ordenar === 'recentes')
     return lista.sort((a, b) => new Date(b.criado_em || 0) - new Date(a.criado_em || 0))
+  // encerrados: os que terminaram há menos tempo primeiro
+  if (quando === 'encerrados' && !ordenar)
+    return lista.sort((a, b) => new Date(b.data_inicio) - new Date(a.data_inicio))
   return lista.sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio))
 }
 

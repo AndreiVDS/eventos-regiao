@@ -5,6 +5,7 @@ const PERIODOS = [
   { valor: 'semana', rotulo: 'Próximos 7 dias' },
   { valor: 'mes', rotulo: 'Próximos 30 dias' },
   { valor: 'personalizado', rotulo: 'Escolher datas…' },
+  { valor: 'encerrados', rotulo: 'Já encerrados' },
   { valor: '', rotulo: 'Qualquer data' },
 ]
 
