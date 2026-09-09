@@ -21,7 +21,7 @@ const VAZIO = {
   ordenar: 'data',
 }
 
-export default function FiltrosEventos({ valores, aoMudar, cidades }) {
+export default function FiltrosEventos({ valores, aoMudar, cidades, temLocalizacao = false }) {
   const set = (campo, valor) => aoMudar({ ...valores, [campo]: valor })
 
   const usaDatas = valores.quando === 'personalizado' || valores.de || valores.ate
@@ -118,7 +118,7 @@ export default function FiltrosEventos({ valores, aoMudar, cidades }) {
       <div>
         <label className="rotulo" htmlFor="f-ordenar">Ordenar por</label>
         <select id="f-ordenar" className="campo" value={valores.ordenar || 'data'} onChange={(e) => set('ordenar', e.target.value)}>
-          {ORDENACOES.map((o) => (
+          {ORDENACOES.filter((o) => !o.exigeLocalizacao || temLocalizacao).map((o) => (
             <option key={o.valor} value={o.valor}>{o.rotulo}</option>
           ))}
         </select>

@@ -6,7 +6,7 @@ import EsqueletoCards from '../componentes/EsqueletoCards'
 import EstadoVazio from '../componentes/EstadoVazio'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
-import { useCidadeAtual } from '../lib/cidade'
+import { useCidadeAtual, useLocalizacao } from '../lib/cidade'
 
 const PADRAO = {
   busca: '', cidade: '', categoria: '', entrada: '', formato: '',
@@ -16,6 +16,7 @@ const PADRAO = {
 export default function Eventos() {
   const [params, setParams] = useSearchParams()
   const [cidadeSlug, definirCidade] = useCidadeAtual()
+  const { coords } = useLocalizacao()
 
   // Um link compartilhado com ?cidade=... passa a valer também no seletor do topo.
   useEffect(() => {
@@ -56,11 +57,12 @@ export default function Eventos() {
   }
 
   const { dados: cidades } = useAsync(() => listarCidades(), [])
+  const chaveCoords = coords ? `${coords.lat},${coords.lng}` : ''
   const { dados: eventos, carregando } = useAsync(
-    () => listarEventos(filtros),
+    () => listarEventos({ ...filtros, origem: coords }),
     [
       filtros.busca, filtros.cidade, filtros.categoria, filtros.entrada, filtros.formato,
-      filtros.quando, filtros.de, filtros.ate, filtros.ordenar,
+      filtros.quando, filtros.de, filtros.ate, filtros.ordenar, chaveCoords,
     ],
   )
 
@@ -88,7 +90,12 @@ export default function Eventos() {
       </p>
 
       <div className="mt-6">
-        <FiltrosEventos valores={filtros} aoMudar={aplicar} cidades={cidades || []} />
+        <FiltrosEventos
+          valores={filtros}
+          aoMudar={aplicar}
+          cidades={cidades || []}
+          temLocalizacao={Boolean(coords)}
+        />
       </div>
 
       {carregando ? (

@@ -3,8 +3,10 @@ import { listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import {
   useCidadeAtual,
+  useLocalizacao,
   cidadeMaisProxima,
   obterLocalizacao,
+  formatarDistancia,
 } from '../lib/cidade'
 
 function normalizar(t = '') {
@@ -14,9 +16,10 @@ function normalizar(t = '') {
 export default function SeletorCidade({ classe = '' }) {
   const { dados: cidades } = useAsync(() => listarCidades(), [])
   const [slug, definir] = useCidadeAtual()
+  const { coords, definirCoords } = useLocalizacao()
   const [aberto, setAberto] = useState(false)
   const [busca, setBusca] = useState('')
-  const [gpsEstado, setGpsEstado] = useState(null) // null | 'buscando' | mensagem de erro
+  const [gpsEstado, setGpsEstado] = useState(null) // null | 'buscando' | 'ok'+texto | erro
   const caixaRef = useRef(null)
 
   const atual = (cidades || []).find((c) => c.slug === slug)
@@ -55,11 +58,20 @@ export default function SeletorCidade({ classe = '' }) {
       const ponto = await obterLocalizacao()
       const perto = cidadeMaisProxima(ponto, cidades || [])
       if (!perto) throw new Error('Nenhuma cidade cadastrada por perto.')
-      setGpsEstado(null)
-      escolher(perto.cidade.slug)
+      definirCoords(ponto)
+      definir(perto.cidade.slug)
+      setBusca('')
+      setGpsEstado(
+        `Você está a ${formatarDistancia(perto.distanciaKm)} de ${perto.cidade.nome}`,
+      )
     } catch (err) {
       setGpsEstado(err.message || 'Não deu para usar a localização.')
     }
+  }
+
+  function limparGps() {
+    definirCoords(null)
+    setGpsEstado(null)
   }
 
   return (
@@ -92,16 +104,40 @@ export default function SeletorCidade({ classe = '' }) {
           aria-label="Escolher cidade"
           className="absolute right-0 z-50 mt-2 w-72 rounded-xl bg-superficie p-3 text-texto shadow-xl ring-1 ring-borda/15"
         >
-          <button
-            type="button"
-            onClick={usarGps}
-            className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-semibold hover:bg-texto/5"
-          >
-            <span aria-hidden="true">📍</span>
-            {gpsEstado === 'buscando' ? 'Localizando…' : 'Usar minha localização'}
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={usarGps}
+              disabled={gpsEstado === 'buscando'}
+              className="flex flex-1 items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-semibold hover:bg-texto/5"
+            >
+              <span aria-hidden="true">📍</span>
+              {gpsEstado === 'buscando'
+                ? 'Localizando…'
+                : coords
+                  ? 'Atualizar minha localização'
+                  : 'Usar minha localização'}
+            </button>
+            {coords && (
+              <button
+                type="button"
+                onClick={limparGps}
+                className="rounded-lg px-2 py-2 text-xs text-suave hover:bg-texto/5"
+              >
+                limpar
+              </button>
+            )}
+          </div>
           {gpsEstado && gpsEstado !== 'buscando' && (
-            <p className="mt-1 px-2 text-xs text-red-700 dark:text-red-400" role="alert">
+            <p
+              className={`mt-1 px-2 text-xs ${
+                gpsEstado.startsWith('Você está')
+                  ? 'text-suave'
+                  : 'text-red-700 dark:text-red-400'
+              }`}
+              role="status"
+            >
+              {gpsEstado.startsWith('Você está') ? '✓ ' : ''}
               {gpsEstado}
             </p>
           )}

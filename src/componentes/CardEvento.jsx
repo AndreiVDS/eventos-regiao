@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Selo from './Selo'
 import { ehDestaque } from '../lib/api'
+import { useLocalizacao, distanciaAteSlug, formatarDistancia } from '../lib/cidade'
 import {
   carimboData,
   emojiCategoria,
@@ -14,6 +15,8 @@ export default function CardEvento({ evento, indice = 0 }) {
   const { dia, mes } = carimboData(evento.data_inicio)
   const passou = eventoJaPassou(evento)
   const destaque = !passou && ehDestaque(evento)
+  const { coords } = useLocalizacao()
+  const distancia = coords ? distanciaAteSlug(coords, evento.cidade) : null
 
   return (
     <article
@@ -75,6 +78,9 @@ export default function CardEvento({ evento, indice = 0 }) {
               <Link to={`/cidades/${evento.cidade}`} className="font-semibold hover:underline">
                 {evento.cidade_nome}/{evento.uf}
               </Link>
+              {distancia != null && (
+                <span className="whitespace-nowrap text-suave"> · a ~{formatarDistancia(distancia)}</span>
+              )}
             </dd>
           </div>
         </dl>

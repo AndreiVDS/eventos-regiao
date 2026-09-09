@@ -21,6 +21,7 @@ export const FORMATOS = [
 
 export const ORDENACOES = [
   { valor: 'data', rotulo: 'Data (mais próximos)' },
+  { valor: 'perto', rotulo: 'Mais perto de você', exigeLocalizacao: true },
   { valor: 'recentes', rotulo: 'Adicionados recentemente' },
   { valor: 'nome', rotulo: 'Nome (A–Z)' },
 ]

@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigurado } from './supabase'
+import { distanciaAteSlug } from './geo'
 
 /**
  * Camada de acesso a dados da plataforma.
@@ -42,7 +43,7 @@ export function normalizar(texto = '') {
 }
 
 export function aplicarFiltros(eventos, filtros = {}) {
-  const { busca, cidade, categoria, entrada, formato, quando, de, ate, ordenar } = filtros
+  const { busca, cidade, categoria, entrada, formato, quando, de, ate, ordenar, origem } = filtros
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
@@ -85,6 +86,10 @@ export function aplicarFiltros(eventos, filtros = {}) {
   if (ordenar === 'nome') return lista.sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR'))
   if (ordenar === 'recentes')
     return lista.sort((a, b) => new Date(b.criado_em || 0) - new Date(a.criado_em || 0))
+  if (ordenar === 'perto' && origem) {
+    const dist = (e) => distanciaAteSlug(origem, e.cidade) ?? Infinity
+    return lista.sort((a, b) => dist(a) - dist(b) || new Date(a.data_inicio) - new Date(b.data_inicio))
+  }
   // encerrados: os que terminaram há menos tempo primeiro
   if (quando === 'encerrados' && !ordenar)
     return lista.sort((a, b) => new Date(b.data_inicio) - new Date(a.data_inicio))

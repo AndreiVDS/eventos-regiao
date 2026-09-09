@@ -29,6 +29,11 @@ export default function Privacidade() {
         <ul className="ml-5 list-disc space-y-1">
           <li><strong>Tema</strong> (claro/escuro/sistema) e <strong>cidade</strong> escolhida no seletor;</li>
           <li>Sua <strong>sessão</strong>, para manter o login entre páginas;</li>
+          <li>
+            Se você usar <strong>“perto de mim”</strong>, sua posição <strong>aproximada</strong>
+            (arredondada para cerca de 1 km, válida por 12 horas) — só para calcular a distância até
+            os eventos. Você pode limpar isso no próprio seletor de cidade.
+          </li>
           <li>No modo de demonstração (sem banco), rascunhos de eventos, destaques e confirmações ficam só no navegador.</li>
         </ul>
         <p>

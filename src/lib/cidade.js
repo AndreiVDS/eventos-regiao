@@ -1,14 +1,19 @@
-import { createContext, createElement, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 /**
  * "Cidade atual" — preferência global de localização do visitante.
  * Guardada no localStorage; '' significa "todas as cidades".
+ * Também guarda (opcional) a posição aproximada do "perto de mim".
  */
 
 const CHAVE = 'cidade'
-const CidadeContexto = createContext(null)
+const CHAVE_LOC = 'localizacao' // { lat, lng, em } — coords arredondadas + validade
+const TTL_MS = 12 * 60 * 60 * 1000
 
-function ler() {
+const CidadeContexto = createContext(null)
+const LocalContexto = createContext(null)
+
+function lerSlug() {
   try {
     return localStorage.getItem(CHAVE) || ''
   } catch {
@@ -16,8 +21,19 @@ function ler() {
   }
 }
 
+function lerLoc() {
+  try {
+    const o = JSON.parse(localStorage.getItem(CHAVE_LOC) || 'null')
+    if (o && Date.now() - o.em < TTL_MS) return { lat: o.lat, lng: o.lng }
+  } catch {
+    /* ignore */
+  }
+  return null
+}
+
 export function CidadeProvider({ children }) {
-  const [slug, setSlug] = useState(ler)
+  const [slug, setSlug] = useState(lerSlug)
+  const [coords, setCoords] = useState(lerLoc)
 
   const definir = useCallback((novo) => {
     setSlug(novo || '')
@@ -29,16 +45,44 @@ export function CidadeProvider({ children }) {
     }
   }, [])
 
+  const definirCoords = useCallback((c) => {
+    if (!c) {
+      setCoords(null)
+      try {
+        localStorage.removeItem(CHAVE_LOC)
+      } catch {
+        /* ignore */
+      }
+      return
+    }
+    // arredonda para ~1 km (2 casas) — não guardamos a posição exata
+    const lat = Math.round(c.lat * 100) / 100
+    const lng = Math.round(c.lng * 100) / 100
+    setCoords({ lat, lng })
+    try {
+      localStorage.setItem(CHAVE_LOC, JSON.stringify({ lat, lng, em: Date.now() }))
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
   // sincroniza entre abas
   useEffect(() => {
     const aoMudar = (e) => {
       if (e.key === CHAVE) setSlug(e.newValue || '')
+      if (e.key === CHAVE_LOC) setCoords(lerLoc())
     }
     window.addEventListener('storage', aoMudar)
     return () => window.removeEventListener('storage', aoMudar)
   }, [])
 
-  return createElement(CidadeContexto.Provider, { value: [slug, definir] }, children)
+  const valorLoc = useMemo(() => ({ coords, definirCoords }), [coords, definirCoords])
+
+  return createElement(
+    CidadeContexto.Provider,
+    { value: [slug, definir] },
+    createElement(LocalContexto.Provider, { value: valorLoc }, children),
+  )
 }
 
 export function useCidadeAtual() {
@@ -47,60 +91,22 @@ export function useCidadeAtual() {
   return ctx
 }
 
-/* ---------- geolocalização: achar a cidade mais próxima ---------- */
-
-function haversineKm(a, b) {
-  const R = 6371
-  const rad = (x) => (x * Math.PI) / 180
-  const dLat = rad(b.lat - a.lat)
-  const dLng = rad(b.lng - a.lng)
-  const s =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2
-  return 2 * R * Math.asin(Math.sqrt(s))
+export function useLocalizacao() {
+  const ctx = useContext(LocalContexto)
+  if (!ctx) throw new Error('useLocalizacao deve estar dentro de <CidadeProvider>')
+  return ctx
 }
 
-// Coordenadas de referência das cidades. Fallback caso o banco não tenha
-// as colunas lat/lng preenchidas (o "perto de mim" funciona mesmo assim).
-export const COORDENADAS = {
-  'jaragua-do-sul': [-26.4851, -49.0666],
-  blumenau: [-26.9194, -49.0661],
-  florianopolis: [-27.5949, -48.5482],
-  joinville: [-26.3045, -48.8487],
-  curitiba: [-25.4284, -49.2733],
-  ipatinga: [-19.4683, -42.5369],
-  'porto-alegre': [-30.0346, -51.2177],
-  gramado: [-29.3747, -50.876],
-  'rio-de-janeiro': [-22.9068, -43.1729],
-  'sao-paulo': [-23.5505, -46.6333],
-  paraty: [-23.2178, -44.7131],
-  'campos-do-jordao': [-22.7392, -45.5915],
-  salvador: [-12.9777, -38.5016],
-  olinda: [-8.0089, -34.8553],
-  parintins: [-2.6283, -56.7358],
-  'ouro-preto': [-20.3856, -43.5035],
-}
+/* ---------- geolocalização ---------- */
 
-function coordsDaCidade(c) {
-  if (c.lat != null && c.lng != null) return { lat: c.lat, lng: c.lng }
-  const ref = COORDENADAS[c.slug]
-  return ref ? { lat: ref[0], lng: ref[1] } : null
-}
-
-export function cidadeMaisProxima(ponto, cidades) {
-  let melhor = null
-  let menor = Infinity
-  for (const c of cidades) {
-    const co = coordsDaCidade(c)
-    if (!co) continue
-    const d = haversineKm(ponto, co)
-    if (d < menor) {
-      menor = d
-      melhor = c
-    }
-  }
-  return melhor ? { cidade: melhor, distanciaKm: Math.round(menor) } : null
-}
+export {
+  COORDENADAS,
+  coordsDaCidade,
+  distanciaAteCidade,
+  distanciaAteSlug,
+  formatarDistancia,
+  cidadeMaisProxima,
+} from './geo'
 
 /** Pede a localização do navegador. Resolve com { lat, lng } ou rejeita. */
 export function obterLocalizacao() {
