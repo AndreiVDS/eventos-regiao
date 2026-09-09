@@ -163,16 +163,21 @@ writeFileSync(
 )
 
 // ---------- 5c. supabase/coordenadas-eventos.sql (só as coordenadas dos locais) ----------
-let coordSql =
-  '-- Coordenadas do LOCAL de cada evento (para a distância "perto de mim").\n' +
-  '-- Seguro rodar mais de uma vez. Cole no SQL Editor do Supabase e execute.\n\n' +
-  'alter table public.eventos add column if not exists lat double precision;\n' +
-  'alter table public.eventos add column if not exists lng double precision;\n\n'
-for (const e of eventosJson) {
-  if (e.lat == null || e.lng == null) continue
-  coordSql += `update public.eventos set lat = ${e.lat}, lng = ${e.lng} where id = '${e.id}';\n`
-}
-writeFileSync(p('supabase/coordenadas-eventos.sql'), coordSql)
+// Uma única instrução UPDATE ... FROM (VALUES ...) — mais à prova de erro de
+// cópia do que 27 UPDATEs soltos.
+const linhasCoord = eventosJson
+  .filter((e) => e.lat != null && e.lng != null)
+  .map((e) => `  ('${e.id}', ${e.lat}, ${e.lng})`)
+writeFileSync(
+  p('supabase/coordenadas-eventos.sql'),
+  '-- Coordenadas do LOCAL de cada evento (distância "perto de mim").\n' +
+    '-- Seguro rodar mais de uma vez. Cole INTEIRO no SQL Editor do Supabase.\n\n' +
+    'alter table public.eventos add column if not exists lat double precision;\n' +
+    'alter table public.eventos add column if not exists lng double precision;\n\n' +
+    'update public.eventos as e\n   set lat = c.lat, lng = c.lng\n  from (values\n' +
+    linhasCoord.join(',\n') +
+    '\n) as c(id, lat, lng)\n where e.id = c.id;\n',
+)
 
 // ---------- 6. api/_dados.json (snapshot para a API serverless) ----------
 mkdirSync(p('api'), { recursive: true })
