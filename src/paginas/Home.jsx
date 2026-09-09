@@ -154,7 +154,7 @@ export default function Home() {
 
       {/* Próximos eventos */}
       <Secao className="container-pagina py-14">
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="titulo-secao text-3xl">
               Próximos eventos{cidadeAtual ? ` em ${cidadeAtual.nome}` : ''}
@@ -167,7 +167,7 @@ export default function Home() {
           </div>
           <Link
             to={cidadeSlug ? `/eventos?cidade=${cidadeSlug}` : '/eventos'}
-            className="btn-contorno !py-2 text-sm"
+            className="btn-contorno shrink-0 !py-2 text-sm"
           >
             Ver todos
           </Link>
@@ -195,7 +195,7 @@ export default function Home() {
       {!carregando && fimDeSemana.length > 0 && (
         <Secao className="bg-superficie py-14">
           <div className="container-pagina">
-            <div className="flex items-end justify-between gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="titulo-secao text-3xl">Neste fim de semana</h2>
                 <p className="text-suave">
@@ -204,7 +204,7 @@ export default function Home() {
               </div>
               <Link
                 to={`/eventos?quando=semana${cidadeSlug ? `&cidade=${cidadeSlug}` : ''}`}
-                className="btn-contorno !py-2 text-sm"
+                className="btn-contorno shrink-0 !py-2 text-sm"
               >
                 Ver mais
               </Link>
@@ -250,7 +250,7 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-6">
-              <Link to="/cidades" className="btn-contorno !py-2 text-sm">Ver todas as cidades</Link>
+              <Link to="/cidades" className="btn-contorno shrink-0 !py-2 text-sm">Ver todas as cidades</Link>
             </div>
           </div>
         </Secao>

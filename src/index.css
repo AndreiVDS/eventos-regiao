@@ -292,8 +292,8 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 font-semibold
-           transition-all duration-200 focus-visible:ring-2 active:scale-[0.97]
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-5 py-3
+           font-semibold transition-all duration-200 focus-visible:ring-2 active:scale-[0.97]
            disabled:pointer-events-none disabled:opacity-60;
   }
   .btn-destaque {

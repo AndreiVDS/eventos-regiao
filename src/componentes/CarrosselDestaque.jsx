@@ -17,39 +17,65 @@ export default function CarrosselDestaque({ eventos = [] }) {
   const [i, setI] = useState(0)
   const [pausado, setPausado] = useState(false)
   const [reduzido] = useState(semMovimento)
-  const timer = useRef(null)
-  const arraste = useRef(null)
+  const [arrastoX, setArrastoX] = useState(0) // deslocamento do dedo, em px
+  const [arrastando, setArrastando] = useState(false)
+  const caixaRef = useRef(null)
+  const inicio = useRef(null)
 
-  const ir = useCallback(
-    (n) => setI(((n % itens.length) + itens.length) % itens.length),
-    [itens.length],
-  )
-
-  const tocando = pausado || reduzido || itens.length < 2
+  const n = itens.length
+  const ir = useCallback((alvo) => setI(((alvo % n) + n) % n), [n])
+  const tocando = pausado || arrastando || reduzido || n < 2
 
   useEffect(() => {
     if (tocando) return
-    timer.current = setInterval(() => setI((v) => (v + 1) % itens.length), INTERVALO)
-    return () => clearInterval(timer.current)
-  }, [tocando, itens.length])
+    const t = setInterval(() => setI((v) => (v + 1) % n), INTERVALO)
+    return () => clearInterval(t)
+  }, [tocando, n])
 
-  if (itens.length === 0) return null
+  if (n === 0) return null
 
   function aoTeclar(e) {
     if (e.key === 'ArrowLeft') ir(i - 1)
     if (e.key === 'ArrowRight') ir(i + 1)
   }
 
-  function inicioArraste(e) {
-    arraste.current = { x: e.clientX, y: e.clientY }
+  function pointerDown(e) {
+    if (n < 2) return
+    inicio.current = { x: e.clientX, y: e.clientY, capturado: false }
   }
-  function fimArraste(e) {
-    if (!arraste.current) return
-    const dx = e.clientX - arraste.current.x
-    const dy = e.clientY - arraste.current.y
-    arraste.current = null
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) ir(i + (dx < 0 ? 1 : -1))
+  function pointerMove(e) {
+    if (!inicio.current) return
+    const dx = e.clientX - inicio.current.x
+    const dy = e.clientY - inicio.current.y
+    // só assume o gesto como "arrastar carrossel" se for mais horizontal
+    if (!inicio.current.capturado) {
+      if (Math.abs(dx) < 8) return
+      if (Math.abs(dy) > Math.abs(dx)) {
+        inicio.current = null
+        return
+      }
+      inicio.current.capturado = true
+      setArrastando(true)
+      try {
+        e.currentTarget.setPointerCapture?.(e.pointerId)
+      } catch {
+        /* ponteiro sintético ou já liberado */
+      }
+    }
+    setArrastoX(dx)
   }
+  function pointerUp() {
+    if (!inicio.current) return
+    const dx = arrastoX
+    const largura = caixaRef.current?.offsetWidth || 1
+    inicio.current = null
+    setArrastando(false)
+    setArrastoX(0)
+    if (dx <= -largura * 0.18) ir(i + 1)
+    else if (dx >= largura * 0.18) ir(i - 1)
+  }
+
+  const deslocamento = `calc(${-i * 100}% + ${arrastando ? arrastoX : 0}px)`
 
   return (
     <section
@@ -63,8 +89,8 @@ export default function CarrosselDestaque({ eventos = [] }) {
       onKeyDown={aoTeclar}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-3xl">Em destaque</h2>
-        {itens.length > 1 && !reduzido && (
+        <h2 className="titulo-secao text-3xl">Em destaque</h2>
+        {n > 1 && !reduzido && (
           <button
             type="button"
             onClick={() => setPausado((p) => !p)}
@@ -85,57 +111,62 @@ export default function CarrosselDestaque({ eventos = [] }) {
       </div>
 
       <div
-        className="relative h-[22rem] touch-pan-y select-none overflow-hidden rounded-2xl bg-tinta text-creme shadow-lg sm:h-[28rem]"
-        onPointerDown={inicioArraste}
-        onPointerUp={fimArraste}
+        ref={caixaRef}
+        className="relative h-[21rem] touch-pan-y overflow-hidden rounded-2xl bg-tinta text-creme shadow-media sm:h-[27rem]"
+        onPointerDown={pointerDown}
+        onPointerMove={pointerMove}
+        onPointerUp={pointerUp}
+        onPointerCancel={pointerUp}
       >
-        {itens.map((e, idx) => {
-          const ativo = idx === i
-          return (
-            <article
-              key={e.id}
-              className="absolute inset-0 transition-opacity duration-700 ease-out"
-              style={{ opacity: ativo ? 1 : 0, pointerEvents: ativo ? 'auto' : 'none' }}
-              aria-hidden={!ativo}
-            >
-              <img
-                src={e.imagem_url}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover opacity-70"
-                style={{
-                  filter: 'blur(18px) saturate(1.25)',
-                  transform: 'scale(1.15)',
-                  animation: ativo && !reduzido ? 'ken-burns 6s ease-out both' : 'none',
-                }}
-                loading={idx === 0 ? 'eager' : 'lazy'}
-              />
-              {/* pôster nítido à direita no desktop */}
-              <img
-                src={e.imagem_url}
-                alt=""
-                className="absolute inset-y-0 right-0 hidden h-full w-1/2 object-contain object-right p-4 sm:block"
-                loading={idx === 0 ? 'eager' : 'lazy'}
-              />
-              <div
-                className="absolute inset-0 sm:hidden"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(20,19,20,0.35) 0%, rgba(20,19,20,0.55) 55%, rgba(20,19,20,0.95) 100%)',
-                }}
-              />
-              <div
-                className="absolute inset-0 hidden sm:block"
-                style={{
-                  background:
-                    'linear-gradient(90deg, rgba(20,19,20,0.96) 0%, rgba(20,19,20,0.82) 42%, rgba(20,19,20,0.15) 100%)',
-                }}
-              />
-              {ativo && (
+        {/* trilho que desliza */}
+        <div
+          className="flex h-full"
+          style={{
+            transform: `translate3d(${deslocamento}, 0, 0)`,
+            transition: arrastando || reduzido ? 'none' : 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
+          }}
+        >
+          {itens.map((e, idx) => {
+            const perto = Math.abs(idx - i) <= 1
+            return (
+              <article
+                key={e.id}
+                className="relative h-full w-full shrink-0 select-none overflow-hidden"
+                aria-hidden={idx !== i}
+              >
+                <img
+                  src={e.imagem_url}
+                  alt=""
+                  className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-70"
+                  style={{ filter: 'blur(16px) saturate(1.25)' }}
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  draggable="false"
+                />
+                {perto && (
+                  <img
+                    src={e.imagem_url}
+                    alt=""
+                    className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-1/2 object-contain object-right p-4 sm:block"
+                    loading="lazy"
+                    draggable="false"
+                  />
+                )}
                 <div
-                  key={i}
-                  className="relative flex h-full flex-col justify-end gap-3 p-6 sm:max-w-[58%] sm:p-10"
-                >
-                  <div className="surgir flex flex-wrap gap-2" style={{ '--atraso': '60ms' }}>
+                  className="absolute inset-0 sm:hidden"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,19,20,0.30) 0%, rgba(20,19,20,0.55) 55%, rgba(20,19,20,0.96) 100%)',
+                  }}
+                />
+                <div
+                  className="absolute inset-0 hidden sm:block"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, rgba(20,19,20,0.96) 0%, rgba(20,19,20,0.82) 42%, rgba(20,19,20,0.12) 100%)',
+                  }}
+                />
+                <div className="relative flex h-full flex-col justify-end gap-3 p-6 sm:max-w-[58%] sm:p-10">
+                  <div className="flex flex-wrap gap-2">
                     <Selo tom="destaque">
                       {emojiCategoria(e.categoria)} {rotuloCategoria(e.categoria)}
                     </Selo>
@@ -143,29 +174,30 @@ export default function CarrosselDestaque({ eventos = [] }) {
                       {e.cidade_nome}/{e.uf}
                     </Selo>
                   </div>
-                  <h3
-                    className="surgir max-w-2xl text-3xl leading-tight sm:text-5xl"
-                    style={{ '--atraso': '120ms' }}
-                  >
-                    {e.titulo}
-                  </h3>
-                  <p className="surgir text-creme/80" style={{ '--atraso': '180ms' }}>
-                    🗓️ {formatarPeriodo(e.data_inicio, e.data_fim)}
-                  </p>
-                  <div className="surgir" style={{ '--atraso': '240ms' }}>
-                    <Link to={`/eventos/${e.id}`} className="btn-destaque mt-1">
+                  <h3 className="text-3xl leading-tight sm:text-5xl">{e.titulo}</h3>
+                  <p className="text-creme/80">🗓️ {formatarPeriodo(e.data_inicio, e.data_fim)}</p>
+                  <div>
+                    <Link
+                      to={`/eventos/${e.id}`}
+                      className="btn-destaque mt-1"
+                      tabIndex={idx === i ? 0 : -1}
+                      onClick={(ev) => {
+                        // se estava arrastando, não navega
+                        if (arrastoX !== 0) ev.preventDefault()
+                      }}
+                    >
                       Ver detalhes
                     </Link>
                   </div>
                 </div>
-              )}
-            </article>
-          )
-        })}
+              </article>
+            )
+          })}
+        </div>
 
-        {itens.length > 1 && (
+        {/* setas só no desktop */}
+        {n > 1 && (
           <>
-            {/* setas só no desktop; no celular vale o arrastar + as bolinhas */}
             <button
               type="button"
               onClick={() => ir(i - 1)}
@@ -187,7 +219,6 @@ export default function CarrosselDestaque({ eventos = [] }) {
               </svg>
             </button>
 
-            {/* barra de progresso do slide atual */}
             {!tocando && (
               <div className="absolute inset-x-0 top-0 h-1 bg-creme/15">
                 <div
@@ -197,28 +228,31 @@ export default function CarrosselDestaque({ eventos = [] }) {
                 />
               </div>
             )}
-
-            <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 pb-3">
-              {itens.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setI(idx)}
-                  aria-label={`Ir para o destaque ${idx + 1}`}
-                  aria-current={idx === i}
-                  className="group px-1.5 py-2"
-                >
-                  <span
-                    className={`block h-2 rounded-full transition-all ${
-                      idx === i ? 'w-6 bg-destaque' : 'w-2 bg-creme/50 group-hover:bg-creme/80'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
           </>
         )}
       </div>
+
+      {/* bolinhas FORA do card, para não cobrir o botão */}
+      {n > 1 && (
+        <div className="mt-3 flex justify-center gap-1.5">
+          {itens.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setI(idx)}
+              aria-label={`Ir para o destaque ${idx + 1}`}
+              aria-current={idx === i}
+              className="group p-1.5"
+            >
+              <span
+                className={`block h-2 rounded-full transition-all ${
+                  idx === i ? 'w-6 bg-destaque' : 'w-2 bg-borda/25 group-hover:bg-borda/40'
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </section>
   )
 }

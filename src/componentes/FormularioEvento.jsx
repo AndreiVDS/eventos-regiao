@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { CATEGORIAS, ENTRADAS, FORMATOS } from '../lib/formatacao'
+import { buscarCep, formatarCep } from '../lib/cep'
+import { enviarImagem, validarImagem, DICA_IMAGEM } from '../lib/upload'
 
 export const EVENTO_VAZIO = {
   titulo: '',
@@ -10,6 +12,7 @@ export const EVENTO_VAZIO = {
   categoria: '',
   formato: 'presencial',
   cidade: '',
+  cep: '',
   local: '',
   endereco: '',
   data_inicio: '',
@@ -29,9 +32,52 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
   const [form, setForm] = useState(valorInicial)
   const [erros, setErros] = useState({})
   const [enviando, setEnviando] = useState(false)
+  const [cepStatus, setCepStatus] = useState(null) // null | 'buscando' | 'ok' | 'erro'
+  const [imgStatus, setImgStatus] = useState(null) // null | 'enviando' | 'ok' | 'erro'
+  const [imgPreview, setImgPreview] = useState(valorInicial.imagem_url || '')
+  const arquivoRef = useRef(null)
 
   const campo = (nome, valor) => setForm((f) => ({ ...f, [nome]: valor }))
   const inval = (nome) => (erros[nome] ? 'true' : undefined)
+
+  async function aoDigitarCep(v) {
+    const fmt = formatarCep(v)
+    campo('cep', fmt)
+    if (fmt.replace(/\D/g, '').length !== 8) return
+    setCepStatus('buscando')
+    const r = await buscarCep(fmt)
+    if (!r) {
+      setCepStatus('erro')
+      return
+    }
+    setCepStatus('ok')
+    setForm((f) => ({
+      ...f,
+      endereco: [r.logradouro, r.bairro].filter(Boolean).join(' - ') || f.endereco,
+      cidade: !f.cidade && cidades ? matchCidade(cidades, r) : f.cidade,
+    }))
+  }
+
+  async function aoEscolherImagem(file) {
+    if (!file) return
+    const erro = validarImagem(file)
+    if (erro) {
+      setImgStatus('erro')
+      setErros((e) => ({ ...e, imagem: erro }))
+      return
+    }
+    setErros((e) => ({ ...e, imagem: undefined }))
+    setImgStatus('enviando')
+    try {
+      const url = await enviarImagem(file)
+      campo('imagem_url', url)
+      setImgPreview(url)
+      setImgStatus('ok')
+    } catch (err) {
+      setImgStatus('erro')
+      setErros((e) => ({ ...e, imagem: err.message }))
+    }
+  }
 
   function validar() {
     const e = {}
@@ -130,7 +176,28 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
           onChange={(e) => campo('local', e.target.value)} aria-invalid={inval('local')} />
       </Grupo>
 
-      <Grupo rotulo="Endereço" htmlFor="endereco">
+      <Grupo
+        rotulo="CEP (opcional)"
+        htmlFor="cep"
+        dica="Preenche o endereço e ajuda a marcar a distância certa até o evento."
+      >
+        <input
+          id="cep"
+          inputMode="numeric"
+          className="campo"
+          placeholder="00000-000"
+          value={form.cep}
+          onChange={(e) => aoDigitarCep(e.target.value)}
+        />
+        {cepStatus === 'buscando' && <p className="mt-1 text-xs text-suave">Buscando endereço…</p>}
+        {cepStatus === 'ok' && <p className="mt-1 text-xs text-suave">✓ Endereço preenchido pelo CEP.</p>}
+        {cepStatus === 'erro' && (
+          <p className="mt-1 text-xs text-suave">CEP não encontrado — pode digitar o endereço à mão.</p>
+        )}
+      </Grupo>
+
+      <Grupo className="sm:col-span-2" rotulo="Endereço" htmlFor="endereco"
+        dica="Rua, número e bairro.">
         <input id="endereco" className="campo" value={form.endereco}
           onChange={(e) => campo('endereco', e.target.value)} />
       </Grupo>
@@ -168,10 +235,68 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
           onChange={(e) => campo('link_oficial', e.target.value)} aria-invalid={inval('link_oficial')} />
       </Grupo>
 
-      <Grupo rotulo="URL da imagem (opcional)" htmlFor="imagem_url">
-        <input id="imagem_url" type="url" className="campo" placeholder="https://" value={form.imagem_url}
-          onChange={(e) => campo('imagem_url', e.target.value)} />
-      </Grupo>
+      <div className="sm:col-span-2">
+        <span className="rotulo">Imagem do evento (opcional)</span>
+        <p className="mb-2 text-xs text-suave">{DICA_IMAGEM}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          {imgPreview ? (
+            <img
+              src={imgPreview}
+              alt="Pré-visualização"
+              className="h-20 w-32 rounded-lg object-cover ring-1 ring-borda/15"
+            />
+          ) : (
+            <div className="grid h-20 w-32 place-items-center rounded-lg bg-texto/5 text-xs text-suave ring-1 ring-borda/15">
+              sem imagem
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
+            <input
+              ref={arquivoRef}
+              id="imagem-arquivo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              onChange={(e) => aoEscolherImagem(e.target.files?.[0])}
+            />
+            <button
+              type="button"
+              className="btn-contorno !py-2 text-sm"
+              onClick={() => arquivoRef.current?.click()}
+              disabled={imgStatus === 'enviando'}
+            >
+              {imgStatus === 'enviando' ? 'Enviando…' : imgPreview ? 'Trocar imagem' : 'Escolher do dispositivo'}
+            </button>
+            {imgPreview && (
+              <button
+                type="button"
+                className="text-xs text-suave underline hover:text-texto"
+                onClick={() => {
+                  campo('imagem_url', '')
+                  setImgPreview('')
+                  setImgStatus(null)
+                }}
+              >
+                remover
+              </button>
+            )}
+          </div>
+        </div>
+        <details className="mt-2 text-sm">
+          <summary className="cursor-pointer text-suave">ou colar um link da imagem</summary>
+          <input
+            type="url"
+            className="campo mt-2"
+            placeholder="https://"
+            value={/^https?:/i.test(form.imagem_url) ? form.imagem_url : ''}
+            onChange={(e) => {
+              campo('imagem_url', e.target.value)
+              setImgPreview(e.target.value)
+            }}
+          />
+        </details>
+        {erros.imagem && <p className="mt-1 text-sm text-red-700 dark:text-red-400" role="alert">{erros.imagem}</p>}
+      </div>
 
       <Grupo rotulo="Quem organiza" htmlFor="organizador_nome" erro={erros.organizador_nome}>
         <input id="organizador_nome" className="campo" value={form.organizador_nome}
@@ -197,12 +322,25 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
       </div>
 
       <div className="sm:col-span-2">
-        <button type="submit" className="btn-destaque" disabled={enviando}>
+        <button
+          type="submit"
+          className="btn-destaque w-full text-base sm:w-auto"
+          disabled={enviando || imgStatus === 'enviando'}
+        >
           {enviando ? 'Enviando…' : textoBotao}
         </button>
       </div>
     </form>
   )
+}
+
+/** Casa a cidade do ViaCEP com uma das cidades cadastradas (mesma UF + nome). */
+function matchCidade(cidades, r) {
+  const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const achou = cidades.find(
+    (c) => c.uf?.toUpperCase() === r.uf?.toUpperCase() && norm(c.nome) === norm(r.cidade),
+  )
+  return achou?.slug || ''
 }
 
 /** Traduz o erro técnico do banco numa frase que o organizador entende. */
