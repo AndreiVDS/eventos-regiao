@@ -44,6 +44,23 @@ describe('aplicarFiltros', () => {
     const r = aplicarFiltros(base, { quando: 'futuros' })
     expect(r[0].id).toBe('a')
   })
+  it('filtra por formato (presencial é o padrão quando ausente)', () => {
+    const comFormato = [
+      { ...base[0], formato: 'online' },
+      { ...base[1] }, // sem formato → presencial
+    ]
+    expect(aplicarFiltros(comFormato, { formato: 'online', quando: '' }).map((e) => e.id)).toEqual(['a'])
+    expect(aplicarFiltros(comFormato, { formato: 'presencial', quando: '' }).map((e) => e.id)).toEqual(['b'])
+  })
+  it('intervalo de datas: de/ate tem prioridade sobre quando', () => {
+    const r = aplicarFiltros(base, { de: '2099-08-01', ate: '2099-08-31', quando: 'futuros' })
+    expect(r.map((e) => e.id)).toEqual(['a'])
+  })
+  it('ordena por nome e por recentes', () => {
+    const comData = base.map((e, i) => ({ ...e, criado_em: `2026-01-0${i + 1}` }))
+    expect(aplicarFiltros(comData, { quando: '', ordenar: 'nome' })[0].titulo).toBe('Evento antigo')
+    expect(aplicarFiltros(comData, { quando: '', ordenar: 'recentes' })[0].id).toBe('c')
+  })
 })
 
 describe('montarRegistroEvento', () => {

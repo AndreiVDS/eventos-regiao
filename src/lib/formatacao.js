@@ -13,6 +13,25 @@ export const ENTRADAS = [
   { valor: 'misto', rotulo: 'Parte gratuito' },
 ]
 
+export const FORMATOS = [
+  { valor: 'presencial', rotulo: 'Presencial', emoji: '📍' },
+  { valor: 'online', rotulo: 'Online', emoji: '💻' },
+  { valor: 'hibrido', rotulo: 'Híbrido', emoji: '🔀' },
+]
+
+export const ORDENACOES = [
+  { valor: 'data', rotulo: 'Data (mais próximos)' },
+  { valor: 'recentes', rotulo: 'Adicionados recentemente' },
+  { valor: 'nome', rotulo: 'Nome (A–Z)' },
+]
+
+export function rotuloFormato(valor) {
+  return FORMATOS.find((f) => f.valor === valor)?.rotulo || valor
+}
+export function emojiFormato(valor) {
+  return FORMATOS.find((f) => f.valor === valor)?.emoji || '📍'
+}
+
 export function rotuloCategoria(valor) {
   return CATEGORIAS.find((c) => c.valor === valor)?.rotulo || valor
 }

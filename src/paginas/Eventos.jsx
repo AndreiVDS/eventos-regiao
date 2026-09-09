@@ -8,7 +8,10 @@ import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual } from '../lib/cidade'
 
-const PADRAO = { busca: '', cidade: '', categoria: '', entrada: '', quando: 'futuros' }
+const PADRAO = {
+  busca: '', cidade: '', categoria: '', entrada: '', formato: '',
+  quando: 'futuros', de: '', ate: '', ordenar: 'data',
+}
 
 export default function Eventos() {
   const [params, setParams] = useSearchParams()
@@ -28,7 +31,11 @@ export default function Eventos() {
       cidade: params.has('cidade') ? params.get('cidade') : cidadeSlug,
       categoria: params.get('categoria') || '',
       entrada: params.get('entrada') || '',
+      formato: params.get('formato') || '',
       quando: params.get('quando') ?? 'futuros',
+      de: params.get('de') || '',
+      ate: params.get('ate') || '',
+      ordenar: params.get('ordenar') || 'data',
     }),
     [params, cidadeSlug],
   )
@@ -37,6 +44,7 @@ export default function Eventos() {
     const p = new URLSearchParams()
     for (const [k, v] of Object.entries(novos)) {
       if (k === 'quando' && (!v || v === 'futuros')) continue
+      if (k === 'ordenar' && (!v || v === 'data')) continue
       if (k === 'cidade') {
         p.set('cidade', v || '') // sempre explícito, para permitir "todas"
         definirCidade(v || '')
@@ -50,7 +58,10 @@ export default function Eventos() {
   const { dados: cidades } = useAsync(() => listarCidades(), [])
   const { dados: eventos, carregando } = useAsync(
     () => listarEventos(filtros),
-    [filtros.busca, filtros.cidade, filtros.categoria, filtros.entrada, filtros.quando],
+    [
+      filtros.busca, filtros.cidade, filtros.categoria, filtros.entrada, filtros.formato,
+      filtros.quando, filtros.de, filtros.ate, filtros.ordenar,
+    ],
   )
 
   return (

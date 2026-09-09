@@ -252,6 +252,7 @@ export const eventos = [
   },
   {
     id: 'fashion-tech-2026',
+    formato: 'hibrido',
     titulo: 'Fashion Tech: inovar, capacitar e proteger ideias na moda',
     descricao:
       'Palestra sobre como a tecnologia transforma o setor da moda, da criação de produtos à proteção da propriedade intelectual.',
@@ -271,6 +272,7 @@ export const eventos = [
   },
   {
     id: 'casa-inteligente-2026',
+    formato: 'hibrido',
     titulo: 'Treinamento Casa Inteligente',
     descricao:
       'Capacitação prática sobre automação residencial: segurança, conforto e eficiência energética com tecnologia acessível.',

@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
-import { CATEGORIAS, ENTRADAS } from '../lib/formatacao'
+import { CATEGORIAS, ENTRADAS, FORMATOS } from '../lib/formatacao'
 
 export const EVENTO_VAZIO = {
   titulo: '',
   descricao: '',
   descricao_completa: '',
   categoria: '',
+  formato: 'presencial',
   cidade: '',
   local: '',
   endereco: '',
@@ -111,6 +112,13 @@ export default function FormularioEvento({ valorInicial = EVENTO_VAZIO, aoEnviar
           onChange={(e) => campo('categoria', e.target.value)} aria-invalid={inval('categoria')}>
           <option value="">Selecione…</option>
           {CATEGORIAS.map((c) => <option key={c.valor} value={c.valor}>{c.rotulo}</option>)}
+        </select>
+      </Grupo>
+
+      <Grupo rotulo="Formato" htmlFor="formato">
+        <select id="formato" className="campo" value={form.formato || 'presencial'}
+          onChange={(e) => campo('formato', e.target.value)}>
+          {FORMATOS.map((f) => <option key={f.valor} value={f.valor}>{f.rotulo}</option>)}
         </select>
       </Grupo>
 

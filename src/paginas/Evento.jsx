@@ -11,6 +11,8 @@ import {
   emojiCategoria,
   rotuloCategoria,
   rotuloEntrada,
+  rotuloFormato,
+  emojiFormato,
   formatarPeriodo,
   eventoJaPassou,
 } from '../lib/formatacao'
@@ -58,6 +60,11 @@ export default function Evento() {
               {emojiCategoria(evento.categoria)} {rotuloCategoria(evento.categoria)}
             </Selo>
             <Selo tom="escuro">{rotuloEntrada(evento.entrada)}</Selo>
+            {evento.formato && evento.formato !== 'presencial' && (
+              <Selo tom="escuro">
+                {emojiFormato(evento.formato)} {rotuloFormato(evento.formato)}
+              </Selo>
+            )}
             {eventoJaPassou(evento) && <Selo tom="escuro">Encerrado</Selo>}
           </div>
           <h1 className="mt-3 max-w-3xl text-4xl sm:text-5xl">{evento.titulo}</h1>

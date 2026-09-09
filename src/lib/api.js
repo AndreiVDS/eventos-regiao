@@ -42,11 +42,11 @@ export function normalizar(texto = '') {
 }
 
 export function aplicarFiltros(eventos, filtros = {}) {
-  const { busca, cidade, categoria, entrada, quando } = filtros
+  const { busca, cidade, categoria, entrada, formato, quando, de, ate, ordenar } = filtros
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
-  return eventos
+  const lista = eventos
     .filter((e) => e.status === 'aprovado')
     .filter((e) => {
       if (busca) {
@@ -56,9 +56,16 @@ export function aplicarFiltros(eventos, filtros = {}) {
       if (cidade && e.cidade !== cidade) return false
       if (categoria && e.categoria !== categoria) return false
       if (entrada && e.entrada !== entrada) return false
-      if (quando) {
-        const fim = new Date(e.data_fim || e.data_inicio)
-        const inicio = new Date(e.data_inicio)
+      if (formato && (e.formato || 'presencial') !== formato) return false
+
+      const fim = new Date(e.data_fim || e.data_inicio)
+      const inicio = new Date(e.data_inicio)
+
+      // intervalo de datas escolhido tem prioridade sobre o "quando"
+      if (de || ate) {
+        if (de && fim < new Date(de)) return false
+        if (ate && inicio > new Date(ate)) return false
+      } else if (quando) {
         if (quando === 'futuros' && fim < hoje) return false
         if (quando === 'semana') {
           const em7dias = new Date(hoje)
@@ -73,7 +80,11 @@ export function aplicarFiltros(eventos, filtros = {}) {
       }
       return true
     })
-    .sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio))
+
+  if (ordenar === 'nome') return lista.sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR'))
+  if (ordenar === 'recentes')
+    return lista.sort((a, b) => new Date(b.criado_em || 0) - new Date(a.criado_em || 0))
+  return lista.sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio))
 }
 
 /* ============================ Cidades ============================ */
@@ -106,9 +117,17 @@ export async function listarEventos(filtros = {}) {
     if (filtros.cidade) query = query.eq('cidade', filtros.cidade)
     if (filtros.categoria) query = query.eq('categoria', filtros.categoria)
     if (filtros.entrada) query = query.eq('entrada', filtros.entrada)
+    if (filtros.formato) query = query.eq('formato', filtros.formato)
     const { data, error } = await query.order('data_inicio', { ascending: true })
     if (error) throw error
-    return aplicarFiltros(data, { busca: filtros.busca, quando: filtros.quando })
+    // busca por texto, período e ordenação aplicados no cliente (mesma regra dos dados locais)
+    return aplicarFiltros(data, {
+      busca: filtros.busca,
+      quando: filtros.quando,
+      de: filtros.de,
+      ate: filtros.ate,
+      ordenar: filtros.ordenar,
+    })
   }
   const { eventos } = await carregarDadosLocais()
   return aplicarFiltros([...eventos, ...lerEnviados()], filtros)
@@ -142,7 +161,7 @@ export function gerarSlug(titulo = 'evento') {
 // Colunas reais da tabela "eventos" (o formulário tem campos extras, como
 // "aceite", que não podem ir no insert).
 const COLUNAS_EVENTO = [
-  'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'cidade',
+  'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade',
   'cidade_nome', 'uf', 'local', 'endereco', 'data_inicio', 'data_fim', 'horario',
   'entrada', 'preco_texto', 'imagem_url', 'link_oficial', 'organizador_nome',
   'organizador_contato', 'criado_por', 'status', 'criado_em',
@@ -169,6 +188,7 @@ export async function enviarEvento(dados, usuario = null) {
   const completo = {
     ...dados,
     id: dados.id || gerarSlug(dados.titulo),
+    formato: dados.formato || 'presencial',
     status: 'pendente',
     criado_em: new Date().toISOString(),
     criado_por: usuario?.id || null,

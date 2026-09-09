@@ -92,6 +92,7 @@ const eventosJson = eventos.map((e, i) => {
     descricao: e.descricao,
     descricao_completa: e.descricao_completa ?? null,
     categoria: e.categoria,
+    formato: e.formato ?? 'presencial',
     cidade: e.cidade,
     cidade_nome: cidade.nome,
     uf: cidade.uf,
@@ -116,7 +117,7 @@ const q = (s) =>
   s == null ? 'null' : typeof s === 'number' ? String(s) : `'${String(s).replace(/'/g, "''")}'`
 const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'lat', 'lng', 'imagem_url', 'site_prefeitura']
 const colsEvento = [
-  'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'cidade', 'cidade_nome', 'uf',
+  'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade', 'cidade_nome', 'uf',
   'local', 'endereco', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto',
   'imagem_url', 'link_oficial', 'organizador_nome', 'status', 'criado_em',
 ]
