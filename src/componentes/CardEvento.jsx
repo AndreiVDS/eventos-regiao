@@ -79,7 +79,17 @@ export default function CardEvento({ evento, indice = 0 }) {
                 {evento.cidade_nome}/{evento.uf}
               </Link>
               {distancia != null && (
-                <span className="whitespace-nowrap text-suave"> · a ~{formatarDistancia(distancia)}</span>
+                <span className="chip-distancia ml-1.5 align-middle">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M12 21s7-6.3 7-12a7 7 0 10-14 0c0 5.7 7 12 7 12z"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  ~{formatarDistancia(distancia)}
+                </span>
               )}
             </dd>
           </div>

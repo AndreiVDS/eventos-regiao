@@ -1,5 +1,5 @@
 import { supabase, supabaseConfigurado } from './supabase'
-import { distanciaAteSlug } from './geo'
+import { distanciaAteSlug, dentroDoRaio } from './geo'
 
 /**
  * Camada de acesso a dados da plataforma.
@@ -43,12 +43,20 @@ export function normalizar(texto = '') {
 }
 
 export function aplicarFiltros(eventos, filtros = {}) {
-  const { busca, cidade, categoria, entrada, formato, quando, de, ate, ordenar, origem } = filtros
+  const { busca, cidade, categoria, entrada, formato, quando, de, ate, ordenar, origem, raioKm } =
+    filtros
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
   const lista = eventos
     .filter((e) => e.status === 'aprovado')
+    .filter((e) => {
+      // raio de distância ("perto de mim"): online sempre passa; presencial
+      // precisa estar dentro do raio a partir da posição do visitante.
+      if (!origem || raioKm == null) return true
+      if ((e.formato || 'presencial') === 'online') return true
+      return dentroDoRaio(distanciaAteSlug(origem, e.cidade), raioKm)
+    })
     .filter((e) => {
       if (busca) {
         const alvo = normalizar(`${e.titulo} ${e.descricao} ${e.cidade_nome} ${e.local}`)
@@ -129,13 +137,15 @@ export async function listarEventos(filtros = {}) {
     if (filtros.formato) query = query.eq('formato', filtros.formato)
     const { data, error } = await query.order('data_inicio', { ascending: true })
     if (error) throw error
-    // busca por texto, período e ordenação aplicados no cliente (mesma regra dos dados locais)
+    // busca por texto, período, raio e ordenação aplicados no cliente (mesma regra dos dados locais)
     return aplicarFiltros(data, {
       busca: filtros.busca,
       quando: filtros.quando,
       de: filtros.de,
       ate: filtros.ate,
       ordenar: filtros.ordenar,
+      origem: filtros.origem,
+      raioKm: filtros.raioKm,
     })
   }
   const { eventos } = await carregarDadosLocais()

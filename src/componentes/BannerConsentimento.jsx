@@ -9,7 +9,7 @@ export default function BannerConsentimento() {
     <div
       role="dialog"
       aria-label="Aviso de privacidade"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-borda/15 bg-superficie/95 backdrop-blur"
+      className="animar-subir fixed inset-x-0 bottom-0 z-50 border-t border-borda/15 bg-superficie/95 backdrop-blur"
     >
       <div className="container-pagina flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-suave">

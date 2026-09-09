@@ -4,9 +4,10 @@ import CardEvento from '../componentes/CardEvento'
 import FiltrosEventos from '../componentes/FiltrosEventos'
 import EsqueletoCards from '../componentes/EsqueletoCards'
 import EstadoVazio from '../componentes/EstadoVazio'
+import ChamadaLocalizacao from '../componentes/ChamadaLocalizacao'
 import { listarEventos, listarCidades } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
-import { useCidadeAtual, useLocalizacao } from '../lib/cidade'
+import { useCidadeAtual, useLocalizacao, RAIOS } from '../lib/cidade'
 
 const PADRAO = {
   busca: '', cidade: '', categoria: '', entrada: '', formato: '',
@@ -16,7 +17,7 @@ const PADRAO = {
 export default function Eventos() {
   const [params, setParams] = useSearchParams()
   const [cidadeSlug, definirCidade] = useCidadeAtual()
-  const { coords } = useLocalizacao()
+  const { coords, raioKm } = useLocalizacao()
 
   // Um link compartilhado com ?cidade=... passa a valer também no seletor do topo.
   useEffect(() => {
@@ -67,12 +68,15 @@ export default function Eventos() {
 
   const { dados: cidades } = useAsync(() => listarCidades(), [])
   const { dados: eventos, carregando } = useAsync(
-    () => listarEventos({ ...filtros, origem: coords }),
+    () => listarEventos({ ...filtros, origem: coords, raioKm }),
     [
       filtros.busca, filtros.cidade, filtros.categoria, filtros.entrada, filtros.formato,
-      filtros.quando, filtros.de, filtros.ate, filtros.ordenar, chaveCoords,
+      filtros.quando, filtros.de, filtros.ate, filtros.ordenar, chaveCoords, raioKm,
     ],
   )
+
+  const ordenandoPorPerto = filtros.ordenar === 'perto' && coords
+  const rotuloRaio = RAIOS.find((r) => r.km === raioKm)?.rotulo
 
   return (
     <div className="container-pagina py-10">
@@ -97,6 +101,20 @@ export default function Eventos() {
         ) : null}
       </p>
 
+      {ordenandoPorPerto && (
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-suave">
+          <span className="ponto-vivo inline-block h-2 w-2 rounded-full bg-destaque text-destaque" />
+          Do mais perto para o mais longe
+          {rotuloRaio && rotuloRaio !== 'qualquer distância' ? ` · ${rotuloRaio}` : ''}
+        </p>
+      )}
+
+      {!coords && (
+        <div className="mt-5">
+          <ChamadaLocalizacao />
+        </div>
+      )}
+
       <div className="mt-6">
         <FiltrosEventos
           valores={filtros}
@@ -117,8 +135,16 @@ export default function Eventos() {
       ) : (
         <div className="mt-8">
           <EstadoVazio
-            titulo="Nenhum evento com esses filtros"
-            descricao="Tente ampliar o período, trocar a cidade ou limpar os filtros."
+            titulo={
+              raioKm != null && coords
+                ? `Nenhum evento num raio de ${rotuloRaio?.replace('até ', '')} de você`
+                : 'Nenhum evento com esses filtros'
+            }
+            descricao={
+              raioKm != null && coords
+                ? 'Aumente a distância no seletor de localização (no topo) ou limpe os filtros.'
+                : 'Tente ampliar o período, trocar a cidade ou limpar os filtros.'
+            }
             acao={
               <button className="btn-destaque" onClick={() => aplicar(PADRAO)}>
                 Limpar filtros

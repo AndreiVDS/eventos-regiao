@@ -33,6 +33,7 @@ function RolarAoTopo() {
 }
 
 export default function App() {
+  const { pathname } = useLocation()
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#conteudo" className="link-pular">Pular para o conteúdo</a>
@@ -42,6 +43,7 @@ export default function App() {
       <main id="conteudo" className="flex-1">
         <LimiteErro>
           <Suspense fallback={<Carregando />}>
+            <div key={pathname} className="pagina-entra">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/eventos" element={<Eventos />} />
@@ -97,6 +99,7 @@ export default function App() {
 
               <Route path="*" element={<NaoEncontrado />} />
             </Routes>
+            </div>
           </Suspense>
         </LimiteErro>
       </main>

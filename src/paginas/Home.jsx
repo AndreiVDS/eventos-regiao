@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import CardEvento from '../componentes/CardEvento'
 import EsqueletoCards from '../componentes/EsqueletoCards'
 import CarrosselDestaque from '../componentes/CarrosselDestaque'
+import ChamadaLocalizacao from '../componentes/ChamadaLocalizacao'
 import Contador from '../componentes/Contador'
 import Secao from '../componentes/Secao'
 import { listarEventos, listarCidades, listarDestaques } from '../lib/api'
@@ -134,6 +135,13 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {/* Convite para usar a localização */}
+      {!cidadeSlug && (
+        <div className="container-pagina pt-8">
+          <ChamadaLocalizacao />
+        </div>
+      )}
 
       {/* Carrossel de destaques */}
       {!carregando && carrossel.length >= 2 && <CarrosselDestaque eventos={carrossel} />}

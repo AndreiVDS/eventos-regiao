@@ -27,13 +27,15 @@ export default function Cabecalho() {
   return (
     <header className="sticky top-0 z-40 bg-tinta text-creme shadow-md">
       <div className="container-pagina flex items-center justify-between gap-4 py-3">
-        <div className="flex items-center gap-1">
-          <Link to="/" className="flex items-center gap-2" onClick={fechar}>
+        <div className="flex min-w-0 items-center gap-1">
+          <Link to="/" className="flex shrink-0 items-center gap-2" onClick={fechar}>
             <img src="/favicon.svg" alt="" width="36" height="36" className="rounded-lg" />
-            <span className="font-titulo text-2xl tracking-wider">Eventos Região</span>
+            <span className="hidden font-titulo text-2xl tracking-wider min-[420px]:inline">
+              Eventos Região
+            </span>
           </Link>
-          <span className="mx-1 hidden h-6 w-px bg-white/15 md:block" />
-          <SeletorCidade classe="hidden md:block" />
+          <span className="mx-1 hidden h-6 w-px bg-white/15 sm:block" />
+          <SeletorCidade />
         </div>
 
         <nav aria-label="Principal" className="hidden items-center gap-1 md:flex">
@@ -81,11 +83,8 @@ export default function Cabecalho() {
         <nav
           id="menu-mobile"
           aria-label="Principal (celular)"
-          className="border-t border-white/10 bg-tinta px-4 pb-4 md:hidden"
+          className="animar-descer border-t border-white/10 bg-tinta px-4 pb-4 pt-1 md:hidden"
         >
-          <div className="py-2">
-            <SeletorCidade />
-          </div>
           {linksPublicos.map((l) => (
             <NavLink key={l.para} to={l.para} className={classeLink} onClick={fechar} style={{ display: 'block' }}>
               {l.texto}

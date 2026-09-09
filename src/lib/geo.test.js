@@ -5,6 +5,7 @@ import {
   formatarDistancia,
   cidadeMaisProxima,
   dentroDaCobertura,
+  dentroDoRaio,
   RAIO_COBERTURA_KM,
 } from './geo'
 
@@ -61,5 +62,20 @@ describe('dentroDaCobertura', () => {
     expect(dentroDaCobertura(RAIO_COBERTURA_KM)).toBe(true)
     expect(dentroDaCobertura(RAIO_COBERTURA_KM + 1)).toBe(false)
     expect(dentroDaCobertura(null)).toBe(false)
+  })
+})
+
+describe('dentroDoRaio', () => {
+  it('raio nulo = sem limite (sempre true, mesmo sem distância)', () => {
+    expect(dentroDoRaio(9999, null)).toBe(true)
+    expect(dentroDoRaio(null, null)).toBe(true)
+  })
+  it('com raio, compara a distância', () => {
+    expect(dentroDoRaio(20, 30)).toBe(true)
+    expect(dentroDoRaio(30, 30)).toBe(true)
+    expect(dentroDoRaio(31, 30)).toBe(false)
+  })
+  it('distância desconhecida não passa quando há raio', () => {
+    expect(dentroDoRaio(null, 30)).toBe(false)
   })
 })

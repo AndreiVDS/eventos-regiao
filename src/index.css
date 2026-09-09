@@ -55,22 +55,47 @@
       scroll-behavior: auto !important;
     }
     /* garante que nada fique invisível quando as animações são desligadas */
-    .revelar {
+    .revelar,
+    .revelar-esq,
+    .revelar-dir,
+    .revelar-escala {
       opacity: 1 !important;
       transform: none !important;
     }
   }
 
+  /* --- Curva de animação padrão do site --- */
+  :root {
+    --mola: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   /* Aparecer ao rolar (usado com o hook useRevelar) */
-  .revelar {
+  .revelar,
+  .revelar-esq,
+  .revelar-dir,
+  .revelar-escala {
     opacity: 0;
-    transform: translateY(18px);
     transition:
       opacity 0.6s ease,
-      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform 0.7s var(--mola);
     transition-delay: var(--atraso, 0ms);
   }
-  .revelar.visivel {
+  .revelar {
+    transform: translateY(18px);
+  }
+  .revelar-esq {
+    transform: translateX(-24px);
+  }
+  .revelar-dir {
+    transform: translateX(24px);
+  }
+  .revelar-escala {
+    transform: scale(0.94);
+  }
+  .revelar.visivel,
+  .revelar-esq.visivel,
+  .revelar-dir.visivel,
+  .revelar-escala.visivel {
     opacity: 1;
     transform: none;
   }
@@ -87,8 +112,134 @@
     }
   }
   .surgir {
-    animation: surgir 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: surgir 0.6s var(--mola) both;
     animation-delay: var(--atraso, 0ms);
+  }
+
+  @keyframes surgir-escala {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Troca de página */
+  .pagina-entra {
+    animation: surgir 0.4s ease both;
+  }
+
+  /* Popovers e menus: cresce a partir do topo */
+  @keyframes abrir-popover {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .animar-popover {
+    animation: abrir-popover 0.18s ease-out both;
+    transform-origin: top;
+  }
+
+  /* Banner de consentimento subindo */
+  @keyframes subir {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  .animar-subir {
+    animation: subir 0.45s var(--mola) both;
+  }
+
+  /* Menu mobile descendo */
+  @keyframes descer {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .animar-descer {
+    animation: descer 0.2s ease-out both;
+  }
+
+  /* Zoom lento no fundo do carrossel (Ken Burns) */
+  @keyframes ken-burns {
+    from {
+      transform: scale(1.12);
+    }
+    to {
+      transform: scale(1.22);
+    }
+  }
+
+  /* Barra de progresso do carrossel */
+  @keyframes preencher {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* Flutuar de leve (ícone de localização, selos) */
+  @keyframes flutuar {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Pulso do ponto "você está aqui" */
+  @keyframes pulso-ping {
+    0% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    70%,
+    100% {
+      transform: scale(2.4);
+      opacity: 0;
+    }
+  }
+  .ponto-vivo {
+    position: relative;
+  }
+  .ponto-vivo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: pulso-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ponto-vivo::after,
+    .animar-flutuar {
+      animation: none !important;
+    }
+  }
+
+  .animar-flutuar {
+    animation: flutuar 3.5s ease-in-out infinite;
   }
 }
 
@@ -110,16 +261,34 @@
 
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 font-semibold
-           transition-all duration-200 focus-visible:ring-2 active:scale-[0.98];
+           transition-all duration-200 focus-visible:ring-2 active:scale-[0.97]
+           disabled:pointer-events-none disabled:opacity-60;
   }
   .btn-destaque {
-    @apply btn bg-destaque text-tinta hover:brightness-95;
+    @apply btn bg-destaque text-tinta hover:brightness-95 hover:-translate-y-0.5
+           hover:shadow-lg hover:shadow-destaque/25;
   }
   .btn-tinta {
-    @apply btn bg-tinta text-creme hover:bg-destaque hover:text-tinta;
+    @apply btn bg-tinta text-creme hover:bg-destaque hover:text-tinta hover:-translate-y-0.5;
   }
   .btn-contorno {
     @apply btn border-2 border-texto text-texto hover:bg-texto hover:text-fundo;
+  }
+
+  /* Rodinha de carregamento */
+  .girando {
+    animation: girar 0.7s linear infinite;
+  }
+  @keyframes girar {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Chip de distância nos cards ("perto de mim") */
+  .chip-distancia {
+    @apply inline-flex items-center gap-1 rounded-full bg-destaque/15 px-2 py-0.5
+           text-xs font-semibold text-texto;
   }
 
   .campo {

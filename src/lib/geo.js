@@ -68,6 +68,22 @@ export function dentroDaCobertura(distanciaKm) {
   return distanciaKm != null && distanciaKm <= RAIO_COBERTURA_KM
 }
 
+// Opções de "raio" para a busca "perto de mim" (null = sem limite de distância).
+export const RAIOS = [
+  { km: 30, rotulo: 'até 30 km' },
+  { km: 60, rotulo: 'até 60 km' },
+  { km: 150, rotulo: 'até 150 km' },
+  { km: 500, rotulo: 'até 500 km' },
+  { km: null, rotulo: 'qualquer distância' },
+]
+
+/** distanciaKm cabe no raio? raioKm nulo/indefinido = sem limite. */
+export function dentroDoRaio(distanciaKm, raioKm) {
+  if (raioKm == null) return true
+  if (distanciaKm == null) return false
+  return distanciaKm <= raioKm
+}
+
 export function cidadeMaisProxima(ponto, cidades) {
   let melhor = null
   let menor = Infinity

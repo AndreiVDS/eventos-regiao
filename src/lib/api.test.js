@@ -64,6 +64,39 @@ describe('aplicarFiltros', () => {
     expect(aplicarFiltros(comData, { quando: '', ordenar: 'nome' })[0].titulo).toBe('Evento antigo')
     expect(aplicarFiltros(comData, { quando: '', ordenar: 'recentes' })[0].id).toBe('c')
   })
+
+  it('ordena por "perto" quando recebe a origem', () => {
+    // origem ~Porto Alegre → b (porto-alegre) antes de a (gramado) antes de c (curitiba)
+    const r = aplicarFiltros(base, {
+      quando: '',
+      ordenar: 'perto',
+      origem: { lat: -30.03, lng: -51.22 },
+    })
+    expect(r.map((e) => e.id)).toEqual(['b', 'a', 'c'])
+  })
+
+  it('raioKm remove eventos presenciais fora do raio a partir da origem', () => {
+    // origem em Porto Alegre, raio 200 km → só b (POA) e a (Gramado ~95 km); c (Curitiba ~545 km) sai
+    const r = aplicarFiltros(base, {
+      quando: '',
+      origem: { lat: -30.03, lng: -51.22 },
+      raioKm: 200,
+    })
+    expect(r.map((e) => e.id).sort()).toEqual(['a', 'b'])
+  })
+
+  it('raioKm mantém eventos online mesmo sem cidade próxima', () => {
+    const comOnline = [
+      { ...base[2], id: 'on', formato: 'online' }, // Curitiba, longe, mas online
+      base[1], // Porto Alegre, perto
+    ]
+    const r = aplicarFiltros(comOnline, {
+      quando: '',
+      origem: { lat: -30.03, lng: -51.22 },
+      raioKm: 50,
+    })
+    expect(r.map((e) => e.id).sort()).toEqual(['b', 'on'])
+  })
 })
 
 describe('montarRegistroEvento', () => {
