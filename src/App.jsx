@@ -27,6 +27,7 @@ const Moderacao = lazy(() => import('./paginas/painel/Moderacao'))
 const Destaques = lazy(() => import('./paginas/painel/Destaques'))
 const NovaCidade = lazy(() => import('./paginas/painel/NovaCidade'))
 const Mensagens = lazy(() => import('./paginas/painel/Mensagens'))
+const Patrocinios = lazy(() => import('./paginas/painel/Patrocinios'))
 const Termos = lazy(() => import('./paginas/Termos'))
 const Contato = lazy(() => import('./paginas/Contato'))
 
@@ -119,6 +120,14 @@ export default function App() {
                 element={
                   <RotaProtegida exige="equipe">
                     <Mensagens />
+                  </RotaProtegida>
+                }
+              />
+              <Route
+                path="/painel/patrocinios"
+                element={
+                  <RotaProtegida exige="equipe">
+                    <Patrocinios />
                   </RotaProtegida>
                 }
               />

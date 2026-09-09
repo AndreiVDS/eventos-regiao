@@ -19,6 +19,7 @@ export function AbasPainel() {
       <NavLink to="/painel/destaques" className={classe}>Destaques</NavLink>
       <NavLink to="/painel/cidades" className={classe}>Cidades</NavLink>
       <NavLink to="/painel/mensagens" className={classe}>Mensagens</NavLink>
+      <NavLink to="/painel/patrocinios" className={classe}>Patrocínios</NavLink>
     </nav>
   )
 }

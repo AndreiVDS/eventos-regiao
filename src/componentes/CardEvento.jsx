@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import Selo from './Selo'
-import { ehDestaque } from '../lib/api'
+import { ehDestaque, ehPatrocinado } from '../lib/api'
 import { useLocalizacao, distanciaAteEvento, coordsDoEvento, formatarDistancia } from '../lib/cidade'
 import {
   carimboData,
@@ -14,7 +14,8 @@ import {
 export default function CardEvento({ evento, indice = 0 }) {
   const { dia, mes } = carimboData(evento.data_inicio)
   const passou = eventoJaPassou(evento)
-  const destaque = !passou && ehDestaque(evento)
+  const patrocinado = !passou && ehPatrocinado(evento)
+  const destaque = !passou && !patrocinado && ehDestaque(evento)
   const { coords } = useLocalizacao()
   const distancia = coords ? distanciaAteEvento(coords, evento) : null
   const distExata = coordsDoEvento(evento)?.exata
@@ -43,6 +44,11 @@ export default function CardEvento({ evento, indice = 0 }) {
         {destaque && (
           <span className="absolute right-3 top-3 rounded-full bg-destaque px-2 py-1 text-xs font-bold text-tinta shadow">
             ★ Destaque
+          </span>
+        )}
+        {patrocinado && (
+          <span className="absolute right-3 top-3 rounded-full bg-tinta px-2 py-1 text-xs font-bold text-creme shadow">
+            ✨ Patrocinado
           </span>
         )}
       </div>

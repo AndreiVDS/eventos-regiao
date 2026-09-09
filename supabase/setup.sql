@@ -46,6 +46,7 @@ do $$ begin
   if to_regclass('public.eventos') is not null then
     alter table public.eventos add column if not exists recorrencia text;
     alter table public.eventos add column if not exists motivo_recusa text;
+    alter table public.eventos add column if not exists patrocinado boolean not null default false;
   end if;
 end $$;
 
@@ -71,6 +72,7 @@ create table if not exists public.eventos (
   lng                 double precision,   -- (para a distância "perto de mim")
   recorrencia         text check (recorrencia is null or recorrencia in ('semanal','mensal','anual')),
   motivo_recusa       text,
+  patrocinado         boolean not null default false,
   data_inicio         date not null,
   data_fim            date,
   horario             text,
@@ -210,6 +212,37 @@ create policy "contatos: qualquer um envia"
 drop policy if exists "contatos: equipe lê" on public.contatos;
 create policy "contatos: equipe lê"
   on public.contatos for select to authenticated using (public.is_equipe());
+
+-- ---------- Tabela: pedidos_destaque (destaque pago, fluxo manual) ----------
+create table if not exists public.pedidos_destaque (
+  id         uuid primary key default gen_random_uuid(),
+  evento_id  text not null references public.eventos (id) on delete cascade,
+  dias       int not null default 7,
+  observacao text,
+  status     text not null default 'solicitado'
+             check (status in ('solicitado','pago','recusado')),
+  criado_por uuid references auth.users (id) on delete set null,
+  criado_em  timestamptz not null default now()
+);
+alter table public.pedidos_destaque enable row level security;
+
+drop policy if exists "pedidos: dono cria" on public.pedidos_destaque;
+create policy "pedidos: dono cria"
+  on public.pedidos_destaque for insert to authenticated
+  with check (
+    criado_por = auth.uid()
+    and exists (select 1 from public.eventos e where e.id = evento_id and e.criado_por = auth.uid())
+  );
+
+drop policy if exists "pedidos: dono e equipe leem" on public.pedidos_destaque;
+create policy "pedidos: dono e equipe leem"
+  on public.pedidos_destaque for select to authenticated
+  using (criado_por = auth.uid() or public.is_equipe());
+
+drop policy if exists "pedidos: equipe resolve" on public.pedidos_destaque;
+create policy "pedidos: equipe resolve"
+  on public.pedidos_destaque for update to authenticated
+  using (public.is_equipe()) with check (public.is_equipe());
 
 -- =====================================================================
 --  View pública sem dados de contato (recomendada para leitura anônima)

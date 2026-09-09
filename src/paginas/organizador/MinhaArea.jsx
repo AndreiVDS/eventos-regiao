@@ -3,6 +3,7 @@ import Carregando from '../../componentes/Carregando'
 import EstadoVazio from '../../componentes/EstadoVazio'
 import StatTile from '../../componentes/graficos/StatTile'
 import Selo from '../../componentes/Selo'
+import SolicitarDestaque from '../../componentes/SolicitarDestaque'
 import { listarMeusEventos } from '../../lib/api'
 import { contarPresencasEm } from '../../lib/presenca'
 import { useAuth } from '../../lib/auth'
@@ -109,6 +110,11 @@ export default function MinhaArea() {
                       </Link>
                     )}
                   </div>
+                  {e.status === 'aprovado' && !eventoJaPassou(e) && (
+                    <div className="mt-2">
+                      <SolicitarDestaque evento={e} />
+                    </div>
+                  )}
                   {e.status === 'recusado' && (
                     <p className="mt-2 rounded-lg bg-red-100 p-2 text-sm text-red-800 dark:bg-red-950/60 dark:text-red-200">
                       {e.motivo_recusa

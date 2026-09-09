@@ -269,7 +269,7 @@ export function gerarSlug(titulo = 'evento') {
 // "aceite", que não podem ir no insert).
 const COLUNAS_EVENTO = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade',
-  'cidade_nome', 'uf', 'local', 'endereco', 'lat', 'lng', 'recorrencia', 'motivo_recusa',
+  'cidade_nome', 'uf', 'local', 'endereco', 'lat', 'lng', 'recorrencia', 'motivo_recusa', 'patrocinado',
   'data_inicio', 'data_fim', 'horario',
   'entrada', 'preco_texto', 'imagem_url', 'link_oficial', 'organizador_nome',
   'organizador_contato', 'criado_por', 'destaque', 'status', 'criado_em',
@@ -464,6 +464,111 @@ export async function listarContatos() {
     return JSON.parse(localStorage.getItem(CHAVE_CONTATOS) || '[]')
   } catch {
     return []
+  }
+}
+
+/* ================= Destaque pago (fluxo manual, sem gateway) ================= */
+
+const CHAVE_PEDIDOS = 'pedidos_destaque_locais'
+export const VALOR_DESTAQUE = { 7: 30, 15: 55, 30: 90 } // R$ por período (ilustrativo)
+
+export async function solicitarDestaque({ evento_id, dias, observacao }, usuario) {
+  const registro = {
+    evento_id,
+    dias: Number(dias) || 7,
+    observacao: (observacao || '').trim() || null,
+    status: 'solicitado',
+    criado_por: usuario?.id || null,
+    criado_em: new Date().toISOString(),
+  }
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('pedidos_destaque').insert(registro)
+    if (error) throw error
+    return
+  }
+  try {
+    const l = JSON.parse(localStorage.getItem(CHAVE_PEDIDOS) || '[]')
+    localStorage.setItem(CHAVE_PEDIDOS, JSON.stringify([{ id: registro.criado_em, ...registro }, ...l]))
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Pedidos de destaque de um evento (para o organizador saber que já pediu). */
+export async function pedidosDoEvento(evento_id) {
+  if (supabaseConfigurado) {
+    const { data } = await supabase
+      .from('pedidos_destaque')
+      .select('*')
+      .eq('evento_id', evento_id)
+      .order('criado_em', { ascending: false })
+    return data || []
+  }
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_PEDIDOS) || '[]').filter((p) => p.evento_id === evento_id)
+  } catch {
+    return []
+  }
+}
+
+export async function listarPedidosDestaque() {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('pedidos_destaque')
+      .select('*, eventos(titulo, cidade_nome, uf)')
+      .order('criado_em', { ascending: false })
+    if (error) throw error
+    return data
+  }
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_PEDIDOS) || '[]')
+  } catch {
+    return []
+  }
+}
+
+/** A equipe confirma o pagamento (liga o destaque) ou recusa o pedido. */
+export async function resolverPedidoDestaque(pedido, novoStatus) {
+  if (supabaseConfigurado) {
+    const { error } = await supabase
+      .from('pedidos_destaque')
+      .update({ status: novoStatus })
+      .eq('id', pedido.id)
+    if (error) throw error
+    if (novoStatus === 'pago') {
+      await supabase
+        .from('eventos')
+        .update({ destaque: true, patrocinado: true })
+        .eq('id', pedido.evento_id)
+    }
+    return
+  }
+  try {
+    const l = JSON.parse(localStorage.getItem(CHAVE_PEDIDOS) || '[]').map((p) =>
+      p.id === pedido.id ? { ...p, status: novoStatus } : p,
+    )
+    localStorage.setItem(CHAVE_PEDIDOS, JSON.stringify(l))
+  } catch {
+    /* ignore */
+  }
+  if (novoStatus === 'pago') {
+    await alternarDestaque(pedido.evento_id, true)
+    try {
+      const p = JSON.parse(localStorage.getItem('patrocinados_locais') || '[]')
+      localStorage.setItem('patrocinados_locais', JSON.stringify([...new Set([...p, pedido.evento_id])]))
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+/** Um evento aparece como "Patrocinado"? (demo: localStorage; real: coluna patrocinado) */
+export function ehPatrocinado(evento) {
+  if (evento?.patrocinado === true) return true
+  try {
+    return JSON.parse(localStorage.getItem('patrocinados_locais') || '[]').includes(evento?.id)
+  } catch {
+    return false
   }
 }
 

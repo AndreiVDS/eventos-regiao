@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Selo from './Selo'
 import { formatarPeriodo, emojiCategoria, rotuloCategoria } from '../lib/formatacao'
+import { ehPatrocinado } from '../lib/api'
 
 const INTERVALO = 5000
 
@@ -173,6 +174,7 @@ export default function CarrosselDestaque({ eventos = [] }) {
                     <Selo tom="escuro">
                       {e.cidade_nome}/{e.uf}
                     </Selo>
+                    {ehPatrocinado(e) && <Selo tom="escuro">✨ Patrocinado</Selo>}
                   </div>
                   <h3 className="text-3xl leading-tight sm:text-5xl">{e.titulo}</h3>
                   <p className="text-creme/80">🗓️ {formatarPeriodo(e.data_inicio, e.data_fim)}</p>
