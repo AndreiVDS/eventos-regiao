@@ -93,6 +93,7 @@ const eventosJson = eventos.map((e, i) => {
     descricao_completa: e.descricao_completa ?? null,
     categoria: e.categoria,
     formato: e.formato ?? 'presencial',
+    destaque: e.destaque === true,
     cidade: e.cidade,
     cidade_nome: cidade.nome,
     uf: cidade.uf,
@@ -114,11 +115,15 @@ writeFileSync(p('public/dados/eventos.json'), JSON.stringify(eventosJson, null, 
 
 // ---------- 5. supabase/seed.sql ----------
 const q = (s) =>
-  s == null ? 'null' : typeof s === 'number' ? String(s) : `'${String(s).replace(/'/g, "''")}'`
+  s == null
+    ? 'null'
+    : typeof s === 'number' || typeof s === 'boolean'
+      ? String(s)
+      : `'${String(s).replace(/'/g, "''")}'`
 const colsCidade = ['slug', 'nome', 'uf', 'regiao', 'descricao', 'lat', 'lng', 'imagem_url', 'site_prefeitura']
 const colsEvento = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade', 'cidade_nome', 'uf',
-  'local', 'endereco', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto',
+  'local', 'endereco', 'data_inicio', 'data_fim', 'horario', 'entrada', 'preco_texto', 'destaque',
   'imagem_url', 'link_oficial', 'organizador_nome', 'status', 'criado_em',
 ]
 let sql = '-- Seed gerado por scripts/gerar-dados.mjs — não edite à mão.\n'

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Selo from './Selo'
+import { ehDestaque } from '../lib/api'
 import {
   carimboData,
   emojiCategoria,
@@ -12,6 +13,7 @@ import {
 export default function CardEvento({ evento, indice = 0 }) {
   const { dia, mes } = carimboData(evento.data_inicio)
   const passou = eventoJaPassou(evento)
+  const destaque = !passou && ehDestaque(evento)
 
   return (
     <article
@@ -32,6 +34,11 @@ export default function CardEvento({ evento, indice = 0 }) {
         {passou && (
           <span className="absolute right-3 top-3 rounded bg-tinta/80 px-2 py-1 text-xs font-semibold text-creme">
             Encerrado
+          </span>
+        )}
+        {destaque && (
+          <span className="absolute right-3 top-3 rounded-full bg-destaque px-2 py-1 text-xs font-bold text-tinta shadow">
+            ★ Destaque
           </span>
         )}
       </div>

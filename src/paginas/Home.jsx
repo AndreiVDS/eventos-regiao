@@ -5,7 +5,7 @@ import EsqueletoCards from '../componentes/EsqueletoCards'
 import CarrosselDestaque from '../componentes/CarrosselDestaque'
 import Contador from '../componentes/Contador'
 import Secao from '../componentes/Secao'
-import { listarEventos, listarCidades } from '../lib/api'
+import { listarEventos, listarCidades, listarDestaques } from '../lib/api'
 import { useAsync } from '../lib/useAsync'
 import { useCidadeAtual } from '../lib/cidade'
 import { eventosDoFimDeSemana } from '../lib/agenda'
@@ -18,12 +18,19 @@ export default function Home() {
 
   const { dados: eventos, carregando } = useAsync(() => listarEventos({ quando: 'futuros' }), [])
   const { dados: cidades } = useAsync(() => listarCidades(), [])
+  const { dados: curados } = useAsync(() => listarDestaques(), [])
 
   const cidadeAtual = (cidades || []).find((c) => c.slug === cidadeSlug)
   const daCidade = cidadeSlug
     ? (eventos || []).filter((e) => e.cidade === cidadeSlug)
     : eventos || []
   const destaques = daCidade.slice(0, 6)
+
+  // carrossel: usa a curadoria da equipe; se não houver, os próximos da cidade
+  const curadosDaCidade = cidadeSlug
+    ? (curados || []).filter((e) => e.cidade === cidadeSlug)
+    : curados || []
+  const carrossel = curadosDaCidade.length >= 2 ? curadosDaCidade : daCidade
   const fimDeSemana = eventosDoFimDeSemana(daCidade).slice(0, 3)
 
   const numeros = useMemo(() => {
@@ -129,7 +136,7 @@ export default function Home() {
       </section>
 
       {/* Carrossel de destaques */}
-      {!carregando && destaques.length >= 2 && <CarrosselDestaque eventos={daCidade} />}
+      {!carregando && carrossel.length >= 2 && <CarrosselDestaque eventos={carrossel} />}
 
       {/* Próximos eventos */}
       <Secao className="container-pagina py-14">

@@ -16,6 +16,7 @@ export function AbasPainel() {
     <nav className="flex flex-wrap gap-2" aria-label="Seções do painel">
       <NavLink end to="/painel" className={classe}>Visão geral</NavLink>
       <NavLink to="/painel/moderacao" className={classe}>Moderação</NavLink>
+      <NavLink to="/painel/destaques" className={classe}>Destaques</NavLink>
     </nav>
   )
 }

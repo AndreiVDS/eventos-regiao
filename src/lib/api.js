@@ -164,7 +164,7 @@ const COLUNAS_EVENTO = [
   'id', 'titulo', 'descricao', 'descricao_completa', 'categoria', 'formato', 'cidade',
   'cidade_nome', 'uf', 'local', 'endereco', 'data_inicio', 'data_fim', 'horario',
   'entrada', 'preco_texto', 'imagem_url', 'link_oficial', 'organizador_nome',
-  'organizador_contato', 'criado_por', 'status', 'criado_em',
+  'organizador_contato', 'criado_por', 'destaque', 'status', 'criado_em',
 ]
 const CAMPOS_DATA = ['data_inicio', 'data_fim']
 
@@ -263,4 +263,57 @@ export async function moderarEvento(id, status) {
   }
   const { error } = await supabase.from('eventos').update({ status }).eq('id', id)
   if (error) throw error
+}
+
+/* ================= Destaques (curadoria da equipe) ================= */
+
+const CHAVE_DESTAQUES = 'destaques_locais' // { [id]: boolean } — sobrepõe o valor do JSON
+
+function lerOverridesDestaque() {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_DESTAQUES) || '{}')
+  } catch {
+    return {}
+  }
+}
+
+/** Aplica o override local (modo demonstração) sobre o valor de destaque do evento. */
+export function ehDestaque(evento, overrides = lerOverridesDestaque()) {
+  return overrides[evento.id] ?? evento.destaque === true
+}
+
+/** Eventos marcados como destaque pela equipe, aprovados e que ainda não terminaram. */
+export async function listarDestaques() {
+  const hoje = new Date()
+  hoje.setHours(0, 0, 0, 0)
+  const futuros = (e) => new Date(e.data_fim || e.data_inicio) >= hoje
+
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('eventos')
+      .select('*')
+      .eq('status', 'aprovado')
+      .eq('destaque', true)
+      .order('data_inicio', { ascending: true })
+    if (error) throw error
+    return data.filter(futuros)
+  }
+  const { eventos } = await carregarDadosLocais()
+  const over = lerOverridesDestaque()
+  return [...eventos, ...lerEnviados()]
+    .filter((e) => e.status === 'aprovado' && ehDestaque(e, over))
+    .filter(futuros)
+    .sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio))
+}
+
+/** Liga/desliga o destaque de um evento (ação da equipe). */
+export async function alternarDestaque(id, valor) {
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('eventos').update({ destaque: valor }).eq('id', id)
+    if (error) throw error
+    return
+  }
+  const over = lerOverridesDestaque()
+  over[id] = valor
+  localStorage.setItem(CHAVE_DESTAQUES, JSON.stringify(over))
 }

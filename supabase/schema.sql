@@ -28,6 +28,7 @@ create table if not exists public.cidades (
 alter table public.cidades add column if not exists lat double precision;
 alter table public.cidades add column if not exists lng double precision;
 alter table public.eventos add column if not exists formato text not null default 'presencial';
+alter table public.eventos add column if not exists destaque boolean not null default false;
 
 -- ---------- Tabela: eventos ----------
 -- id é texto (slug legível na URL, ex.: "rock-in-rio-2026"); o app gera
@@ -41,6 +42,7 @@ create table if not exists public.eventos (
                        ('cultura','esporte','comunitario','educacao','negocios','gastronomia')),
   formato             text not null default 'presencial'
                        check (formato in ('presencial','online','hibrido')),
+  destaque            boolean not null default false,
   cidade              text not null references public.cidades(slug),
   cidade_nome         text not null,
   uf                  text not null,

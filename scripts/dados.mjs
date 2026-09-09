@@ -212,6 +212,7 @@ export const eventos = [
   // ---------------- Santa Catarina / Paraná / Minas (curadoria regional) ----------------
   {
     id: 'schutzenfest-2026',
+    destaque: true,
     titulo: '34ª Schützenfest',
     descricao:
       'A tradicional festa do tiro esportivo, da dança e da gastronomia germânica de Jaraguá do Sul, com desfiles, bandinhas típicas e concursos de tiro ao alvo.',
@@ -330,6 +331,7 @@ export const eventos = [
   },
   {
     id: 'oktoberfest-blumenau-2026',
+    destaque: true,
     titulo: 'Oktoberfest Blumenau 2026',
     descricao:
       'A segunda maior festa alemã do mundo: desfiles, bandinhas, chopp em metro e a tradicional dança dos tamancos.',
@@ -469,6 +471,7 @@ export const eventos = [
   // ---------------- Brasil — eventos nacionais reais ----------------
   {
     id: 'rock-in-rio-2026',
+    destaque: true,
     titulo: 'Rock in Rio 2026',
     descricao:
       'Um dos maiores festivais de música do mundo, com sete dias de shows na Cidade do Rock, no Parque Olímpico.',
@@ -509,6 +512,7 @@ export const eventos = [
   },
   {
     id: 'acampamento-farroupilha-poa-2026',
+    destaque: true,
     titulo: 'Acampamento Farroupilha 2026',
     descricao:
       'A maior celebração da cultura gaúcha: piquetes, chama crioula, shows tradicionalistas, gastronomia campeira e oficinas — tudo gratuito.',
@@ -549,6 +553,7 @@ export const eventos = [
   },
   {
     id: 'natal-luz-gramado-2026',
+    destaque: true,
     titulo: 'Natal Luz de Gramado 2026',
     descricao:
       'O festival de Natal mais longo do mundo (Guinness): 88 dias de espetáculos, desfiles e mais de 400 atrações gratuitas na Serra Gaúcha.',
@@ -648,6 +653,7 @@ export const eventos = [
   },
   {
     id: 'festival-parintins-2027',
+    destaque: true,
     titulo: 'Festival Folclórico de Parintins 2027',
     descricao:
       'A disputa entre os bois Garantido (vermelho) e Caprichoso (azul) transforma a ilha em uma ópera amazônica a céu aberto no Bumbódromo.',

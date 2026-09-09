@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizar, aplicarFiltros, gerarSlug, montarRegistroEvento } from './api'
+import { normalizar, aplicarFiltros, gerarSlug, montarRegistroEvento, ehDestaque } from './api'
 
 const base = [
   { id: 'a', titulo: 'Festival de Cinema', descricao: '', cidade_nome: 'Gramado', local: 'Palácio',
@@ -78,6 +78,17 @@ describe('montarRegistroEvento', () => {
   it('recorta data para YYYY-MM-DD', () => {
     const r = montarRegistroEvento({ data_inicio: '2026-10-08T00:00:00.000Z' })
     expect(r.data_inicio).toBe('2026-10-08')
+  })
+})
+
+describe('ehDestaque', () => {
+  it('usa o valor do evento quando não há override', () => {
+    expect(ehDestaque({ id: 'a', destaque: true }, {})).toBe(true)
+    expect(ehDestaque({ id: 'b', destaque: false }, {})).toBe(false)
+  })
+  it('override local tem prioridade (modo demonstração)', () => {
+    expect(ehDestaque({ id: 'a', destaque: true }, { a: false })).toBe(false)
+    expect(ehDestaque({ id: 'b', destaque: false }, { b: true })).toBe(true)
   })
 })
 
