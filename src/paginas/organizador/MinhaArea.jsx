@@ -51,7 +51,7 @@ export default function MinhaArea() {
         </p>
       )}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatTile rotulo="Publicados" valor={aprovados.length} tom="destaque" />
         <StatTile rotulo="Em revisão" valor={pendentes.length} />
         <StatTile rotulo="Ainda vão acontecer" valor={proximos.length} />
@@ -71,30 +71,42 @@ export default function MinhaArea() {
         <ul className="mt-4 space-y-3">
           {lista.map((e) => {
             const s = STATUS[e.status] || STATUS.pendente
+            const confirmados = e.status === 'aprovado' ? presencas?.[e.id] || 0 : 0
             return (
               <li
                 key={e.id}
-                className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-superficie p-4 shadow-sm ring-1 ring-borda/10"
+                className="flex gap-3 rounded-xl bg-superficie p-3 shadow-suave ring-1 ring-borda/10 sm:gap-4 sm:p-4"
               >
-                <img src={e.imagem_url} alt="" className="h-14 w-20 rounded object-cover" />
+                <img
+                  src={e.imagem_url}
+                  alt=""
+                  className="h-16 w-20 shrink-0 rounded-lg object-cover sm:h-16 sm:w-28"
+                />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{e.titulo}</p>
-                  <p className="text-sm text-suave">
-                    {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf} ·{' '}
+                  <p className="font-semibold leading-snug line-clamp-2">{e.titulo}</p>
+                  <p className="mt-0.5 text-sm text-suave">
+                    {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf}
+                    <br className="sm:hidden" />
+                    <span className="hidden sm:inline"> · </span>
                     {formatarPeriodo(e.data_inicio, e.data_fim)}
                   </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <Selo tom={s.tom}>{s.rotulo}</Selo>
+                    {confirmados > 0 && (
+                      <span className="text-sm text-suave">
+                        ✋ {confirmados} confirmado{confirmados === 1 ? '' : 's'}
+                      </span>
+                    )}
+                    {e.status === 'aprovado' && (
+                      <Link
+                        to={`/eventos/${e.id}`}
+                        className="text-sm font-semibold text-texto underline hover:text-suave"
+                      >
+                        Ver página
+                      </Link>
+                    )}
+                  </div>
                 </div>
-                {e.status === 'aprovado' && (presencas?.[e.id] || 0) > 0 && (
-                  <span className="text-sm text-suave">
-                    ✋ {presencas[e.id]} confirmado{presencas[e.id] === 1 ? '' : 's'}
-                  </span>
-                )}
-                <Selo tom={s.tom}>{s.rotulo}</Selo>
-                {e.status === 'aprovado' && (
-                  <Link to={`/eventos/${e.id}`} className="text-sm font-semibold underline">
-                    Ver página
-                  </Link>
-                )}
               </li>
             )
           })}
