@@ -1,10 +1,15 @@
 // POST /api/notificar — envia e-mail ao organizador quando a equipe aprova ou
 // recusa um evento. Só a equipe (autenticada) pode disparar.
 //
-// Variáveis de ambiente na Vercel:
-//   GMAIL_USER            e-mail completo (ex.: equipe@gmail.com)
-//   GMAIL_APP_PASSWORD    senha de app de 16 caracteres do Gmail
-//   VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY (já existem)
+// Variáveis de ambiente na Vercel (qualquer provedor SMTP):
+//   SMTP_HOST   ex.: smtp.gmail.com  |  smtp-relay.brevo.com
+//   SMTP_PORT   ex.: 465 (SSL) ou 587 (STARTTLS)
+//   SMTP_USER   usuário do SMTP (no Gmail = o e-mail; no Brevo = o login SMTP)
+//   SMTP_PASS   senha do SMTP (Gmail = senha de app; Brevo = a "SMTP key")
+//   SMTP_FROM   (opcional) e-mail remetente exibido; padrão = SMTP_USER
+//
+// Atalho: se você usar Gmail, pode preencher GMAIL_USER / GMAIL_APP_PASSWORD
+// em vez de SMTP_* — o código entende os dois.
 import nodemailer from 'nodemailer'
 
 const SUPA_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
@@ -12,9 +17,17 @@ const SUPA_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON
 const SITE = (process.env.VITE_SITE_URL || 'https://eventos-regiao.vercel.app').replace(/\/$/, '')
 const ehEmail = (s) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(s || '').trim())
 
+const SMTP = {
+  host: process.env.SMTP_HOST || (process.env.GMAIL_USER ? 'smtp.gmail.com' : ''),
+  port: Number(process.env.SMTP_PORT || 465),
+  user: process.env.SMTP_USER || process.env.GMAIL_USER || '',
+  pass: process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '',
+}
+SMTP.from = process.env.SMTP_FROM || SMTP.user
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ erro: 'Método não permitido' })
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+  if (!SMTP.host || !SMTP.user || !SMTP.pass) {
     return res.status(200).json({ enviado: false, motivo: 'SMTP não configurado' })
   }
 
@@ -60,13 +73,13 @@ export default async function handler(req, res) {
         `\nVocê pode ajustar as informações e enviar de novo em ${SITE}/organizador.\n\n— Equipe Eventos Região`
 
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+      host: SMTP.host,
+      port: SMTP.port,
+      secure: SMTP.port === 465,
+      auth: { user: SMTP.user, pass: SMTP.pass },
     })
     await transporter.sendMail({
-      from: `Eventos Região <${process.env.GMAIL_USER}>`,
+      from: `Eventos Região <${SMTP.from}>`,
       to: para,
       subject: assunto,
       text: corpo,
