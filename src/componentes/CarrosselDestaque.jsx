@@ -26,7 +26,9 @@ export default function CarrosselDestaque({ eventos = [] }) {
 
   const n = itens.length
   const ir = useCallback((alvo) => setI(((alvo % n) + n) % n), [n])
-  const tocando = pausado || arrastando || reduzido || n < 2
+  // "reduzir movimento" desliga os efeitos de zoom/deslize, mas o carrossel
+  // continua trocando de evento sozinho (só que de forma instantânea).
+  const tocando = pausado || arrastando || n < 2
 
   useEffect(() => {
     if (tocando) return
@@ -92,7 +94,7 @@ export default function CarrosselDestaque({ eventos = [] }) {
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="titulo-secao text-3xl">Em destaque</h2>
-        {n > 1 && !reduzido && (
+        {n > 1 && (
           <button
             type="button"
             onClick={() => setPausado((p) => !p)}
@@ -261,7 +263,7 @@ export default function CarrosselDestaque({ eventos = [] }) {
               </svg>
             </button>
 
-            {!tocando && (
+            {!tocando && !reduzido && (
               <div className="absolute inset-x-0 top-0 h-1 bg-creme/15">
                 <div
                   key={i}
