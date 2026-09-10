@@ -3,6 +3,44 @@ import { distanciaAteEvento, dentroDoRaio } from './geo'
 import { geocodificarEvento } from './geocode'
 
 /**
+ * Dispara um e-mail pela função /api/notificar (Vercel). É "melhor esforço":
+ * roda em segundo plano e nunca quebra a ação principal. Sem SMTP configurado
+ * a função responde "enviado: false" e nada acontece.
+ */
+function notificar(payload) {
+  try {
+    if (typeof fetch !== 'function') return
+    fetch('/api/notificar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true, // sobrevive à navegação logo após enviar o formulário
+    }).catch(() => {})
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Só os campos seguros do evento que a função de e-mail precisa. */
+function dadosEventoEmail(e) {
+  return {
+    id: e.id,
+    titulo: e.titulo,
+    categoria: e.categoria,
+    formato: e.formato,
+    cidade_nome: e.cidade_nome,
+    uf: e.uf,
+    local: e.local,
+    data_inicio: e.data_inicio,
+    data_fim: e.data_fim,
+    horario: e.horario,
+    imagem_url: e.imagem_url,
+    organizador_nome: e.organizador_nome,
+    organizador_contato: e.organizador_contato,
+  }
+}
+
+/**
  * Camada de acesso a dados da plataforma.
  *
  * Se o Supabase estiver configurado (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY),
@@ -341,6 +379,8 @@ export async function enviarEvento(dados, usuario = null) {
     )
     const { error } = await supabase.from('eventos').insert(paraBanco)
     if (error) throw error
+    // avisa a equipe (evento novo p/ moderar) e manda recibo ao organizador
+    notificar({ tipo: 'novo', evento: dadosEventoEmail(registro) })
     return registro
   }
 
@@ -421,16 +461,17 @@ export async function moderarEvento(id, status, motivo = '') {
     .eq('id', id)
   if (error) throw error
 
-  // avisa o organizador por e-mail (só funciona se o SMTP estiver configurado
-  // na Vercel; se não, a função responde "enviado: false" e nada quebra)
+  // avisa o organizador (aprovado/recusado) e manda cópia para a equipe.
+  // Só funciona com SMTP configurado na Vercel; se não, nada quebra.
   try {
     const { data: sessao } = await supabase.auth.getSession()
     const token = sessao?.session?.access_token
     if (token) {
-      await fetch('/api/notificar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: token, evento_id: id, status, motivo: motivoRecusa }),
+      notificar({
+        tipo: status === 'aprovado' ? 'aprovado' : 'recusado',
+        access_token: token,
+        evento_id: id,
+        motivo: motivoRecusa,
       })
     }
   } catch {
@@ -456,6 +497,7 @@ export async function enviarContato({ nome, email, assunto, mensagem }) {
   if (supabaseConfigurado) {
     const { error } = await supabase.from('contatos').insert(registro)
     if (error) throw error
+    notificar({ tipo: 'contato', mensagem: registro })
     return
   }
   try {

@@ -59,7 +59,12 @@ Use **um** provedor SMTP para os dois. Duas opções abaixo.
 Salve. Sem código.
 
 > Em **Authentication → URL Configuration**: "Site URL" =
-> `https://eventos-regiao.vercel.app` e `.../redefinir-senha` nas "Redirect URLs".
+> `https://eventos-regiao.vercel.app` e `https://eventos-regiao.vercel.app/**`
+> nas "Redirect URLs" — **sem isso o link do "esqueci a senha" abre
+> `localhost:3000` e não funciona.**
+
+Para traduzir e estilizar esses e-mails (confirmar conta, redefinir senha, link
+mágico), veja **`docs/EMAILS-SUPABASE.md`**.
 
 ---
 
@@ -75,15 +80,28 @@ Development):
 | `SMTP_USER` | usuário do SMTP |
 | `SMTP_PASS` | senha de app / SMTP key |
 | `SMTP_FROM` | (opcional) e-mail remetente exibido |
+| `EQUIPE_EMAILS` | e-mails da equipe que recebem os avisos, separados por vírgula (ex.: `voce@gmail.com,fulano@gmail.com,ciclano@gmail.com`). Se não preencher, usa `VITE_ADMIN_EMAILS`. |
 
 Depois **Deployments → Redeploy**.
 
-### Como funciona
-Quando a equipe clica Aprovar/Recusar, o site chama `/api/notificar`. A função
-confere que quem chamou é da equipe, pega o **Contato do organizador** e, **se
-for um e-mail**, envia a mensagem (com o motivo, quando recusado). Se o contato
-for telefone, ou se as variáveis não estiverem preenchidas, nada acontece — a
-moderação funciona igual.
+### O que dispara e-mail
+
+| Momento | Vai para |
+|---|---|
+| Organizador **envia** um evento | equipe ("novo p/ moderar") + recibo pro organizador |
+| Equipe **aprova** | organizador ("publicado") + cópia pra equipe |
+| Equipe **recusa** | organizador (com o motivo) + cópia pra equipe |
+| Alguém usa o **formulário de contato** | equipe |
+
+Tudo é **melhor esforço**: o site chama `/api/notificar` em segundo plano. Se o
+SMTP não estiver configurado, ou o contato do organizador for um telefone em vez
+de e-mail, nada é enviado e a ação (enviar / moderar) funciona igual. O HTML dos
+e-mails está em `api/_email.js`.
+
+> Os avisos de "evento novo" e "contato" não exigem login (quem dispara é o
+> visitante). O conteúdo é escapado e truncado; no limite, alguém consegue forçar
+> alguns e-mails de aviso à equipe. Para a escala do projeto tudo bem — se virar
+> incômodo, trocar por verificação com a *service-role key* do Supabase.
 
 ---
 
