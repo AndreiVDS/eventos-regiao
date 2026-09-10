@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AbasPainel } from './Painel'
 import Carregando from '../../componentes/Carregando'
 import EstadoVazio from '../../componentes/EstadoVazio'
@@ -11,15 +12,63 @@ const ROTULO = { solicitado: 'Solicitado', pago: 'Pago — em destaque', recusad
 
 export default function Patrocinios() {
   const { dados: pedidos, carregando, recarregar } = useAsync(() => listarPedidosDestaque(), [])
+  const [msg, setMsg] = useState(null)
+  const [ocupado, setOcupado] = useState(null)
 
   async function resolver(pedido, status) {
-    await resolverPedidoDestaque(pedido, status)
-    recarregar?.()
+    setOcupado(pedido.id)
+    setMsg(null)
+    try {
+      await resolverPedidoDestaque(pedido, status)
+      setMsg(
+        status === 'pago'
+          ? '✓ Pagamento confirmado — o evento entrou no destaque.'
+          : 'Pedido recusado.',
+      )
+      recarregar?.()
+    } catch (e) {
+      setMsg(`Não deu para salvar: ${e.message || 'tente de novo.'}`)
+    } finally {
+      setOcupado(null)
+    }
   }
 
   const nome = (p) => p.eventos?.titulo || p.evento_id
   const lista = pedidos || []
   const abertos = lista.filter((p) => p.status === 'solicitado')
+  const resolvidos = lista.filter((p) => p.status !== 'solicitado')
+
+  const Cartao = ({ p }) => (
+    <li className="rounded-xl bg-superficie p-4 shadow-suave ring-1 ring-borda/10">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="font-semibold">{nome(p)}</p>
+        <Selo tom={TOM[p.status]}>{ROTULO[p.status]}</Selo>
+      </div>
+      <p className="mt-0.5 text-sm text-suave">
+        {p.dias} dias · R$ {VALOR_DESTAQUE[p.dias] ?? '—'} ·{' '}
+        {p.criado_em ? fmt.format(new Date(p.criado_em)) : ''}
+      </p>
+      {p.observacao && <p className="mt-1 text-sm text-texto">“{p.observacao}”</p>}
+      {p.status === 'solicitado' && (
+        <div className="mt-3 flex flex-wrap gap-3">
+          <button
+            className="btn-destaque !py-1.5 text-sm"
+            disabled={ocupado === p.id}
+            onClick={() => resolver(p, 'pago')}
+          >
+            Confirmar pagamento
+          </button>
+          <button
+            className="btn-contorno !py-1.5 text-sm"
+            disabled={ocupado === p.id}
+            onClick={() => resolver(p, 'recusado')}
+          >
+            Recusar
+          </button>
+        </div>
+      )}
+    </li>
+  )
 
   return (
     <div className="container-pagina py-10">
@@ -33,6 +82,12 @@ export default function Patrocinios() {
         <AbasPainel />
       </div>
 
+      {msg && (
+        <p className="mt-4 rounded-lg bg-destaque/15 p-2 text-sm text-texto" role="status">
+          {msg}
+        </p>
+      )}
+
       {carregando ? (
         <Carregando texto="Carregando pedidos…" />
       ) : lista.length === 0 ? (
@@ -44,39 +99,29 @@ export default function Patrocinios() {
         </div>
       ) : (
         <>
-          {abertos.length > 0 && (
-            <p className="mt-6 text-sm font-semibold text-texto">
-              {abertos.length} aguardando confirmação
-            </p>
+          <h2 className="mt-8 text-xl">
+            Aguardando {abertos.length > 0 && `(${abertos.length})`}
+          </h2>
+          {abertos.length === 0 ? (
+            <p className="mt-2 text-sm text-suave">Nada pendente.</p>
+          ) : (
+            <ul className="mt-3 space-y-3">
+              {abertos.map((p) => (
+                <Cartao key={p.id} p={p} />
+              ))}
+            </ul>
           )}
-          <ul className="mt-3 space-y-3">
-            {lista.map((p) => (
-              <li key={p.id} className="rounded-xl bg-superficie p-4 shadow-suave ring-1 ring-borda/10">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="font-semibold">{nome(p)}</p>
-                  <Selo tom={TOM[p.status]}>{ROTULO[p.status]}</Selo>
-                </div>
-                <p className="mt-0.5 text-sm text-suave">
-                  {p.dias} dias · R$ {VALOR_DESTAQUE[p.dias] ?? '—'} ·{' '}
-                  {p.criado_em ? fmt.format(new Date(p.criado_em)) : ''}
-                </p>
-                {p.observacao && <p className="mt-1 text-sm text-texto">“{p.observacao}”</p>}
-                {p.status === 'solicitado' && (
-                  <div className="mt-3 flex gap-3">
-                    <button className="btn-destaque !py-1.5 text-sm" onClick={() => resolver(p, 'pago')}>
-                      Confirmar pagamento
-                    </button>
-                    <button
-                      className="btn-contorno !py-1.5 text-sm"
-                      onClick={() => resolver(p, 'recusado')}
-                    >
-                      Recusar
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+
+          {resolvidos.length > 0 && (
+            <>
+              <h2 className="mt-8 text-xl">Histórico</h2>
+              <ul className="mt-3 space-y-3 opacity-80">
+                {resolvidos.map((p) => (
+                  <Cartao key={p.id} p={p} />
+                ))}
+              </ul>
+            </>
+          )}
         </>
       )}
     </div>

@@ -530,11 +530,15 @@ export async function listarPedidosDestaque() {
 /** A equipe confirma o pagamento (liga o destaque) ou recusa o pedido. */
 export async function resolverPedidoDestaque(pedido, novoStatus) {
   if (supabaseConfigurado) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('pedidos_destaque')
       .update({ status: novoStatus })
       .eq('id', pedido.id)
+      .select()
     if (error) throw error
+    if (!data || data.length === 0) {
+      throw new Error('sem permissão para alterar (rode supabase/extras.sql e confira a tabela equipe).')
+    }
     if (novoStatus === 'pago') {
       await supabase
         .from('eventos')

@@ -71,26 +71,34 @@ export default function Destaques() {
         {lista.map((e) => {
           const ativo = ehDestaque(e)
           return (
-            <li key={e.id} className="flex items-center gap-3 p-3">
+            <li key={e.id} className="flex items-start gap-3 p-3">
               <button
                 type="button"
                 onClick={() => alternar(e)}
                 disabled={salvando === e.id}
                 aria-pressed={ativo}
                 aria-label={ativo ? `Remover ${e.titulo} dos destaques` : `Destacar ${e.titulo}`}
-                className={`shrink-0 rounded-lg p-2 text-2xl leading-none transition-transform hover:scale-110 ${
+                className={`mt-0.5 shrink-0 rounded-lg p-1.5 text-2xl leading-none transition-transform hover:scale-110 ${
                   ativo ? 'text-destaque' : 'text-suave/40'
                 }`}
               >
                 {ativo ? '★' : '☆'}
               </button>
-              <img src={e.imagem_url} alt="" className="h-12 w-16 rounded object-cover" />
+              <img
+                src={e.imagem_url}
+                alt=""
+                className="h-12 w-16 shrink-0 rounded object-cover"
+              />
               <div className="min-w-0 flex-1">
-                <Link to={`/eventos/${e.id}`} className="truncate font-semibold hover:underline">
+                <Link
+                  to={`/eventos/${e.id}`}
+                  className="block font-semibold leading-snug hover:underline line-clamp-2"
+                >
                   {e.titulo}
                 </Link>
-                <p className="text-sm text-suave">
-                  {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf} ·{' '}
+                <p className="mt-0.5 text-sm text-suave">
+                  {rotuloCategoria(e.categoria)} · {e.cidade_nome}/{e.uf}
+                  <br />
                   {formatarPeriodo(e.data_inicio, e.data_fim)}
                 </p>
               </div>
