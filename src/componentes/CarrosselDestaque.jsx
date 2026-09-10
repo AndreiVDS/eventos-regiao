@@ -4,7 +4,8 @@ import Selo from './Selo'
 import { formatarPeriodo, emojiCategoria, rotuloCategoria } from '../lib/formatacao'
 import { ehPatrocinado } from '../lib/api'
 
-const INTERVALO = 5000
+const INTERVALO = 8000
+const CURVA = 'cubic-bezier(0.16, 1, 0.3, 1)' // saída suave ("assenta" no fim)
 
 function semMovimento() {
   return (
@@ -124,15 +125,28 @@ export default function CarrosselDestaque({ eventos = [] }) {
           className="flex h-full"
           style={{
             transform: `translate3d(${deslocamento}, 0, 0)`,
-            transition: arrastando || reduzido ? 'none' : 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
+            transition: arrastando || reduzido ? 'none' : `transform 0.7s ${CURVA}`,
           }}
         >
           {itens.map((e, idx) => {
-            const perto = Math.abs(idx - i) <= 1
+            const dist = idx - i
+            const ativo = dist === 0
+            const perto = Math.abs(dist) <= 1
+            // vizinhos ficam menores, levemente inclinados e mais escuros:
+            // dá sensação de profundidade sem sair do plano.
+            const estiloSlide = reduzido
+              ? undefined
+              : {
+                  transform: `perspective(1400px) rotateY(${ativo ? 0 : dist < 0 ? 6 : -6}deg) scale(${ativo ? 1 : 0.94})`,
+                  opacity: arrastando ? 1 : ativo ? 1 : 0.45,
+                  transition: arrastando ? 'none' : `transform 0.7s ${CURVA}, opacity 0.7s ease`,
+                  transformOrigin: dist < 0 ? 'right center' : 'left center',
+                }
             return (
               <article
                 key={e.id}
                 className="relative h-full w-full shrink-0 select-none overflow-hidden"
+                style={estiloSlide}
                 aria-hidden={idx !== i}
               >
                 <img
@@ -150,6 +164,15 @@ export default function CarrosselDestaque({ eventos = [] }) {
                     className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-1/2 object-contain object-right p-4 sm:block"
                     loading="lazy"
                     draggable="false"
+                    style={
+                      reduzido
+                        ? undefined
+                        : {
+                            transform: ativo ? 'translateX(0)' : 'translateX(24px)',
+                            opacity: ativo ? 1 : 0,
+                            transition: `transform 0.8s ${CURVA}, opacity 0.6s ease`,
+                          }
+                    }
                   />
                 )}
                 <div
@@ -166,7 +189,19 @@ export default function CarrosselDestaque({ eventos = [] }) {
                       'linear-gradient(90deg, rgba(20,19,20,0.96) 0%, rgba(20,19,20,0.82) 42%, rgba(20,19,20,0.12) 100%)',
                   }}
                 />
-                <div className="relative flex h-full flex-col justify-end gap-3 p-6 sm:max-w-[58%] sm:p-10">
+                <div
+                  className="relative flex h-full flex-col justify-end gap-3 p-6 sm:max-w-[58%] sm:p-10"
+                  style={
+                    reduzido
+                      ? undefined
+                      : {
+                          transform: ativo ? 'translateY(0)' : 'translateY(16px)',
+                          opacity: ativo ? 1 : 0,
+                          transition: `transform 0.8s ${CURVA}, opacity 0.7s ease`,
+                          transitionDelay: ativo ? '0.1s' : '0s',
+                        }
+                  }
+                >
                   <div className="flex flex-wrap gap-2">
                     <Selo tom="destaque">
                       {emojiCategoria(e.categoria)} {rotuloCategoria(e.categoria)}
