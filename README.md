@@ -33,6 +33,18 @@ communities).
 
 ---
 
+## Screenshots
+
+| Home | Agenda + filters |
+|---|---|
+| ![Home](docs/screenshots/01-home.jpg) | ![Event agenda with filters](docs/screenshots/02-agenda.jpg) |
+
+| Map view | Event page |
+|---|---|
+| ![Events on a map](docs/screenshots/03-mapa.jpg) | ![Event detail page](docs/screenshots/04-evento.jpg) |
+
+---
+
 ## Features
 
 ### Visitor (resident / tourist)
