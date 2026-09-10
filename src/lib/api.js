@@ -420,6 +420,22 @@ export async function moderarEvento(id, status, motivo = '') {
     .update({ status, motivo_recusa: motivoRecusa })
     .eq('id', id)
   if (error) throw error
+
+  // avisa o organizador por e-mail (só funciona se o SMTP estiver configurado
+  // na Vercel; se não, a função responde "enviado: false" e nada quebra)
+  try {
+    const { data: sessao } = await supabase.auth.getSession()
+    const token = sessao?.session?.access_token
+    if (token) {
+      await fetch('/api/notificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: token, evento_id: id, status, motivo: motivoRecusa }),
+      })
+    }
+  } catch {
+    /* notificação é "melhor esforço" — nunca bloqueia a moderação */
+  }
 }
 
 /* ================= Contato ================= */
