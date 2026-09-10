@@ -205,7 +205,9 @@ sql += '\non conflict (slug) do update set lat = excluded.lat, lng = excluded.ln
 sql += `insert into public.eventos (${colsEvento.join(', ')}) values\n`
 sql += eventosJson.map((e) => '  (' + colsEvento.map((k) => q(e[k])).join(', ') + ')').join(',\n')
 // atualiza as coordenadas do local em bases que já tinham os eventos
-sql += '\non conflict (id) do update set lat = excluded.lat, lng = excluded.lng;\n'
+sql +=
+  '\non conflict (id) do update set lat = excluded.lat, lng = excluded.lng,' +
+  ' imagem_url = excluded.imagem_url, recorrencia = excluded.recorrencia;\n'
 writeFileSync(p('supabase/seed.sql'), sql)
 
 // ---------- 5b. supabase/setup.sql (schema + seed num arquivo só) ----------
@@ -237,6 +239,20 @@ writeFileSync(
     'update public.eventos as e\n   set lat = c.lat, lng = c.lng\n  from (values\n' +
     linhasCoord.join(',\n') +
     '\n) as c(id, lat, lng)\n where e.id = c.id;\n',
+)
+
+// ---------- 5d. supabase/imagens-eventos.sql (sincroniza imagem_url e recorrência) ----------
+const sq = (s) => (s == null ? 'null' : `'${String(s).replace(/'/g, "''")}'`)
+const linhasImg = eventosJson.map((e) => `  ('${e.id}', ${sq(e.imagem_url)}, ${sq(e.recorrencia)})`)
+writeFileSync(
+  p('supabase/imagens-eventos.sql'),
+  '-- Atualiza a imagem e a recorrência dos 27 eventos de exemplo no banco\n' +
+    '-- (o seed com "on conflict" antigo não mexia nesses campos).\n' +
+    '-- Seguro rodar mais de uma vez. Cole INTEIRO no SQL Editor do Supabase.\n\n' +
+    'alter table public.eventos add column if not exists recorrencia text;\n\n' +
+    'update public.eventos as e\n   set imagem_url = c.imagem_url, recorrencia = c.recorrencia\n  from (values\n' +
+    linhasImg.join(',\n') +
+    '\n) as c(id, imagem_url, recorrencia)\n where e.id = c.id;\n',
 )
 
 // ---------- 6. api/_dados.json (snapshot para a API serverless) ----------
