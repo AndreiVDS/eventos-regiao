@@ -22,6 +22,7 @@ export default function Rodape() {
             <li><Link to="/contato" className="hover:text-destaque">Contato</Link></li>
             <li><Link to="/privacidade" className="hover:text-destaque">Privacidade e dados</Link></li>
             <li><Link to="/termos" className="hover:text-destaque">Termos de uso</Link></li>
+            <li><Link to="/creditos" className="hover:text-destaque">Créditos das imagens</Link></li>
           </ul>
         </nav>
 

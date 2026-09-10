@@ -30,6 +30,7 @@ const Mensagens = lazy(() => import('./paginas/painel/Mensagens'))
 const Patrocinios = lazy(() => import('./paginas/painel/Patrocinios'))
 const Termos = lazy(() => import('./paginas/Termos'))
 const Contato = lazy(() => import('./paginas/Contato'))
+const Creditos = lazy(() => import('./paginas/Creditos'))
 
 function RolarAoTopo() {
   const { pathname } = useLocation()
@@ -63,6 +64,7 @@ export default function App() {
               <Route path="/privacidade" element={<Privacidade />} />
               <Route path="/termos" element={<Termos />} />
               <Route path="/contato" element={<Contato />} />
+              <Route path="/creditos" element={<Creditos />} />
               <Route path="/entrar" element={<Entrar />} />
               <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 

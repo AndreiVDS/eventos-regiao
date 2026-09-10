@@ -109,6 +109,30 @@ writeFileSync(
   bannerEvento({ categoria: 'comunitario' }).trim(),
 )
 
+// Fotos temáticas (Wikimedia Commons, CC) para os eventos de curadoria que não
+// têm foto própria. Créditos em /creditos. Chave = id do evento, valor = arquivo
+// em public/img/eventos/tema/.
+const TEMA_EVENTO = {
+  'rock-in-rio-2026': 'show',
+  'virada-cultural-sp-2027': 'virada',
+  'reveillon-copacabana-2027': 'fogos',
+  'natal-luz-gramado-2026': 'natal-luz',
+  'natal-curitiba-2026': 'natal-cidade',
+  'sao-silvestre-2026': 'corrida',
+  'carnaval-olinda-2027': 'carnaval-olinda',
+  'festival-parintins-2027': 'parintins',
+  'boi-de-mamao-floripa-2026': 'boi-mamao',
+  'festa-iemanja-salvador-2027': 'iemanja',
+  'lavagem-do-bonfim-2027': 'bonfim',
+  'festival-teatro-curitiba-2027': 'teatro',
+  'festival-danca-joinville-2027': 'danca',
+  'festival-inverno-campos-do-jordao-2027': 'orquestra',
+  'feira-do-livro-poa-2026': 'feira-livro',
+  'flip-paraty-2027': 'feira-livro',
+  'forum-das-letras-ouro-preto-2026': 'feira-livro',
+  'acampamento-farroupilha-poa-2026': 'virada',
+}
+
 // ---------- 4. eventos.json ----------
 const porSlug = Object.fromEntries(cidades.map((c) => [c.slug, c]))
 const eventosJson = eventos.map((e, i) => {
@@ -117,8 +141,12 @@ const eventosJson = eventos.map((e, i) => {
 
   let imagem_url = e.imagem_url
   if (imagem_url === 'auto') {
-    writeFileSync(p('public/img/eventos', `${e.id}.svg`), bannerEvento(e).trim())
-    imagem_url = `/img/eventos/${e.id}.svg`
+    if (TEMA_EVENTO[e.id]) {
+      imagem_url = `/img/eventos/tema/${TEMA_EVENTO[e.id]}.jpg`
+    } else {
+      writeFileSync(p('public/img/eventos', `${e.id}.svg`), bannerEvento(e).trim())
+      imagem_url = `/img/eventos/${e.id}.svg`
+    }
   }
 
   const par = coordsEvento[e.id]
