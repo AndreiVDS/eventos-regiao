@@ -152,8 +152,13 @@ export default function CarrosselDestaque({ eventos = [] }) {
                 <img
                   src={e.imagem_url}
                   alt=""
-                  className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-70"
-                  style={{ filter: 'blur(16px) saturate(1.25)' }}
+                  className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70"
+                  style={{
+                    filter: 'blur(16px) saturate(1.25)',
+                    transform: 'scale(1.12)',
+                    // zoom lento enquanto o slide está na tela
+                    animation: !reduzido && ativo ? 'ken-burns 9s ease-out both' : 'none',
+                  }}
                   loading={idx === 0 ? 'eager' : 'lazy'}
                   draggable="false"
                 />
@@ -168,9 +173,9 @@ export default function CarrosselDestaque({ eventos = [] }) {
                       reduzido
                         ? undefined
                         : {
-                            transform: ativo ? 'translateX(0)' : 'translateX(24px)',
+                            transform: ativo ? 'translateX(0) scale(1)' : 'translateX(32px) scale(1.05)',
                             opacity: ativo ? 1 : 0,
-                            transition: `transform 0.8s ${CURVA}, opacity 0.6s ease`,
+                            transition: `transform 0.9s ${CURVA}, opacity 0.6s ease`,
                           }
                     }
                   />
@@ -195,10 +200,10 @@ export default function CarrosselDestaque({ eventos = [] }) {
                     reduzido
                       ? undefined
                       : {
-                          transform: ativo ? 'translateY(0)' : 'translateY(16px)',
+                          transform: ativo ? 'translateY(0)' : 'translateY(26px)',
                           opacity: ativo ? 1 : 0,
                           transition: `transform 0.8s ${CURVA}, opacity 0.7s ease`,
-                          transitionDelay: ativo ? '0.1s' : '0s',
+                          transitionDelay: ativo ? '0.15s' : '0s',
                         }
                   }
                 >
