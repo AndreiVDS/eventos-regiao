@@ -1,185 +1,288 @@
 # Eventos Região
 
-**Plataforma Inclusiva para Fortalecimento do Turismo e Cultura — "Promovendo Eventos e Impulsionando a Economia Local"**
+> An inclusive, region-focused platform for discovering and promoting local cultural, sporting and community events — built to strengthen local tourism and economy.
 
-Projeto da disciplina **Atividade Extensionista III: Tecnologia Aplicada à Inclusão Digital — Análise**, do curso de **Engenharia de Software** do Centro Universitário Internacional UNINTER.
+**Live:** <https://eventos-regiao.vercel.app>
 
-| | |
-|---|---|
-| **Setor de aplicação** | Turismo, cultura, lazer e eventos comunitários |
-| **ODS** | 8 — Trabalho decente e crescimento econômico · 11 — Cidades e comunidades sustentáveis |
-| **Equipe** | Andrei Vinícius da Silveira (RU 4605228) · Gabriel Lenhardt (RU 4739897) · Gabriel Augusto Fernandes Ferreira Martins (RU 4704869) |
+![React](https://img.shields.io/badge/React-18-20232a?logo=react)
+![Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38bdf8?logo=tailwindcss&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Postgres_%2B_Auth-3ecf8e?logo=supabase&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Serverless-000?logo=vercel)
+![PWA](https://img.shields.io/badge/PWA-installable-5a0fc8?logo=pwa)
+![Tests](https://img.shields.io/badge/Vitest-68_passing-6e9f18?logo=vitest&logoColor=white)
 
 ---
 
-## O que é
+## Overview
 
-Uma aplicação web que **centraliza a divulgação de eventos** culturais, esportivos e comunitários de diferentes regiões do Brasil, com três experiências:
+Small municipal, community and cultural events (a book fair, a street race, a *boi de mamão*
+performance, a neighbourhood *festa junina*) are largely invisible on national ticketing
+platforms — they are free, run by libraries, city departments or collectives, and have no
+ticket to sell. **Eventos Região** is a discovery and curation layer for exactly those
+events, organised by **city and proximity** rather than by nationwide search.
 
-| Público | O que faz | Onde |
+It ships as a **Progressive Web App**: installable, fast on low-end devices, and usable on an
+unstable connection. It also exposes a small **public read API** so other regional sites can
+embed the agenda.
+
+The project was developed for **Atividade Extensionista III — Tecnologia Aplicada à Inclusão
+Digital**, B.Sc. in Software Engineering, Centro Universitário Internacional UNINTER, aligned
+with UN SDGs **8** (decent work and economic growth) and **11** (sustainable cities and
+communities).
+
+---
+
+## Features
+
+### Visitor (resident / tourist)
+- Browse and filter events by **city, category, date range, price and format**.
+- **"Near me"**: with the browser's geolocation, events are sorted by real distance from the
+  visitor to the **venue** (Haversine), with an adjustable radius; online events always pass.
+- **Interactive map** of an event's location (Leaflet + OpenStreetMap) with a one-tap
+  "get directions" link to Google/Apple Maps.
+- **City pages** that double as a "what's on in this town" destination guide.
+- **RSVP** ("I'm going") with a public counter.
+- Light / dark theme, respects `prefers-reduced-motion`.
+
+### Organizer
+- Email/password account (Supabase Auth) with self-service **password reset**.
+- Submit events for free; they enter a **moderation queue** as `pending`.
+- Suggest a city that isn't listed yet (address auto-geocoded; city held as *unapproved*
+  until the event is approved).
+- Image upload to Supabase Storage, or a URL, or an auto-generated gradient banner.
+- **"My events"** dashboard with status, rejection reason and per-event indicators.
+- Request a **paid highlight** for an event (manual, gateway-free flow).
+- Transactional email on submission (receipt) and on approval / rejection.
+
+### Team (moderators)
+- Role derived from an allowlist (`equipe` table **and/or** `VITE_ADMIN_EMAILS`).
+- Moderate the event queue (approve / reject with a reason).
+- Add or approve cities from the panel, using the embedded **IBGE** municipality list
+  (state → municipality cascade).
+- Read contact-form messages, resolve highlight requests.
+- **Metrics panel**: events by city, category, state and month (accessible charts with an
+  equivalent data table).
+- Email notification on every new submission, moderation result and contact message.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+  U["Browser / PWA<br/>React SPA"]
+
+  subgraph Vercel
+    V["Static assets<br/>+ edge cache"]
+    F["Serverless functions<br/>/api/* (Node)"]
+  end
+
+  subgraph Supabase
+    P[("PostgreSQL<br/>+ Row Level Security")]
+    A["Auth"]
+    ST["Storage<br/>bucket 'eventos'"]
+  end
+
+  subgraph "External (keyless)"
+    OSM["Nominatim + OSM tiles"]
+    CEP["ViaCEP"]
+  end
+
+  M["SMTP provider"]
+
+  U -->|static assets| V
+  U -->|GET /api/*| F
+  U -->|"supabase-js: REST + Auth"| P
+  U --> A
+  U --> ST
+  U -.-> OSM
+  U -.-> CEP
+  F -->|"REST (anon key + user JWT)"| P
+  F -->|nodemailer| M
+```
+
+**Two runtime modes, one codebase**
+
+| Mode | Trigger | Data source |
 |---|---|---|
-| **Visitante** (turista / morador) | Descobre eventos com busca e filtros por cidade, categoria, data e entrada; explora cidades e sua identidade cultural | `/`, `/eventos`, `/cidades` |
-| **Organizador** | Cria conta, cadastra eventos (gratuito, passam por revisão) e acompanha o status em "Meus eventos", com indicadores | `/entrar`, `/organizador` |
-| **Equipe** | Modera os eventos enviados e acompanha as métricas da plataforma (por cidade, categoria, estado e mês) | `/painel` |
+| **Production** | `VITE_SUPABASE_*` env vars present | Supabase (Postgres + Auth + Storage) |
+| **Demo** | env vars absent | `public/dados/*.json`, local session, `localStorage` writes |
 
-A plataforma é um **PWA** (Progressive Web App): funciona no celular, pode ser instalada como aplicativo e abre mesmo com internet instável. Também expõe uma **API pública** (`/api`) para que outros sites reutilizem a agenda.
-
-## Como isso responde à proposta
-
-| Objetivo da proposta | Onde aparece no sistema |
-|---|---|
-| Centralizar informações de eventos de várias regiões | **Agenda** com 27 eventos reais em 16 cidades / 9 estados |
-| Nova opção de divulgação para organizadores | **Área do organizador** + fila de moderação |
-| Estimular turismo e economia local | Páginas de **cidade** com identidade cultural; destaque a eventos gratuitos; métricas por região |
-| Interface acessível e intuitiva | Base semântica, navegação por teclado, foco visível, contraste, textos alternativos, `prefers-reduced-motion` |
-| Engajar a comunidade no uso da tecnologia | Cadastro simples, API aberta, material em `docs/` |
-| Fortalecer pertencimento e identidade cultural | Descrições culturais por cidade; categorias que valorizam o local |
+Demo mode makes the whole app (organizer and team flows included) runnable with no backend —
+useful for local development and review.
 
 ---
 
-## Tecnologias
+## Tech stack
 
-- **Front-end:** React 18 + Vite 5 + React Router
-- **Estilo:** Tailwind CSS 3
-- **PWA:** vite-plugin-pwa (Workbox)
-- **Back-end / API:** [Supabase](https://supabase.com) (PostgreSQL + API REST automática + Auth)
-- **API pública:** funções serverless em `/api` (Vercel)
-- **Hospedagem:** Vercel
-
-> A aplicação roda **sem back-end** para demonstração: enquanto as variáveis do Supabase não estão configuradas, os dados vêm de `public/dados/*.json`, o login usa uma sessão local e os envios ficam no navegador.
-
-> **Nunca fez deploy nem usou Supabase?** Leia o **[Guia de publicação](docs/GUIA-PUBLICACAO.md)** — explicação passo a passo, do zero.
+| Layer | Choice | Notes |
+|---|---|---|
+| UI | **React 18**, **React Router 6** | route-level code splitting via `React.lazy`; v7 future flags on |
+| Build | **Vite 5** | `npm run build` = generate data → `vite build` → prerender SEO |
+| Styling | **Tailwind CSS 3** | class-based dark mode, CSS-variable design tokens |
+| PWA | **vite-plugin-pwa** (Workbox) | precache app shell, offline fallback, installable |
+| Backend | **Supabase** | PostgreSQL, Auth (email/password + recovery), auto REST (PostgREST), Storage |
+| Serverless | **Vercel Functions** (Node, ESM) | public read API + transactional email endpoint |
+| Maps | **Leaflet 1.9** + OpenStreetMap tiles | imperative, lazy-loaded |
+| Geocoding | **Nominatim** (OSM) forward + reverse; **ViaCEP** for postal codes | keyless, best-effort |
+| Email | **nodemailer** | provider-agnostic SMTP; HTML templates in `api/_email.js` |
+| Reference data | **IBGE Localidades API** | 5570 municipalities baked to `public/dados/municipios.json` |
+| Tests | **Vitest** | 68 unit tests over the pure logic (`src/lib/*`) |
+| Lint | **ESLint 9** (flat config) | react / hooks / refresh plugins |
+| CI | **GitHub Actions** | lint + test + build on every push and PR |
 
 ---
 
-## Rodando localmente
+## Data model
 
-Pré-requisitos: **Node.js 18+**.
+PostgreSQL on Supabase, with **Row Level Security enabled on every table**. Full DDL and
+policies: [`supabase/schema.sql`](supabase/schema.sql).
+
+| Object | Purpose | Access model (RLS) |
+|---|---|---|
+| `cidades` | Cities and their cultural identity | public read of `aprovada` rows; team manages all; an authenticated organizer may `insert` only as `aprovada = false` |
+| `eventos` | Events (text slug PK, venue lat/lng, recurrence, sponsored flag, status) | public read of `aprovado`; authors read their own; team reads/writes all; **anyone** may `insert`, forced to `status = 'pendente'` |
+| `equipe` | Moderator allowlist | a row is visible **only to its own owner** (prevents enumerating admins) |
+| `presencas` | RSVPs | readable for counting; each user inserts/deletes **only their own** |
+| `contatos` | Contact-form messages | `anon`/`authenticated` may `insert`; only team may `select` |
+| `pedidos_destaque` | Paid-highlight requests | event owner creates/reads own; team updates (resolve) |
+| `eventos_publicos` *(view)* | Contact-free projection of approved events | intended for anonymous reads |
+| `is_equipe()` *(function)* | `security definer` check used across policies | — |
+| Storage bucket `eventos` | Organizer image uploads | public read; authenticated upload; team delete |
+
+**Secrets never live in the repo.** The client only ever holds the Supabase *anon* key,
+which is safe precisely because RLS constrains it. SMTP credentials and the service-side
+config exist only as Vercel environment variables.
+
+---
+
+## Public API
+
+Read-only, permissive CORS, edge-cached. Reads from Supabase when configured, otherwise from
+a build-time snapshot (`api/_dados.json`).
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/eventos` | Approved events. Query: `cidade`, `uf`, `categoria`, `entrada`, `busca`, `de`, `ate`, `limite` |
+| `GET` | `/api/eventos/:id` | One event by slug |
+| `GET` | `/api/cidades` | Cities with event counts |
+
+```bash
+curl "https://eventos-regiao.vercel.app/api/eventos?uf=SC&categoria=cultura&limite=5"
+```
+
+---
+
+## Local development
+
+Requires **Node.js 20+**.
 
 ```bash
 npm install
-npm run setup        # cria o .env, gera os dados de exemplo e imprime os próximos passos
-npm run dev          # http://localhost:5173  (modo demonstração, sem contas)
+npm run setup     # scaffolds .env, generates sample data, prints next steps
+npm run dev       # http://localhost:5173  — demo mode, no accounts needed
 ```
 
-Outros comandos:
+| Script | Does |
+|---|---|
+| `npm run dev` | Vite dev server |
+| `npm run build` | regenerate data → production build in `dist/` → prerender SEO pages + sitemap |
+| `npm run preview` | serve `dist/` locally |
+| `npm run test` | Vitest |
+| `npm run lint` | ESLint |
+| `npm run gerar-dados` | regenerate `public/dados/*.json`, `supabase/*.sql`, API snapshot and SVG art |
+| `npm run gerar-municipios` | refresh the IBGE municipality list |
 
-```bash
-npm run build        # regenera os dados e gera a versão de produção em dist/
-npm run preview      # serve o dist/ localmente
-npm run test         # testes (Vitest)
-npm run lint         # ESLint
-npm run gerar-dados  # regenera public/dados/*.json, supabase/*.sql,
-                     # api/_dados.json e os SVGs de cidades/eventos
-```
+Sample data has a **single source of truth**: [`scripts/dados.mjs`](scripts/dados.mjs). Edit
+there and run `npm run gerar-dados`; everything else is generated.
 
-Os dados de exemplo têm **uma fonte única**: `scripts/dados.mjs`. Edite lá e rode `npm run gerar-dados`.
+### Environment variables
 
----
-
-## Conectando o back-end (Supabase) — ~10 min
-
-1. Crie um projeto em <https://supabase.com>.
-2. **SQL Editor** → cole e execute **`supabase/setup.sql`** (é o schema + os dados de exemplo num arquivo só).
-3. **Authentication → Users** → crie os usuários da equipe.
-4. No mesmo SQL Editor, rode (uma vez, com os e-mails reais):
-   ```sql
-   insert into public.equipe (email) values ('voce@exemplo.com') on conflict do nothing;
-   ```
-5. **Project Settings → API** → copie a **Project URL** e a chave **anon public** para o `.env`:
-   ```env
-   VITE_SUPABASE_URL=https://xxxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
-   VITE_ADMIN_EMAILS=voce@exemplo.com,colega@exemplo.com
-   ```
-   Quem está em `equipe` / `VITE_ADMIN_EMAILS` entra como **equipe**; os demais, como **organizador**.
-6. Reinicie o `npm run dev`.
-
----
-
-## API pública
-
-Endpoints de leitura, com CORS liberado e cache na borda. Úteis para outros sites da região embutirem a agenda.
-
-| Método | Rota | Descrição |
+| Variable | Side | Purpose |
 |---|---|---|
-| `GET` | `/api/eventos` | Eventos aprovados. Filtros: `cidade`, `uf`, `categoria`, `entrada`, `busca`, `de`, `ate`, `limite` |
-| `GET` | `/api/eventos/:id` | Um evento pelo slug |
-| `GET` | `/api/cidades` | Cidades + contagem de eventos |
+| `VITE_SUPABASE_URL` | client | Supabase project URL — *omit for demo mode* |
+| `VITE_SUPABASE_ANON_KEY` | client | Supabase anon key (RLS-guarded) |
+| `VITE_ADMIN_EMAILS` | client | comma-separated emails granted the **team** role |
+| `VITE_SITE_URL` | client / build | canonical + Open Graph base URL |
+| `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` | server | transactional email (any SMTP provider) |
+| `EQUIPE_EMAILS` | server | recipients of team notifications (falls back to `VITE_ADMIN_EMAILS`) |
 
-```bash
-curl "https://SEU-DOMINIO.vercel.app/api/eventos?uf=SC&categoria=cultura&limite=5"
-```
-
-As funções leem do Supabase quando configurado; caso contrário, de `api/_dados.json` (gerado no build).
-
----
-
-## Deploy na Vercel — ~5 min
-
-**Opção rápida (com o repositório público):**
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAndreiVDS%2Feventos-regiao&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,VITE_ADMIN_EMAILS&project-name=eventos-regiao&repository-name=eventos-regiao)
-
-O botão clona o repo, pede as três variáveis e faz o deploy.
-
-**Manual:**
-
-1. <https://vercel.com> → **New Project → Import** o repositório. A Vercel detecta o Vite e serve `/api` como funções.
-2. **Settings → Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_ADMIN_EMAILS`.
-3. Cada `git push` na branch principal gera um deploy; pull requests ganham uma URL de preview.
-4. Domínio próprio: **Settings → Domains**.
-
-> Dá para publicar **sem o Supabase**: sem as variáveis, o site sobe em modo demonstração com os 27 eventos de exemplo e a API pública servida do snapshot.
+See [`.env.example`](.env.example). Backend setup: [`docs/GUIA-PUBLICACAO.md`](docs/GUIA-PUBLICACAO.md);
+email: [`docs/SMTP.md`](docs/SMTP.md) and [`docs/EMAILS-SUPABASE.md`](docs/EMAILS-SUPABASE.md).
 
 ---
 
-## Estrutura do projeto
+## Deployment (Vercel)
+
+1. **New Project → Import** this repository. Vercel detects Vite and serves `/api` as functions.
+2. Add the environment variables above (Production + Preview).
+3. In Supabase: run `supabase/schema.sql`, then `supabase/storage.sql`; create the team users
+   and insert their emails into `public.equipe`.
+4. Every push to `main` deploys; pull requests get a preview URL.
+
+Without the Supabase variables the site still deploys — in demo mode, with the sample agenda
+and the API served from the snapshot.
+
+---
+
+## Project structure
 
 ```
-├── api/                     # funções serverless (API pública) + _dados.json (gerado)
-├── public/
-│   ├── dados/               # eventos.json / cidades.json (gerados)
-│   ├── img/cidades/         # postais SVG das cidades (gerados)
-│   ├── img/eventos/         # banners SVG de eventos sem foto (gerados)
-│   └── icones/              # ícones do PWA
-├── scripts/
-│   ├── dados.mjs            # FONTE ÚNICA dos dados de exemplo
-│   └── gerar-dados.mjs      # gera JSON, SQL e SVGs
-├── src/
-│   ├── componentes/         # Cabeçalho, CardEvento, FormularioEvento, gráficos, ...
-│   ├── paginas/
-│   │   ├── organizador/     # MinhaArea, NovoEvento
-│   │   └── painel/          # Painel (métricas), Moderacao
-│   ├── lib/
-│   │   ├── api.js           # camada de dados (Supabase OU JSON local)
-│   │   ├── auth.jsx         # AuthProvider / useAuth
-│   │   ├── metricas.js      # agregações do painel
-│   │   ├── formatacao.js    # datas, categorias, rótulos
-│   │   └── useAsync.js
-│   ├── App.jsx              # rotas + guardas de rota
-│   └── index.css            # Tailwind + acessibilidade
-├── supabase/
-│   ├── schema.sql           # tabelas, RLS, função is_equipe()
-│   └── seed.sql             # dados de exemplo (gerado)
-├── docs/
-│   ├── proposta-de-tema.pdf
-│   └── analise/             # requisitos, casos de uso, arquitetura
-└── legado/                  # primeira versão estática (histórico)
+api/                 serverless functions: public read API, /api/notificar (email), _email.js
+public/dados/         generated JSON (events, cities, municipalities)
+public/img/           generated SVG city/event art; curated CC-licensed photos
+scripts/              dados.mjs (source of truth) + generators (data, SEO, municipalities)
+src/
+  componentes/        Header, CardEvento, FormularioEvento, MapaEventos, charts, carousel, ...
+  paginas/
+    organizador/      MinhaArea, NovoEvento
+    painel/           Painel (metrics), Moderacao, Destaques, Cidades, Mensagens, Patrocinios
+  lib/                api.js (data layer), auth.jsx, geo.js, geocode.js, meta.js (SEO),
+                      metricas.js, cidade.js (geolocation ctx), upload.js, ...
+  App.jsx             routes + route guards
+supabase/             schema.sql (tables + RLS + is_equipe), storage.sql, generated seed
+docs/                 publishing guide, SMTP guides, analysis (requirements, use cases)
+legado/               first static prototype, kept for history
 ```
 
 ---
 
-## Acessibilidade
+## Quality
 
-HTML semântico, um `<h1>` por página, link "pular para o conteúdo", foco visível (`:focus-visible`), menu operável por teclado (`aria-expanded`/`aria-controls`), rótulos associados a todos os campos, erros com `role="alert"`, textos alternativos em imagens informativas e `alt=""` nas decorativas, gráficos com tabela equivalente, respeito a `prefers-reduced-motion`, contraste conferido na paleta.
+- **Testing** — 68 Vitest unit tests covering the pure logic: distance/radius math, date and
+  agenda helpers, metric aggregations, the data-layer filters, RSVP logic.
+- **CI** — GitHub Actions runs `lint`, `test` and `build` on every push and pull request.
+- **Accessibility** — semantic HTML, one `<h1>` per page, skip link, visible `:focus-visible`,
+  keyboard-operable menus (`aria-expanded`/`aria-controls`), labelled inputs, `role="alert"`
+  errors, `alt` text on informative images and `alt=""` on decorative ones, charts backed by a
+  data table, `prefers-reduced-motion` honoured, palette contrast checked.
+- **SEO** — per-page `<title>`/description/Open Graph/JSON-LD via a `useMeta` hook, plus a
+  post-build step that prerenders static HTML per event and city and emits `sitemap.xml` /
+  `robots.txt`.
+- **Privacy (LGPD)** — the only personal datum collected is the organizer's contact, used only
+  for moderation and **never exposed publicly** (enforced by RLS and the `eventos_publicos`
+  view); the submission form requires explicit consent.
 
-Como testar: **Lighthouse** (aba Acessibilidade) e a extensão **axe DevTools**. Guarde os relatórios em `docs/analise/`.
+---
 
-## Privacidade (LGPD)
+## Roadmap
 
-O único dado pessoal coletado é o **contato do organizador**, usado apenas pela equipe para validar o evento e **nunca exibido publicamente** (fora da `view eventos_publicos` e das regras de RLS). O formulário exige consentimento explícito.
+- Scheduled email ("your event is in 2 days", "new event in your city") — needs `pg_cron` and a
+  subscriber list.
+- Payment gateway for paid highlights (currently a manual Pix flow).
+- Sympla/Eventbrite affiliate hand-off for events that do sell tickets.
+- Multi-region onboarding for city tourism departments.
 
-## Licença e uso
+---
 
-Projeto acadêmico, sem fins lucrativos. As imagens fotográficas em `public/img/` são placeholders da fase de análise e devem ser substituídas por material com autorização de uso antes de qualquer publicação oficial. As datas de edições ainda não confirmadas estão marcadas como "prevista" nas descrições.
+## Team
+
+Andrei Vinícius da Silveira (RU 4605228) · Gabriel Lenhardt (RU 4739897) ·
+Gabriel Augusto Fernandes Ferreira Martins (RU 4704869)
+
+## License
+
+Academic, non-profit project. Photographic images under `public/img/` are either
+CC-licensed (attributed on the in-app **Credits** page) or placeholders to be replaced with
+authorised material before any official publication.
