@@ -4,6 +4,7 @@
 
 **Live:** <https://eventos-regiao.vercel.app>
 
+[![CI](https://github.com/AndreiVDS/eventos-regiao/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreiVDS/eventos-regiao/actions/workflows/ci.yml)
 ![React](https://img.shields.io/badge/React-18-20232a?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38bdf8?logo=tailwindcss&logoColor=white)
